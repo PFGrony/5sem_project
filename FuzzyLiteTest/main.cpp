@@ -1,9 +1,9 @@
 //File: ObstacleAvoidance.cpp
 #include "fl/Headers.h"
 
+using namespace fl;
 
 int main(int argc, char* argv[]) {
-    using namespace fl;
     Engine* engine = FllImporter().fromFile("ObstacleAvoidance.fll");
 
     std::string status;
