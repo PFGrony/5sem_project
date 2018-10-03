@@ -15,3 +15,4 @@ else:unix: LIBS += -L$$PWD/fuzzylite/release/bin/ -lfuzzylite
 
 INCLUDEPATH += $$PWD/fuzzylite
 DEPENDPATH += $$PWD/fuzzylite
+// Hej
