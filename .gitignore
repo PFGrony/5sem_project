@@ -3,3 +3,6 @@ build-FuzzyLiteTest-Desktop-Release
 
 build-CameraTest-Desktop-Debug
 build-CameraTest-Desktop-Release
+
+build-Test_Lidar-Desktop-Debug
+build-Test_Lidar-Desktop-Release
