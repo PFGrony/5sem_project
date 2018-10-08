@@ -19,7 +19,7 @@ void poseCallback(ConstPosesStampedPtr &_msg) {
   // Dump the message contents to stdout.
   //  std::cout << _msg->DebugString();
 
-  for (int i = 0; i < _msg->pose_size(); i++) {
+  /*for (int i = 0; i < _msg->pose_size(); i++) {
     if (_msg->pose(i).name() == "pioneer2dx") {
 
       std::cout << std::setprecision(2) << std::fixed << std::setw(6)
@@ -31,9 +31,10 @@ void poseCallback(ConstPosesStampedPtr &_msg) {
                 << _msg->pose(i).orientation().y() << std::setw(6)
                 << _msg->pose(i).orientation().z() << std::endl;
     }
-  }
+  }*/
 }
 
+float range_array[200] = { };
 
 void lidarCallback(ConstLaserScanStampedPtr &msg) {
 
@@ -44,6 +45,9 @@ void lidarCallback(ConstLaserScanStampedPtr &msg) {
 
   float range_min = float(msg->scan().range_min());
   float range_max = float(msg->scan().range_max());
+
+  //std::cout << "min: " << range_min << std::endl;
+  //std::cout << "max: " << range_max << std::endl;
 
   int sec = msg->time().sec();
   int nsec = msg->time().nsec();
@@ -59,9 +63,11 @@ void lidarCallback(ConstLaserScanStampedPtr &msg) {
 
   cv::Mat im(height, width, CV_8UC3);
   im.setTo(0);
-  for (int i = 0; i < nranges; i++) {
-    float angle = angle_min + i * angle_increment;
-    float range = std::min(float(msg->scan().ranges(i)), range_max);
+  for (int i = 0; i < nranges; i++)
+  {
+      range_array[i]=std::min(float(msg->scan().ranges(i)), range_max);
+      float angle = angle_min + i * angle_increment;
+      float range = std::min(float(msg->scan().ranges(i)), range_max);
     //    double intensity = msg->scan().intensities(i);
     cv::Point2f startpt(200.5f + range_min * px_per_m * std::cos(angle),
                         200.5f - range_min * px_per_m * std::sin(angle));
@@ -80,6 +86,54 @@ void lidarCallback(ConstLaserScanStampedPtr &msg) {
   mutex.lock();
   cv::imshow("lidar", im);
   mutex.unlock();
+}
+
+float left = 0.0;
+float little_left = 0.0;
+float forward = 0.0;
+float little_right = 0.0;
+float right = 0.0;
+
+void update_ranges()
+{
+    left = 10.0;
+    little_left = 10.0;
+    forward = 10.0;
+    little_right = 10.0;
+    right = 10.0;
+
+    for (int i = 0;i<5;i++)
+    {
+        for (int j = 0;j<40;j++)
+        {
+            switch(i)
+            {
+            case 0:
+                if (range_left[j]<left)
+                    left = range_array[j];
+                break;
+            case 1:
+                if (range_little_left[j]<little_left)
+                    little_left = range_array[j+40];
+                break;
+            case 2:
+                if (range_forward[j]<forward)
+                    forward = range_array[j+80];
+                break;
+            case 3:
+                if (range_little_right[j]<little_right)
+                    little_right = range_array[j+120];
+                break;
+            case 4:
+                if (range_right[j]<right)
+                    right = range_array[j+160];
+                break;
+            default :
+                break;
+            }
+        }
+    }
+
 }
 
 int main(int _argc, char **_argv) {
@@ -124,7 +178,7 @@ int main(int _argc, char **_argv) {
 
   // Loop
   while (true) {
-    gazebo::common::Time::MSleep(10);
+    gazebo::common::Time::MSleep(100);
 
     mutex.lock();
     int key = cv::waitKey(1);
@@ -146,6 +200,10 @@ int main(int _argc, char **_argv) {
       //      speed *= 0.1;
       //      dir *= 0.1;
     }
+
+    update_ranges();
+
+    std::cout << left << " " << little_left << " " << forward << " " << little_right << " " << right << std::endl;
 
     // Generate a pose
     ignition::math::Pose3d pose(double(speed), 0, 0, 0, 0, double(dir));
