@@ -8,3 +8,13 @@ SOURCES += main.cpp
 CONFIG += link_pkgconfig
 PKGCONFIG += gazebo
 PKGCONFIG += opencv
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../fuzzylite/release/bin/release/ -lfuzzylite
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../fuzzylite/release/bin/debug/ -lfuzzylite
+else:unix: LIBS += -L$$PWD/../fuzzylite/release/bin/ -lfuzzylite
+
+INCLUDEPATH += $$PWD/../fuzzylite
+DEPENDPATH += $$PWD/../fuzzylite
+
+DISTFILES += \
+    ObstacleAvoidance.fll

@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+#include "fl/Headers.h"
+
 static boost::mutex mutex;
 
 void statCallback(ConstWorldStatisticsPtr &_msg) {
@@ -42,6 +44,8 @@ void lidarCallback(ConstLaserScanStampedPtr &msg) {
   float angle_min = float(msg->scan().angle_min());
   //  double angle_max = msg->scan().angle_max();
   float angle_increment = float(msg->scan().angle_step());
+
+  //std::cout << "Angle_min: " << angle_min << " angle_inc: " << angle_increment << std::endl;
 
   float range_min = float(msg->scan().range_min());
   float range_max = float(msg->scan().range_max());
@@ -109,23 +113,23 @@ void update_ranges()
             switch(i)
             {
             case 0:
-                if (range_left[j]<left)
+                if (range_array[j]<left)
                     left = range_array[j];
                 break;
             case 1:
-                if (range_little_left[j]<little_left)
+                if (range_array[j+40]<little_left)
                     little_left = range_array[j+40];
                 break;
             case 2:
-                if (range_forward[j]<forward)
+                if (range_array[j+80]<forward)
                     forward = range_array[j+80];
                 break;
             case 3:
-                if (range_little_right[j]<little_right)
+                if (range_array[j+120]<little_right)
                     little_right = range_array[j+120];
                 break;
             case 4:
-                if (range_right[j]<right)
+                if (range_array[j+160]<right)
                     right = range_array[j+160];
                 break;
             default :
@@ -133,10 +137,50 @@ void update_ranges()
             }
         }
     }
-
 }
 
-int main(int _argc, char **_argv) {
+double direction = 0.0;
+double use_dis = 0.0;
+
+void find_smallest()
+{
+// Angle_min: -2.26889 angle_inc: 0.022803
+    use_dis = 10.0;
+    for (int i = 0;i<200;i++)
+    {
+        if(use_dis > range_array[i])
+        {
+            use_dis = range_array[i];
+            direction = i*0.022803-2.26889;
+        }
+    }
+}
+
+fl::Engine* engine;
+fl::InputVariable* obstacle;
+fl::InputVariable* distance;
+fl::OutputVariable* mSteer;
+fl::OutputVariable* mSpeed;
+
+void fuzzy_init()
+{
+    engine = fl::FllImporter().fromFile("ObstacleAvoidance.fll");
+
+    std::string status;
+    if (not engine->isReady(&status))
+        throw fl::Exception("[engine error] engine is not ready:n" + status, FL_AT);
+
+    obstacle = engine->getInputVariable("obstacle");
+
+    distance = engine->getInputVariable("distance");
+
+    mSteer = engine->getOutputVariable("mSteer");
+
+    mSpeed = engine->getOutputVariable("mSpeed");
+}
+
+int main(int _argc, char **_argv)
+{
   // Load gazebo
   gazebo::client::setup(_argc, _argv);
 
@@ -161,49 +205,36 @@ int main(int _argc, char **_argv) {
   // Publish a reset of the world
   gazebo::transport::PublisherPtr worldPublisher =
       node->Advertise<gazebo::msgs::WorldControl>("~/world_control");
+
   gazebo::msgs::WorldControl controlMessage;
   controlMessage.mutable_reset()->set_all(true);
   worldPublisher->WaitForConnection();
   worldPublisher->Publish(controlMessage);
 
-  const int key_left = 81;
-  const int key_up = 82;
-  const int key_down = 84;
-  const int key_right = 83;
-  const int key_esc = 27;
-
+  // Start AI of doom
+  fuzzy_init();
 
   float speed = 0.0;
   float dir = 0.0;
 
   // Loop
-  while (true) {
-    gazebo::common::Time::MSleep(100);
+  while (true)
+  {
+    gazebo::common::Time::MSleep(20);
 
-    mutex.lock();
-    int key = cv::waitKey(1);
-    mutex.unlock();
+   // update_ranges();
 
-    if (key == key_esc)
-      break;
+    // std::cout << left << " " << little_left << " " << forward << " " << little_right << " " << right << std::endl;
 
-    if ((key == key_up) && (speed <= 1.2f))
-      speed += 0.05;
-    else if ((key == key_down) && (speed >= -1.2f))
-      speed -= 0.05;
-    else if ((key == key_right) && (dir <= 0.4f))
-      dir += 0.05;
-    else if ((key == key_left) && (dir >= -0.4f))
-      dir -= 0.05;
-    else {
-      // slow down
-      //      speed *= 0.1;
-      //      dir *= 0.1;
-    }
+    find_smallest();
 
-    update_ranges();
+    obstacle->setValue(direction);
+    distance->setValue(use_dis);
+    engine->process();
+    speed = mSpeed->getValue();
+    dir = mSteer->getValue();
 
-    std::cout << left << " " << little_left << " " << forward << " " << little_right << " " << right << std::endl;
+    //std::cout << "dir: "<< dir << " speed: "<< speed << std::endl;
 
     // Generate a pose
     ignition::math::Pose3d pose(double(speed), 0, 0, 0, 0, double(dir));
