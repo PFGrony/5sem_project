@@ -3,7 +3,12 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    camera.cpp \
+    gazebo_world.cpp
+
+#Gazebo
+PKGCONFIG += gazebo
 
 #OpenCV
 QT_CONFIG -=no-pkg-config
@@ -24,4 +29,8 @@ DEPENDPATH += $$PWD/../fuzzylite
 
 INCLUDEPATH += $$PWD/fuzzylite
 DEPENDPATH += $$PWD/fuzzylite
+
+HEADERS += \
+    camera.h \
+    gazebo_world.h
 
