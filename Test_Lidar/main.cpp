@@ -92,53 +92,6 @@ void lidarCallback(ConstLaserScanStampedPtr &msg) {
   mutex.unlock();
 }
 
-float left = 0.0;
-float little_left = 0.0;
-float forward = 0.0;
-float little_right = 0.0;
-float right = 0.0;
-
-void update_ranges()
-{
-    left = 10.0;
-    little_left = 10.0;
-    forward = 10.0;
-    little_right = 10.0;
-    right = 10.0;
-
-    for (int i = 0;i<5;i++)
-    {
-        for (int j = 0;j<40;j++)
-        {
-            switch(i)
-            {
-            case 0:
-                if (range_array[j]<left)
-                    left = range_array[j];
-                break;
-            case 1:
-                if (range_array[j+40]<little_left)
-                    little_left = range_array[j+40];
-                break;
-            case 2:
-                if (range_array[j+80]<forward)
-                    forward = range_array[j+80];
-                break;
-            case 3:
-                if (range_array[j+120]<little_right)
-                    little_right = range_array[j+120];
-                break;
-            case 4:
-                if (range_array[j+160]<right)
-                    right = range_array[j+160];
-                break;
-            default :
-                break;
-            }
-        }
-    }
-}
-
 double direction = 0.0;
 double use_dis = 0.0;
 
@@ -220,9 +173,16 @@ int main(int _argc, char **_argv)
   // Loop
   while (true)
   {
-    gazebo::common::Time::MSleep(20);
+    gazebo::common::Time::MSleep(100);
 
    // update_ranges();
+
+    mutex.lock();
+    int key = cv::waitKey(1);
+    mutex.unlock();
+
+    if (key == 27)
+        break;
 
     // std::cout << left << " " << little_left << " " << forward << " " << little_right << " " << right << std::endl;
 
@@ -234,7 +194,10 @@ int main(int _argc, char **_argv)
     speed = mSpeed->getValue();
     dir = mSteer->getValue();
 
-    //std::cout << "dir: "<< dir << " speed: "<< speed << std::endl;
+    speed = 0.2*speed;
+    dir = 0.5*dir;
+
+    std::cout << "dir: "<< dir << " speed: "<< speed << std::endl;
 
     // Generate a pose
     ignition::math::Pose3d pose(double(speed), 0, 0, 0, 0, double(dir));
