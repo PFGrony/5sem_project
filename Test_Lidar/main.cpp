@@ -104,7 +104,7 @@ void find_smallest()
         if(use_dis > range_array[i])
         {
             use_dis = range_array[i];
-            direction = i*0.022803-2.26889;
+            direction = i*0.0228-2.269;
         }
     }
 }
@@ -173,7 +173,7 @@ int main(int _argc, char **_argv)
   // Loop
   while (true)
   {
-    gazebo::common::Time::MSleep(100);
+    gazebo::common::Time::MSleep(10);
 
    // update_ranges();
 
@@ -194,8 +194,8 @@ int main(int _argc, char **_argv)
     speed = mSpeed->getValue();
     dir = mSteer->getValue();
 
-    speed = 0.2*speed;
-    dir = 0.5*dir;
+    //if(dir<0.01)
+    //    dir = 0;
 
     std::cout << "dir: "<< dir << " speed: "<< speed << std::endl;
 

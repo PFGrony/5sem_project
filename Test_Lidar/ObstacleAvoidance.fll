@@ -3,11 +3,10 @@ Engine: ObstacleAvoidance
 
 InputVariable: obstacle
   enabled: true
-  range: -2.269 2.269
+  range: -2.3 2.3
   lock-range: true
-  term: left Ramp 0.000 -1.000
-  term: forward Triangle -1.000 0.000 1.000
-  term: right Ramp 0.000 1.000
+  term: left Ramp 1.000 -1.000
+  term: right Ramp -1.000 1.000
 
 InputVariable: distance
   enabled: true
@@ -25,8 +24,8 @@ OutputVariable: mSteer
   defuzzifier: Centroid 100
   default: nan
   lock-previous: false
-  term: left Ramp -1.000 1.000
-  term: right Ramp 1.000 -1.000
+  term: left Ramp 0.000 1.000
+  term: right Ramp 0.000 -1.000
 
 OutputVariable: mSpeed
   enabled: true
@@ -48,7 +47,6 @@ RuleBlock: mamdani
   activation: General
   rule: if obstacle is left and distance is near then mSteer is right
   rule: if obstacle is right and distance is near then mSteer is left
-  rule: if obstacle is forward and distance is near then mSteer is left
   rule: if distance is near then mSpeed is slow
   rule: if distance is close then mSpeed is medium
   rule: if distance is far then mSpeed is fast
