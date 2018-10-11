@@ -8,6 +8,8 @@
 
 #include "fl/Headers.h"
 
+#include "fuzzycontroller.h"
+
 static boost::mutex mutex;
 
 void statCallback(ConstWorldStatisticsPtr &_msg) {
@@ -34,6 +36,21 @@ void poseCallback(ConstPosesStampedPtr &_msg) {
                 << _msg->pose(i).orientation().z() << std::endl;
     }
   }*/
+}
+
+void cameraCallback(ConstImageStampedPtr &msg) {
+
+  std::size_t width = msg->image().width();
+  std::size_t height = msg->image().height();
+  const char *data = msg->image().data().c_str();
+  cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
+
+  im = im.clone();
+  cv::cvtColor(im, im, CV_BGR2RGB);
+
+  mutex.lock();
+  cv::imshow("camera", im);
+  mutex.unlock();
 }
 
 float range_array[200] = { };
@@ -92,45 +109,7 @@ void lidarCallback(ConstLaserScanStampedPtr &msg) {
   mutex.unlock();
 }
 
-double direction = 0.0;
-double use_dis = 0.0;
 
-void find_smallest()
-{
-// Angle_min: -2.26889 angle_inc: 0.022803
-    use_dis = 10.0;
-    for (int i = 0;i<200;i++)
-    {
-        if(use_dis > range_array[i])
-        {
-            use_dis = range_array[i];
-            direction = i*0.0228-2.269;
-        }
-    }
-}
-
-fl::Engine* engine;
-fl::InputVariable* obstacle;
-fl::InputVariable* distance;
-fl::OutputVariable* mSteer;
-fl::OutputVariable* mSpeed;
-
-void fuzzy_init()
-{
-    engine = fl::FllImporter().fromFile("ObstacleAvoidance.fll");
-
-    std::string status;
-    if (not engine->isReady(&status))
-        throw fl::Exception("[engine error] engine is not ready:n" + status, FL_AT);
-
-    obstacle = engine->getInputVariable("obstacle");
-
-    distance = engine->getInputVariable("distance");
-
-    mSteer = engine->getOutputVariable("mSteer");
-
-    mSpeed = engine->getOutputVariable("mSpeed");
-}
 
 int main(int _argc, char **_argv)
 {
@@ -147,6 +126,9 @@ int main(int _argc, char **_argv)
 
   gazebo::transport::SubscriberPtr poseSubscriber =
       node->Subscribe("~/pose/info", poseCallback);
+
+  gazebo::transport::SubscriberPtr cameraSubscriber =
+      node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
 
   gazebo::transport::SubscriberPtr lidarSubscriber =
       node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidarCallback);
@@ -165,17 +147,15 @@ int main(int _argc, char **_argv)
   worldPublisher->Publish(controlMessage);
 
   // Start AI of doom
-  fuzzy_init();
+  fuzzyController AI;
+  AI.fuzzyInit();
 
-  float speed = 0.0;
-  float dir = 0.0;
+
 
   // Loop
   while (true)
   {
     gazebo::common::Time::MSleep(10);
-
-   // update_ranges();
 
     mutex.lock();
     int key = cv::waitKey(1);
@@ -184,23 +164,12 @@ int main(int _argc, char **_argv)
     if (key == 27)
         break;
 
-    // std::cout << left << " " << little_left << " " << forward << " " << little_right << " " << right << std::endl;
+    AI.fuzzyUpdate(range_array);
 
-    find_smallest();
-
-    obstacle->setValue(direction);
-    distance->setValue(use_dis);
-    engine->process();
-    speed = mSpeed->getValue();
-    dir = mSteer->getValue();
-
-    //if(dir<0.01)
-    //    dir = 0;
-
-    std::cout << "dir: "<< dir << " speed: "<< speed << std::endl;
+    std::cout << "dir: "<< AI.getSteer() << " speed: "<< AI.getSpeed() << std::endl;
 
     // Generate a pose
-    ignition::math::Pose3d pose(double(speed), 0, 0, 0, 0, double(dir));
+    ignition::math::Pose3d pose(double(AI.getSpeed()), 0, 0, 0, 0, double(AI.getSteer()));
 
     // Convert to a pose message
     gazebo::msgs::Pose msg;
