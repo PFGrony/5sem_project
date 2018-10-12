@@ -18,9 +18,13 @@ public:
     gazebo::transport::SubscriberPtr startLidar(gazebo::transport::NodePtr &temp);
 
 
+    float* getLidarRange();
+
 private:
-    static void cameraCallback(ConstImageStampedPtr &msg);
-    static void lidarCallback(ConstLaserScanStampedPtr &msg);
+    void cameraCallback(ConstImageStampedPtr &msg);
+    void lidarCallback(ConstLaserScanStampedPtr &msg);
+
+    float lidarRange[200];
 
 };
 #endif // CAMERA_H
