@@ -13,9 +13,9 @@ void fuzzyController::fuzzyInit()
     engine->setName("ObstacleAvoidance");
     engine->setDescription("");
 
-    float close = 0.600;
-    float mid = 1.000;
-    float far = 1.800;
+    float close = 0.800;
+    float mid = 1.600;
+    float far = 2.800;
 
     inFarLeft = new InputVariable;
     inFarLeft->setName("inFarLeft");
@@ -138,6 +138,9 @@ void fuzzyController::fuzzyInit()
 
     mamdani->addRule(Rule::parse("if inForward is close and inFarLeft is not close then outSteer is sharpLeft",engine));
     mamdani->addRule(Rule::parse("if inForward is close and inFarRight is not close then outSteer is sharpRight",engine));
+
+    mamdani->addRule(Rule::parse("if inForward is close and inFarRight is not mid then outSteer is sharpRight",engine));
+    mamdani->addRule(Rule::parse("if inForward is close and inFarLeft is not mid then outSteer is sharpLeft",engine));
     //Speed
     mamdani->addRule(Rule::parse("if inForward is close then outSpeed is slow", engine));
     mamdani->addRule(Rule::parse("if inForward is mid then outSpeed is medium", engine));

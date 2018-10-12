@@ -10,6 +10,8 @@
 
 #include "fuzzycontroller.h"
 
+//#include <vector>
+
 static boost::mutex mutex;
 
 void statCallback(ConstWorldStatisticsPtr &_msg) {
@@ -38,19 +40,41 @@ void poseCallback(ConstPosesStampedPtr &_msg) {
   }*/
 }
 
-void cameraCallback(ConstImageStampedPtr &msg) {
+void cameraCallback(ConstImageStampedPtr &msg)
+{
+    std::size_t width = msg->image().width();
+    std::size_t height = msg->image().height();
+    const char *data = msg->image().data().c_str();
+    cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
 
-  std::size_t width = msg->image().width();
-  std::size_t height = msg->image().height();
-  const char *data = msg->image().data().c_str();
-  cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
+    if (false) // find circles
+    {
+        cv::Mat gray;
+        cv::cvtColor(im, gray, cv::COLOR_BGR2GRAY);
+        cv::medianBlur(gray, gray, 5);
 
-  im = im.clone();
-  cv::cvtColor(im, im, CV_BGR2RGB);
+        std::vector<cv::Vec3f> circles;
+        cv::HoughCircles(gray,circles, cv::HOUGH_GRADIENT,1,gray.rows/16,50,20,0,0);
 
-  mutex.lock();
-  cv::imshow("camera", im);
-  mutex.unlock();
+        for( size_t i = 0; i < circles.size(); i++ )
+        {
+            cv::Vec3i c = circles[i];
+            cv::Point center = cv::Point(c[0], c[1]);
+            // circle center
+            cv::circle( im, center, 1, cv::Scalar(255,0,0), 3, cv::LINE_AA);
+            // circle outline
+            int radius = c[2];
+            cv::circle( im, center, radius, cv::Scalar(255,0,0), 3, cv::LINE_AA);
+        }
+    }
+
+    im = im.clone();
+    cv::cvtColor(im, im, CV_BGR2RGB);
+
+    mutex.lock();
+    cv::imshow("camera", im);
+    mutex.unlock();
+
 }
 
 float range_array[200] = { };
@@ -89,12 +113,19 @@ void lidarCallback(ConstLaserScanStampedPtr &msg) {
       range_array[i]=std::min(float(msg->scan().ranges(i)), range_max);
       float angle = angle_min + i * angle_increment;
       float range = std::min(float(msg->scan().ranges(i)), range_max);
+      cv::Scalar color;
+      if (i<60 || i>140)
+          color = cv::Scalar(0,255,255);
+      if (i>59 && i<141)
+          color = cv::Scalar(0,255,0);
+      if (i>89 && i<111)
+          color = cv::Scalar(0,0,255);
     //    double intensity = msg->scan().intensities(i);
-    cv::Point2f startpt(200.5f + range_min * px_per_m * std::cos(angle),
+      cv::Point2f startpt(200.5f + range_min * px_per_m * std::cos(angle),
                         200.5f - range_min * px_per_m * std::sin(angle));
-    cv::Point2f endpt(200.5f + range * px_per_m * std::cos(angle),
+      cv::Point2f endpt(200.5f + range * px_per_m * std::cos(angle),
                       200.5f - range * px_per_m * std::sin(angle));
-    cv::line(im, startpt * 16, endpt * 16, cv::Scalar( 255, 255, 255 ), 1,
+      cv::line(im, startpt * 16, endpt * 16, color, 1,
              cv::LINE_AA, 4);
 
     //    std::cout << angle << " " << range << " " << intensity << std::endl;
