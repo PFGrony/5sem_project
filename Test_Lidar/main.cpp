@@ -94,7 +94,7 @@ void lidarCallback(ConstLaserScanStampedPtr &msg) {
                         200.5f - range_min * px_per_m * std::sin(angle));
     cv::Point2f endpt(200.5f + range * px_per_m * std::cos(angle),
                       200.5f - range * px_per_m * std::sin(angle));
-    cv::line(im, startpt * 16, endpt * 16, cv::Scalar(255, 255, 255, 255), 1,
+    cv::line(im, startpt * 16, endpt * 16, cv::Scalar( 255, 255, 255 ), 1,
              cv::LINE_AA, 4);
 
     //    std::cout << angle << " " << range << " " << intensity << std::endl;
@@ -150,8 +150,6 @@ int main(int _argc, char **_argv)
   fuzzyController AI;
   AI.fuzzyInit();
 
-
-
   // Loop
   while (true)
   {
@@ -163,6 +161,7 @@ int main(int _argc, char **_argv)
 
     if (key == 27)
         break;
+
 
     AI.fuzzyUpdate(range_array);
 
