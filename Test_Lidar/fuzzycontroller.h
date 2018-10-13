@@ -9,7 +9,7 @@ public:
     fuzzyController();
 
     void fuzzyInit();
-    void fuzzyUpdate(float array[]);
+    void fuzzyUpdate(float array[],int bo_ci,int off);
     float getSpeed();
     float getSteer();
 private:
@@ -21,6 +21,9 @@ private:
     float forward;
     float right;
     float farRight;
+
+    int boo_cir;
+    int off_cir;
 
     fl::Engine* engine;
 

@@ -138,9 +138,6 @@ void fuzzyController::fuzzyInit()
 
     mamdani->addRule(Rule::parse("if inForward is close and inFarLeft is not close then outSteer is sharpLeft",engine));
     mamdani->addRule(Rule::parse("if inForward is close and inFarRight is not close then outSteer is sharpRight",engine));
-
-    mamdani->addRule(Rule::parse("if inForward is close and inFarRight is not mid then outSteer is sharpRight",engine));
-    mamdani->addRule(Rule::parse("if inForward is close and inFarLeft is not mid then outSteer is sharpLeft",engine));
     //Speed
     mamdani->addRule(Rule::parse("if inForward is close then outSpeed is slow", engine));
     mamdani->addRule(Rule::parse("if inForward is mid then outSpeed is medium", engine));
@@ -152,7 +149,7 @@ void fuzzyController::fuzzyInit()
         throw Exception("[engine error] engine is not ready:n" + status, FL_AT);
 }
 
-void fuzzyController::fuzzyUpdate(float array[])
+void fuzzyController::fuzzyUpdate(float array[], int bo_ci, int off)
 {
     // setup to find the lowest value for left and right, and to find the averrage for the rest
     farLeft = 0;
@@ -190,6 +187,42 @@ void fuzzyController::fuzzyUpdate(float array[])
     forward = forward/(rForward-rLeft);
     //right = right/(rRight-rForward);
     farRight = farRight/(rFarRight-rRight);
+
+    if (bo_ci)
+    {
+        boo_cir = 40;
+        off_cir = off;
+    }
+    else
+    {
+        if (boo_cir != 0)
+            boo_cir--;
+        off_cir = 0;
+    }
+
+
+
+
+    if (boo_cir)
+    {
+        forward = 3;
+        if (off_cir < 0)
+        {
+            right = 3;
+            left = 0;
+        }
+        else if (off_cir > 0)
+        {
+            left = 3;
+            right = 0;
+        }
+        else
+        {
+            left = 3;
+            right = 3;
+        }
+    }
+
 
 
     // Load into engine, process it and set the new values for speed and steer

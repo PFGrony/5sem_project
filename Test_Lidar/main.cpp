@@ -10,7 +10,6 @@
 
 #include "fuzzycontroller.h"
 
-//#include <vector>
 
 static boost::mutex mutex;
 
@@ -40,6 +39,10 @@ void poseCallback(ConstPosesStampedPtr &_msg) {
   }*/
 }
 
+int offset = (160);
+int circle_bool = 0;
+
+
 void cameraCallback(ConstImageStampedPtr &msg)
 {
     std::size_t width = msg->image().width();
@@ -47,24 +50,44 @@ void cameraCallback(ConstImageStampedPtr &msg)
     const char *data = msg->image().data().c_str();
     cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
 
-    if (false) // find circles
+    //int(height) 240
+    //int(width) 320
+
+    offset = (160);
+    int rad = 0;
+
+    if (true) // find circles
     {
         cv::Mat gray;
         cv::cvtColor(im, gray, cv::COLOR_BGR2GRAY);
         cv::medianBlur(gray, gray, 5);
 
         std::vector<cv::Vec3f> circles;
-        cv::HoughCircles(gray,circles, cv::HOUGH_GRADIENT,1,gray.rows/16,50,20,0,0);
+        cv::HoughCircles(gray,circles, cv::HOUGH_GRADIENT,1,gray.rows,50,20,0,0);
+
+        if (circles.size() > 0)
+            circle_bool = 1;
+        else
+            circle_bool = 0;
+
 
         for( size_t i = 0; i < circles.size(); i++ )
         {
             cv::Vec3i c = circles[i];
             cv::Point center = cv::Point(c[0], c[1]);
+
+            if (abs(int(c[0])-160)<abs(offset) && int(c[2]) > rad)
+            {
+                offset = int(c[0])-160;
+                rad = int(c[2]);
+                //std::cout << "off: " << offset << ", rad: " << rad <<  std::endl;
+            }
+
             // circle center
-            cv::circle( im, center, 1, cv::Scalar(255,0,0), 3, cv::LINE_AA);
+            //cv::circle( im, center, 1, cv::Scalar(255,0,0), 3, cv::LINE_AA);
             // circle outline
-            int radius = c[2];
-            cv::circle( im, center, radius, cv::Scalar(255,0,0), 3, cv::LINE_AA);
+            //int radius = c[2];
+            //cv::circle( im, center, radius, cv::Scalar(255,0,0), 3, cv::LINE_AA);
         }
     }
 
@@ -194,9 +217,9 @@ int main(int _argc, char **_argv)
         break;
 
 
-    AI.fuzzyUpdate(range_array);
+    AI.fuzzyUpdate(range_array,circle_bool,offset);
 
-    std::cout << "dir: "<< AI.getSteer() << " speed: "<< AI.getSpeed() << std::endl;
+    //std::cout << "dir: "<< AI.getSteer() << " speed: "<< AI.getSpeed() << std::endl;
 
     // Generate a pose
     ignition::math::Pose3d pose(double(AI.getSpeed()), 0, 0, 0, 0, double(AI.getSteer()));
