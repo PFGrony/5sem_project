@@ -30,13 +30,12 @@ void gazebo_world::poseCallback(ConstPosesStampedPtr &_msg) {
   }
 }
 
-
-gazebo::transport::SubscriberPtr gazebo_world::startPose(gazebo::transport::NodePtr &temp)
+void gazebo_world::startStat(gazebo::transport::NodePtr &node)
 {
-    return temp->Subscribe("~/pose/info", poseCallback);
+    gazebo::transport::SubscriberPtr statSubscriber = node->Subscribe("~/world_stats", statCallback);
 }
 
-gazebo::transport::SubscriberPtr gazebo_world::startStat(gazebo::transport::NodePtr &temp)
+void gazebo_world::startPose(gazebo::transport::NodePtr &node)
 {
-    return temp->Subscribe("~/world_stats", statCallback);
+    gazebo::transport::SubscriberPtr poseSubscriber = node->Subscribe("~/pose/info", poseCallback);
 }

@@ -1,10 +1,33 @@
 #include "camera.h"
 
+///Sensor Data
+//If lock==1 data is not empty
+static bool lock=0;
+//Camera
+static cv::Mat matCamera;
+//Lidar
+static std::array<float,200> lidarAngle;
+static std::array<float,200> lidarRange;
+
 camera::camera()
 {
 }
 
-float* camera::getLidarRange()
+bool camera::getLock()
+{
+    return lock;
+}
+
+cv::Mat camera::getMatCamera()
+{
+    return matCamera;
+}
+
+std::array<float,200> camera::getLidarAngle()
+{
+    return lidarAngle;
+}
+std::array<float,200> camera::getLidarRange()
 {
     return lidarRange;
 }
@@ -16,13 +39,13 @@ void camera::cameraCallback(ConstImageStampedPtr &msg)
   const char *data = msg->image().data().c_str();
   cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
 
-
-  something.push_back(1);
-
   im = im.clone();
   cv::cvtColor(im, im, CV_BGR2RGB);
 
-  mutex.lock();
+
+  matCamera=im.clone();
+
+  mutex.lock(); 
   cv::imshow("camera", im);
   mutex.unlock();
 }
@@ -52,12 +75,36 @@ void camera::lidarCallback(ConstLaserScanStampedPtr &msg)
 
   cv::Mat im(height, width, CV_8UC3);
   im.setTo(0);
+
+
   for (int i = 0; i < nranges; i++)
   {
     float angle = angle_min + i * angle_increment;
     float range = std::min(float(msg->scan().ranges(i)), range_max);
-    std::cout<<angle<<std::endl;
-    //lidarRange[i]=range;
+
+
+    if(i>97&&i<103)
+    {
+        if(i==98)
+        {
+                std::cout<<"Orig: [";
+        }
+        std::cout<<range;
+        if(i!=102)
+        {
+            std::cout<<", ";
+        }
+        if(i==102)
+        {
+                std::cout<<"]"<<std::endl;
+        }
+    }
+
+    lock=1;
+    lidarRange.at(i)=range;
+    lidarAngle.at(i)=angle;
+
+
 
     //    double intensity = msg->scan().intensities(i);
     cv::Point2f startpt(200.5f + range_min * px_per_m * std::cos(angle),
@@ -67,7 +114,6 @@ void camera::lidarCallback(ConstLaserScanStampedPtr &msg)
     cv::line(im, startpt * 16, endpt * 16, cv::Scalar(255, 255, 255, 255), 1,
              cv::LINE_AA, 4);
 
-    //    std::cout << angle << " " << range << " " << intensity << std::endl;
   }
   cv::circle(im, cv::Point(200, 200), 2, cv::Scalar(0, 0, 255));
   cv::putText(im, std::to_string(sec) + ":" + std::to_string(nsec),
@@ -79,14 +125,14 @@ void camera::lidarCallback(ConstLaserScanStampedPtr &msg)
   mutex.unlock();
 }
 
-//gazebo::transport::SubscriberPtr camera::startCamera(gazebo::transport::NodePtr &temp)
-//{
-//    return temp->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
-//}
+gazebo::transport::SubscriberPtr camera::startCamera(gazebo::transport::NodePtr &node)
+{
+    return node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
+}
 
-//gazebo::transport::SubscriberPtr camera::startLidar(gazebo::transport::NodePtr &temp)
-//{
-//    return temp->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidarCallback);
-//}
+gazebo::transport::SubscriberPtr camera::startLidar(gazebo::transport::NodePtr &node)
+{
+    return node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidarCallback);
+}
 
 

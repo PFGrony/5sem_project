@@ -10,8 +10,8 @@ class gazebo_world
 public:
     gazebo_world();
 
-    gazebo::transport::SubscriberPtr startPose(gazebo::transport::NodePtr &temp);
-    gazebo::transport::SubscriberPtr startStat(gazebo::transport::NodePtr &temp);
+    void startStat(gazebo::transport::NodePtr &temp);
+    void startPose(gazebo::transport::NodePtr &temp);
 
 private:
     static void statCallback(ConstWorldStatisticsPtr &_msg);

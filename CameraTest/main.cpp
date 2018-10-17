@@ -12,22 +12,6 @@
 #include "camera.h"
 #include "gazebo_world.h"
 
-void cameraCallback(ConstImageStampedPtr &msg)
-{
-  std::size_t width = msg->image().width();
-  std::size_t height = msg->image().height();
-  const char *data = msg->image().data().c_str();
-  cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
-
-
-  im = im.clone();
-  cv::cvtColor(im, im, CV_BGR2RGB);
-
-  mutex.lock();
-  cv::imshow("camera", im);
-  mutex.unlock();
-}
-
 
 int main()
 {
@@ -39,25 +23,20 @@ int main()
     node->Init();
 
     // Listen to Gazebo topics
-    gazebo_world gazebo_temp;
-    gazebo::transport::SubscriberPtr statSubscriber = gazebo_temp.startStat(node);
-//        node->Subscribe("~/world_stats", statCallback);
+    gazebo_world gazeboWorld;
+    gazeboWorld.startStat(node);
+    gazeboWorld.startPose(node);
 
-    gazebo::transport::SubscriberPtr poseSubscriber = gazebo_temp.startPose(node);
-//        node->Subscribe("~/pose/info", poseCallback);
-
-//    //Camera Functions class
-//    camera camera_temp;
-//    camera_temp.cameraCallback;
-//    gazebo::transport::SubscriberPtr cameraSubscriber = camera_temp.startCamera(node);
-//    gazebo::transport::SubscriberPtr lidarSubscriber = camera_temp.startLidar(node);
-
+    //Camera Functions class
     camera camera_temp;
-    gazebo::transport::SubscriberPtr cameraSubscriber =node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
+    gazebo::transport::SubscriberPtr cameraSubscriber = camera_temp.startCamera(node);
+    gazebo::transport::SubscriberPtr lidarSubscriber = camera_temp.startLidar(node);
+
+
 
     // Publish to the robot vel_cmd topic
     gazebo::transport::PublisherPtr movementPublisher =
-        node->Advertise<gazebo::msgs::Pose>("~/pioneer2dx/vel_cmd");
+            node->Advertise<gazebo::msgs::Pose>("~/pioneer2dx/vel_cmd");
 
     // Publish a reset of the world
     gazebo::transport::PublisherPtr worldPublisher =
@@ -76,17 +55,22 @@ int main()
     float speed = 0.0;
     float dir = 0.0;
 
+
+
+
     // Loop
-    while (true) {
+    while (true)
+    {
+      //Waits for 10ms in gazebo and opencv
       gazebo::common::Time::MSleep(10);
 
       mutex.lock();
       int key = cv::waitKey(1);
       mutex.unlock();
 
+      //Key input
       if (key == key_esc)
         break;
-
       if ((key == key_up) && (speed <= 1.2f))
         speed += 0.05;
       else if ((key == key_down) && (speed >= -1.2f))
@@ -101,6 +85,25 @@ int main()
             dir *= 0.99;
       }
 
+      //Container for data from camera class
+      std::array<float,200> something=camera_temp.getLidarRange();
+
+      //Prints Data from camera Class
+      if(camera_temp.getLock()==1)
+      {
+          std::cout<<"Copy: [";
+          for(int i=0;i<5;i++)
+          {
+              std::cout<<something[98+i];
+              if(i!=4)
+              {
+                  std::cout<<", ";
+              }
+          }
+          std::cout<<"]"<<std::endl;
+      }
+
+
 
       // Generate a pose
       ignition::math::Pose3d pose(double(speed), 0, 0, 0, 0, double(dir));
@@ -109,16 +112,10 @@ int main()
       gazebo::msgs::Pose msg;
       gazebo::msgs::Set(&msg, pose);
       movementPublisher->Publish(msg);
-    }
 
+    }
     // Make sure to shut everything down.
     gazebo::client::shutdown();
-
-//    Mat file=Mat::zeros(200,200,CV_8UC1)*255;
-//    namedWindow("1",WINDOW_AUTOSIZE);
-//    imshow("1",file);
-//    cout << "Hello World!" << endl<<endl;
-//    waitKey(0);
 
     return 0;
 }
