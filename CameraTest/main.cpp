@@ -1,14 +1,32 @@
 #include <iostream>
-#include "camera.h"
-#include "gazebo_world.h"
 
-
-
+//Gazebo
 #include <gazebo/gazebo_client.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <gazebo/transport/transport.hh>
 
+//OpenCV
 #include "opencv2/opencv.hpp"
+
+//Classes
+#include "camera.h"
+#include "gazebo_world.h"
+
+void cameraCallback(ConstImageStampedPtr &msg)
+{
+  std::size_t width = msg->image().width();
+  std::size_t height = msg->image().height();
+  const char *data = msg->image().data().c_str();
+  cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
+
+
+  im = im.clone();
+  cv::cvtColor(im, im, CV_BGR2RGB);
+
+  mutex.lock();
+  cv::imshow("camera", im);
+  mutex.unlock();
+}
 
 
 int main()
@@ -30,11 +48,12 @@ int main()
 
 //    //Camera Functions class
 //    camera camera_temp;
-
+//    camera_temp.cameraCallback;
 //    gazebo::transport::SubscriberPtr cameraSubscriber = camera_temp.startCamera(node);
 //    gazebo::transport::SubscriberPtr lidarSubscriber = camera_temp.startLidar(node);
-    camera camera_temp;
 
+    camera camera_temp;
+    gazebo::transport::SubscriberPtr cameraSubscriber =node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
 
     // Publish to the robot vel_cmd topic
     gazebo::transport::PublisherPtr movementPublisher =

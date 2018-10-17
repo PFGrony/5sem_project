@@ -8,21 +8,23 @@
 #include "opencv2/opencv.hpp"
 
 static boost::mutex mutex;
+static std::vector<int> something;
 
 class camera
 {
 public:
     camera();
 
-    gazebo::transport::SubscriberPtr startCamera(gazebo::transport::NodePtr &temp);
-    gazebo::transport::SubscriberPtr startLidar(gazebo::transport::NodePtr &temp);
+//    gazebo::transport::SubscriberPtr startCamera(gazebo::transport::NodePtr &temp);
+//    gazebo::transport::SubscriberPtr startLidar(gazebo::transport::NodePtr &temp);
+
 
 
     float* getLidarRange();
 
-private:
+//private:
     void cameraCallback(ConstImageStampedPtr &msg);
-    void lidarCallback(ConstLaserScanStampedPtr &msg);
+    static void lidarCallback(ConstLaserScanStampedPtr &msg);
 
     float lidarRange[200];
 

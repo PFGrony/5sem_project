@@ -17,6 +17,8 @@ void camera::cameraCallback(ConstImageStampedPtr &msg)
   cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
 
 
+  something.push_back(1);
+
   im = im.clone();
   cv::cvtColor(im, im, CV_BGR2RGB);
 
@@ -55,7 +57,7 @@ void camera::lidarCallback(ConstLaserScanStampedPtr &msg)
     float angle = angle_min + i * angle_increment;
     float range = std::min(float(msg->scan().ranges(i)), range_max);
     std::cout<<angle<<std::endl;
-    lidarRange[i]=range;
+    //lidarRange[i]=range;
 
     //    double intensity = msg->scan().intensities(i);
     cv::Point2f startpt(200.5f + range_min * px_per_m * std::cos(angle),
@@ -88,18 +90,3 @@ void camera::lidarCallback(ConstLaserScanStampedPtr &msg)
 //}
 
 
-void camera::cameraCallback(ConstImageStampedPtr &msg)
-{
-  std::size_t width = msg->image().width();
-  std::size_t height = msg->image().height();
-  const char *data = msg->image().data().c_str();
-  cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
-
-
-  im = im.clone();
-  cv::cvtColor(im, im, CV_BGR2RGB);
-
-  mutex.lock();
-  cv::imshow("camera", im);
-  mutex.unlock();
-}
