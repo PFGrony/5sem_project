@@ -1,3 +1,4 @@
+//std classes
 #include <iostream>
 
 //Gazebo
@@ -7,10 +8,12 @@
 
 //OpenCV
 #include "opencv2/opencv.hpp"
+#include "fl/Headers.h"
 
 //Classes
 #include "computerVision.h"
 #include "gazeboWorld.h"
+#include "fuzzyController.h"
 
 
 int main()

@@ -5,7 +5,8 @@ CONFIG -= qt
 
 SOURCES += main.cpp \
     gazeboWorld.cpp \
-    computerVision.cpp
+    computerVision.cpp \
+    fuzzyController.cpp
 
 #Gazebo
 PKGCONFIG += gazebo
@@ -32,5 +33,6 @@ DEPENDPATH += $$PWD/fuzzylite
 
 HEADERS += \
     gazeboWorld.h \
-    computerVision.h
+    computerVision.h \
+    fuzzyController.h
 

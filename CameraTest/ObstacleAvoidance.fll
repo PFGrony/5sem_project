@@ -1,12 +1,33 @@
 #File: ObstacleAvoidance.fll
 Engine: ObstacleAvoidance
+
 InputVariable: obstacle
   enabled: true
-  range: 0.000 1.000
+  range: -2.3 2.3
+  lock-range: true
+  term: left Ramp 1.000 -1.000
+  term: right Ramp -1.000 1.000
+
+InputVariable: distance
+  enabled: true
+  range: 0.000 10.000
   lock-range: false
-  term: left Ramp 1.000 0.000
-  term: right Ramp 0.000 1.000
+  term: near Ramp 1.500 1.000
+  term: close Triangle 1.000 1.500 10.000
+  term: far Ramp 1.500 10.000
+
 OutputVariable: mSteer
+  enabled: true
+  range: -1.000 1.000
+  lock-range: false
+  aggregation: Maximum
+  defuzzifier: Centroid 100
+  default: nan
+  lock-previous: false
+  term: left Ramp 0.000 1.000
+  term: right Ramp 0.000 -1.000
+
+OutputVariable: mSpeed
   enabled: true
   range: 0.000 1.000
   lock-range: false
@@ -14,13 +35,18 @@ OutputVariable: mSteer
   defuzzifier: Centroid 100
   default: nan
   lock-previous: false
-  term: left Ramp 1.000 0.000
-  term: right Ramp 0.000 1.000
+  term: slow Ramp 0.500 0.000
+  term: medium Triangle 0.000 0.500 1.000
+  term: fast Ramp 0.500 1.000
+
 RuleBlock: mamdani
   enabled: true
-  conjunction: none
-  disjunction: none
-  implication: AlgebraicProduct
+  conjunction: Minimum
+  disjunction: Maximum
+  implication: Minimum
   activation: General
-  rule: if obstacle is left then mSteer is right
-  rule: if obstacle is right then mSteer is left
+  rule: if obstacle is left and distance is near then mSteer is right
+  rule: if obstacle is right and distance is near then mSteer is left
+  rule: if distance is near then mSpeed is slow
+  rule: if distance is close then mSpeed is medium
+  rule: if distance is far then mSpeed is fast
