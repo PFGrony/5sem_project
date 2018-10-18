@@ -16,6 +16,13 @@
 #include "fuzzyController.h"
 
 
+//Key constants
+//    const int key_left = 81;
+//    const int key_up = 82;
+//    const int key_down = 84;
+//    const int key_right = 83;
+#define key_esc  27
+
 int main()
 {
     //Creata Gazebo World
@@ -34,16 +41,11 @@ int main()
     //resets Gazebo World
     _gazeboWorld.worldReset();
 
-    const int key_left = 81;
-    const int key_up = 82;
-    const int key_down = 84;
-    const int key_right = 83;
-    const int key_esc = 27;
+    // Start AI of doom
+    fuzzyController AI;
+    AI.fuzzyInit();
 
-    float speed = 0.0;
-    float dir = 0.0;
-
-
+    int circle_bool = 0;
     // Loop
     while (true)
     {
@@ -58,40 +60,52 @@ int main()
       //Checks key input
       if (key == key_esc)
         break;
-      if ((key == key_up) && (speed <= 1.2f))
-        speed += 0.05;
-      else if ((key == key_down) && (speed >= -1.2f))
-        speed -= 0.05;
-      else if ((key == key_right) && (dir <= 0.4f))
-        dir += 0.05;
-      else if ((key == key_left) && (dir >= -0.4f))
-        dir -= 0.05;
-      else {
-        // slow down
-            speed *= 0.99;
-            dir *= 0.99;
-      }
 
       //Container for data from camera class
       std::array<float,200> something=cvObj.getLidarRange();
 
-      //Prints Data from camera Class
-      if(cvObj.getLock()==1)
+      //Camera data
+      cv::Mat imageCopy=cvObj.getMatCamera();
+
+
+      //detect circles
+      int offset = (160);
+      int rad = 0;
+
+
+      if (! imageCopy.empty()) // find circles
       {
-          std::cout<<"Copy: [";
-          for(int i=0;i<5;i++)
+          cv::Mat gray;
+          cv::cvtColor(imageCopy, gray, cv::COLOR_BGR2GRAY);
+          cv::medianBlur(gray, gray, 5);
+
+          std::vector<cv::Vec3f> circles;
+          cv::HoughCircles(gray,circles, cv::HOUGH_GRADIENT,1,gray.rows,50,20,0,0);
+
+          if (circles.size() > 0)
+              circle_bool = 1;
+          else
+              circle_bool = 0;
+
+
+          for( size_t i = 0; i < circles.size(); i++ )
           {
-              std::cout<<something[98+i];
-              if(i!=4)
+              cv::Vec3i c = circles[i];
+              cv::Point center = cv::Point(c[0], c[1]);
+
+              if (abs(int(c[0])-160)<abs(offset) && int(c[2]) > rad)
               {
-                  std::cout<<", ";
+                  offset = int(c[0])-160;
+                  rad = int(c[2]);
+                  //std::cout << "off: " << offset << ", rad: " << rad <<  std::endl;
               }
+
           }
-          std::cout<<"]"<<std::endl;
       }
 
+      AI.fuzzyUpdate(something,circle_bool,offset);
 
-        _gazeboWorld.generatePose(speed,dir);
+      _gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
 
     }
     // Make sure to shut everything down.

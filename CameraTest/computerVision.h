@@ -9,6 +9,8 @@
 
 static boost::mutex mutex;
 
+
+
 class computerVision
 {
 public:

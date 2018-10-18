@@ -9,7 +9,7 @@ public:
     fuzzyController();
 
     void fuzzyInit();
-    void fuzzyUpdate(float array[],int bo_ci,int off);
+    void fuzzyUpdate(std::array<float,200> arrays/*float array[]*/,int bo_ci,int off);
     float getSpeed();
     float getSteer();
 private:

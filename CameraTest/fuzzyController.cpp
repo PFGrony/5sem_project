@@ -149,7 +149,7 @@ void fuzzyController::fuzzyInit()
         throw Exception("[engine error] engine is not ready:n" + status, FL_AT);
 }
 
-void fuzzyController::fuzzyUpdate(float array[], int bo_ci, int off)
+void fuzzyController::fuzzyUpdate(std::array<float,200> arrays/*float array[]*/, int bo_ci, int off)
 {
     // setup to find the lowest value for left and right, and to find the averrage for the rest
     farLeft = 0;
@@ -167,19 +167,19 @@ void fuzzyController::fuzzyUpdate(float array[], int bo_ci, int off)
     for (int i = 0;i<200;i++)
     {
         if (i<rFarLeft)
-            farLeft += array[i];
+            farLeft += arrays.at(i);
 
-        if (i > (rFarLeft-1) && i<rLeft && left > array[i])
-            left = array[i];
+        if (i > (rFarLeft-1) && i<rLeft && left > arrays.at(i))
+            left = arrays.at(i);
 
         if (i > (rLeft-1) && i<rForward)
-            forward += array[i];
+            forward += arrays.at(i);
 
-        if (i > (rForward-1) && i<rRight && right > array[i])
-            right = array[i];
+        if (i > (rForward-1) && i<rRight && right > arrays.at(i))
+            right = arrays.at(i);
 
         if (i >(rRight-1) && i<rFarRight)
-            farRight += array[i];
+            farRight += arrays.at(i);
     }
 
     farLeft = farLeft/(rFarLeft);
