@@ -1,4 +1,4 @@
-#include "camera.h"
+#include "computerVision.h"
 
 ///Sensor Data
 //If lock==1 data is not empty
@@ -9,30 +9,30 @@ static cv::Mat matCamera;
 static std::array<float,200> lidarAngle;
 static std::array<float,200> lidarRange;
 
-camera::camera()
+computerVision::computerVision()
 {
 }
 
-bool camera::getLock()
+bool computerVision::getLock()
 {
     return lock;
 }
 
-cv::Mat camera::getMatCamera()
+cv::Mat computerVision::getMatCamera()
 {
     return matCamera;
 }
 
-std::array<float,200> camera::getLidarAngle()
+std::array<float,200> computerVision::getLidarAngle()
 {
     return lidarAngle;
 }
-std::array<float,200> camera::getLidarRange()
+std::array<float,200> computerVision::getLidarRange()
 {
     return lidarRange;
 }
 
-void camera::cameraCallback(ConstImageStampedPtr &msg)
+void computerVision::cameraCallback(ConstImageStampedPtr &msg)
 {
   std::size_t width = msg->image().width();
   std::size_t height = msg->image().height();
@@ -50,7 +50,7 @@ void camera::cameraCallback(ConstImageStampedPtr &msg)
   mutex.unlock();
 }
 
-void camera::lidarCallback(ConstLaserScanStampedPtr &msg)
+void computerVision::lidarCallback(ConstLaserScanStampedPtr &msg)
 {
 
   //  std::cout << ">> " << msg->DebugString() << std::endl;
@@ -125,12 +125,12 @@ void camera::lidarCallback(ConstLaserScanStampedPtr &msg)
   mutex.unlock();
 }
 
-void camera::startCamera(gazebo::transport::NodePtr &node)
+void computerVision::startCamera(gazebo::transport::NodePtr &node)
 {
     cameraSubscriber = node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
 }
 
-void camera::startLidar(gazebo::transport::NodePtr &node)
+void computerVision::startLidar(gazebo::transport::NodePtr &node)
 {
     lidarSubscriber= node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidarCallback);
 }

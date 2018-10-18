@@ -1,5 +1,5 @@
-#ifndef CAMERA_H
-#define CAMERA_H
+#ifndef COMPUTERVISION_H
+#define COMPUTERVISION_H
 
 #include <gazebo/gazebo_client.hh>
 #include <gazebo/msgs/msgs.hh>
@@ -9,10 +9,10 @@
 
 static boost::mutex mutex;
 
-class camera
+class computerVision
 {
 public:
-    camera();
+    computerVision();
 
     bool getLock();
 
@@ -34,4 +34,4 @@ private:
     gazebo::transport::SubscriberPtr lidarSubscriber;
 
 };
-#endif // CAMERA_H
+#endif // COMPUTERVISION_H

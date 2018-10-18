@@ -1,15 +1,15 @@
-#ifndef GAZEBO_WORLD_H
-#define GAZEBO_WORLD_H
+#ifndef GAZEBOWORLD_H
+#define GAZEBOWORLD_H
 
 #include <gazebo/gazebo_client.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <gazebo/transport/transport.hh>
 
-class gazebo_world
+class gazeboWorld
 {
 public:
-    gazebo_world();
-    gazebo_world(gazebo::transport::NodePtr &node);
+    gazeboWorld();
+    gazeboWorld(gazebo::transport::NodePtr &node);
 
     void startStat();
     void startPose();
@@ -34,4 +34,4 @@ private:
 
 };
 
-#endif // GAZEBO_WORLD_H
+#endif // GAZEBOWORLD_H

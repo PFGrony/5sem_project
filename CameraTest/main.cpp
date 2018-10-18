@@ -9,31 +9,27 @@
 #include "opencv2/opencv.hpp"
 
 //Classes
-#include "camera.h"
-#include "gazebo_world.h"
+#include "computerVision.h"
+#include "gazeboWorld.h"
 
 
 int main()
 {
     //Creata Gazebo World
-    gazebo_world gazeboWorld;
+    gazeboWorld _gazeboWorld;
     //Get Gazebo World pointer
-    gazebo::transport::NodePtr node= gazeboWorld.getNode();
-    //starts Gazebo statistics and posing
-    gazeboWorld.startStat();
-    gazeboWorld.startPose();
-
+    gazebo::transport::NodePtr node= _gazeboWorld.getNode();
 
 
     //Camera Functions class
-    camera camera_temp;
+    computerVision cvObj;
 
-    camera_temp.startCamera(node);
-    camera_temp.startLidar(node);
+    cvObj.startCamera(node);
+    cvObj.startLidar(node);
 
 
     //resets Gazebo World
-    gazeboWorld.worldReset();
+    _gazeboWorld.worldReset();
 
     const int key_left = 81;
     const int key_up = 82;
@@ -74,10 +70,10 @@ int main()
       }
 
       //Container for data from camera class
-      std::array<float,200> something=camera_temp.getLidarRange();
+      std::array<float,200> something=cvObj.getLidarRange();
 
       //Prints Data from camera Class
-      if(camera_temp.getLock()==1)
+      if(cvObj.getLock()==1)
       {
           std::cout<<"Copy: [";
           for(int i=0;i<5;i++)
@@ -92,7 +88,7 @@ int main()
       }
 
 
-        gazeboWorld.generatePose(speed,dir);
+        _gazeboWorld.generatePose(speed,dir);
 
     }
     // Make sure to shut everything down.

@@ -1,6 +1,6 @@
-#include "gazebo_world.h"
+#include "gazeboWorld.h"
 
-gazebo_world::gazebo_world()
+gazeboWorld::gazeboWorld()
 {
     // Load gazebo
     gazebo::client::setup();
@@ -13,21 +13,25 @@ gazebo_world::gazebo_world()
     // Publish to the robot vel_cmd topic
     movementPublisher = node->Advertise<gazebo::msgs::Pose>("~/pioneer2dx/vel_cmd");
 
+    //starts Gazebo statistics and posing
+    this->startStat();
+    this->startPose();
+
 }
 
-gazebo::transport::NodePtr gazebo_world::getNode()
+gazebo::transport::NodePtr gazeboWorld::getNode()
 {
     return node;
 }
 
-void gazebo_world::statCallback(ConstWorldStatisticsPtr &_msg) {
+void gazeboWorld::statCallback(ConstWorldStatisticsPtr &_msg) {
   (void)_msg;
   // Dump the message contents to stdout.
   //  std::cout << _msg->DebugString();
   //  std::cout << std::flush;
 }
 
-void gazebo_world::poseCallback(ConstPosesStampedPtr &_msg) {
+void gazeboWorld::poseCallback(ConstPosesStampedPtr &_msg) {
   // Dump the message contents to stdout.
   //  std::cout << _msg->DebugString();
 
@@ -46,17 +50,17 @@ void gazebo_world::poseCallback(ConstPosesStampedPtr &_msg) {
   }
 }
 
-void gazebo_world::startStat()
+void gazeboWorld::startStat()
 {
     statSubscriber = node->Subscribe("~/world_stats", statCallback);
 }
 
-void gazebo_world::startPose()
+void gazeboWorld::startPose()
 {
     poseSubscriber = node->Subscribe("~/pose/info", poseCallback);
 }
 
-void gazebo_world::generatePose(double speed,double dir)
+void gazeboWorld::generatePose(double speed,double dir)
 {
     // Generate a pose
     ignition::math::Pose3d pose(speed, 0, 0, 0, 0, dir);
@@ -67,7 +71,7 @@ void gazebo_world::generatePose(double speed,double dir)
     movementPublisher->Publish(msg);
 }
 
-void gazebo_world::worldReset()
+void gazeboWorld::worldReset()
 {
     // Publish a reset of the world
     worldPublisher = node->Advertise<gazebo::msgs::WorldControl>("~/world_control");

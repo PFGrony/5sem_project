@@ -4,8 +4,8 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += main.cpp \
-    camera.cpp \
-    gazebo_world.cpp
+    gazeboWorld.cpp \
+    computerVision.cpp
 
 #Gazebo
 PKGCONFIG += gazebo
@@ -31,6 +31,6 @@ INCLUDEPATH += $$PWD/fuzzylite
 DEPENDPATH += $$PWD/fuzzylite
 
 HEADERS += \
-    camera.h \
-    gazebo_world.h
+    gazeboWorld.h \
+    computerVision.h
 
