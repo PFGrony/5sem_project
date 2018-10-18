@@ -15,36 +15,25 @@
 
 int main()
 {
-    // Load gazebo
-    gazebo::client::setup();
-
-    // Create our node for communication
-    gazebo::transport::NodePtr node(new gazebo::transport::Node());
-    node->Init();
-
-    // Listen to Gazebo topics
+    //Creata Gazebo World
     gazebo_world gazeboWorld;
-    gazeboWorld.startStat(node);
-    gazeboWorld.startPose(node);
+    //Get Gazebo World pointer
+    gazebo::transport::NodePtr node= gazeboWorld.getNode();
+    //starts Gazebo statistics and posing
+    gazeboWorld.startStat();
+    gazeboWorld.startPose();
+
+
 
     //Camera Functions class
     camera camera_temp;
-    gazebo::transport::SubscriberPtr cameraSubscriber = camera_temp.startCamera(node);
-    gazebo::transport::SubscriberPtr lidarSubscriber = camera_temp.startLidar(node);
+
+    camera_temp.startCamera(node);
+    camera_temp.startLidar(node);
 
 
-
-    // Publish to the robot vel_cmd topic
-    gazebo::transport::PublisherPtr movementPublisher =
-            node->Advertise<gazebo::msgs::Pose>("~/pioneer2dx/vel_cmd");
-
-    // Publish a reset of the world
-    gazebo::transport::PublisherPtr worldPublisher =
-        node->Advertise<gazebo::msgs::WorldControl>("~/world_control");
-    gazebo::msgs::WorldControl controlMessage;
-    controlMessage.mutable_reset()->set_all(true);
-    worldPublisher->WaitForConnection();
-    worldPublisher->Publish(controlMessage);
+    //resets Gazebo World
+    gazeboWorld.worldReset();
 
     const int key_left = 81;
     const int key_up = 82;
@@ -56,19 +45,18 @@ int main()
     float dir = 0.0;
 
 
-
-
     // Loop
     while (true)
     {
-      //Waits for 10ms in gazebo and opencv
+      //Waits for 10ms in gazebo
       gazebo::common::Time::MSleep(10);
 
+      //Get key input
       mutex.lock();
       int key = cv::waitKey(1);
       mutex.unlock();
 
-      //Key input
+      //Checks key input
       if (key == key_esc)
         break;
       if ((key == key_up) && (speed <= 1.2f))
@@ -104,14 +92,7 @@ int main()
       }
 
 
-
-      // Generate a pose
-      ignition::math::Pose3d pose(double(speed), 0, 0, 0, 0, double(dir));
-
-      // Convert to a pose message
-      gazebo::msgs::Pose msg;
-      gazebo::msgs::Set(&msg, pose);
-      movementPublisher->Publish(msg);
+        gazeboWorld.generatePose(speed,dir);
 
     }
     // Make sure to shut everything down.

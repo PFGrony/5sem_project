@@ -2,6 +2,22 @@
 
 gazebo_world::gazebo_world()
 {
+    // Load gazebo
+    gazebo::client::setup();
+
+    // Create our node for communication
+    gazebo::transport::NodePtr nodeNew(new gazebo::transport::Node());
+    node=nodeNew;
+    node->Init();
+
+    // Publish to the robot vel_cmd topic
+    movementPublisher = node->Advertise<gazebo::msgs::Pose>("~/pioneer2dx/vel_cmd");
+
+}
+
+gazebo::transport::NodePtr gazebo_world::getNode()
+{
+    return node;
 }
 
 void gazebo_world::statCallback(ConstWorldStatisticsPtr &_msg) {
@@ -30,12 +46,33 @@ void gazebo_world::poseCallback(ConstPosesStampedPtr &_msg) {
   }
 }
 
-void gazebo_world::startStat(gazebo::transport::NodePtr &node)
+void gazebo_world::startStat()
 {
-    gazebo::transport::SubscriberPtr statSubscriber = node->Subscribe("~/world_stats", statCallback);
+    statSubscriber = node->Subscribe("~/world_stats", statCallback);
 }
 
-void gazebo_world::startPose(gazebo::transport::NodePtr &node)
+void gazebo_world::startPose()
 {
-    gazebo::transport::SubscriberPtr poseSubscriber = node->Subscribe("~/pose/info", poseCallback);
+    poseSubscriber = node->Subscribe("~/pose/info", poseCallback);
+}
+
+void gazebo_world::generatePose(double speed,double dir)
+{
+    // Generate a pose
+    ignition::math::Pose3d pose(speed, 0, 0, 0, 0, dir);
+
+    // Convert to a pose message
+    gazebo::msgs::Pose msg;
+    gazebo::msgs::Set(&msg, pose);
+    movementPublisher->Publish(msg);
+}
+
+void gazebo_world::worldReset()
+{
+    // Publish a reset of the world
+    worldPublisher = node->Advertise<gazebo::msgs::WorldControl>("~/world_control");
+    gazebo::msgs::WorldControl controlMessage;
+    controlMessage.mutable_reset()->set_all(true);
+    worldPublisher->WaitForConnection();
+    worldPublisher->Publish(controlMessage);
 }

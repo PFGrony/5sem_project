@@ -14,19 +14,24 @@ class camera
 public:
     camera();
 
-    gazebo::transport::SubscriberPtr startCamera(gazebo::transport::NodePtr &temp);
-    gazebo::transport::SubscriberPtr startLidar(gazebo::transport::NodePtr &temp);
-
-
     bool getLock();
 
     cv::Mat getMatCamera();
     std::array<float,200> getLidarAngle();
     std::array<float,200> getLidarRange();
 
+
+    void startCamera(gazebo::transport::NodePtr &node);
+    void startLidar(gazebo::transport::NodePtr &node);
+
+
 private:
     static void cameraCallback(ConstImageStampedPtr &msg);
     static void lidarCallback(ConstLaserScanStampedPtr &msg);
+
+
+    gazebo::transport::SubscriberPtr cameraSubscriber;
+    gazebo::transport::SubscriberPtr lidarSubscriber;
 
 };
 #endif // CAMERA_H

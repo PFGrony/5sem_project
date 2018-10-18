@@ -125,14 +125,12 @@ void camera::lidarCallback(ConstLaserScanStampedPtr &msg)
   mutex.unlock();
 }
 
-gazebo::transport::SubscriberPtr camera::startCamera(gazebo::transport::NodePtr &node)
+void camera::startCamera(gazebo::transport::NodePtr &node)
 {
-    return node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
+    cameraSubscriber = node->Subscribe("~/pioneer2dx/camera/link/camera/image", cameraCallback);
 }
 
-gazebo::transport::SubscriberPtr camera::startLidar(gazebo::transport::NodePtr &node)
+void camera::startLidar(gazebo::transport::NodePtr &node)
 {
-    return node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidarCallback);
+    lidarSubscriber= node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidarCallback);
 }
-
-
