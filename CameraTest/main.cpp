@@ -17,11 +17,11 @@
 
 
 //Key constants
-#define key_left = 81;
-#define key_up = 82;
-#define key_down = 84;
-#define key_right = 83;
-#define key_esc  27
+const int key_left = 81;
+const int key_up = 82;
+const int key_down = 84;
+const int key_right = 83;
+const int key_esc = 27;
 
 //Functions
 void detectCircles(cv::Mat &imageCopy,int &offset,int &rad,int &circle_bool);
@@ -84,6 +84,10 @@ int main()
       _gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
 
     }
+
+    //shutdown robot before exit
+    _gazeboWorld.generatePose(0,0);
+
     // Make sure to shut everything down.
     gazebo::client::shutdown();
 

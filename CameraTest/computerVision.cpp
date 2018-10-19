@@ -91,7 +91,7 @@ void computerVision::lidarCallback(ConstLaserScanStampedPtr &msg)
     lidarAngle.at(i)=angle;
 
 
-    ////Kuus
+    //Delegate colours
     cv::Scalar color;
     if (i<60 || i>140)
         color = cv::Scalar(0,255,255);
@@ -99,8 +99,6 @@ void computerVision::lidarCallback(ConstLaserScanStampedPtr &msg)
         color = cv::Scalar(0,255,0);
     if (i>89 && i<111)
         color = cv::Scalar(0,0,255);
-
-    /// Kuus end
 
 
 //    //    double intensity = msg->scan().intensities(i);
