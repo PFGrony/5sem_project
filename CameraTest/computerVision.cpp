@@ -42,49 +42,6 @@ void computerVision::cameraCallback(ConstImageStampedPtr &msg)
   const char *data = msg->image().data().c_str();
   cv::Mat im(int(height), int(width), CV_8UC3, const_cast<char *>(data));
 
-  ////Kuus
-//  //int(height) 240
-//  //int(width) 320
-
-//  offset = (160);
-//  int rad = 0;
-
-//  if (true) // find circles
-//  {
-//      cv::Mat gray;
-//      cv::cvtColor(im, gray, cv::COLOR_BGR2GRAY);
-//      cv::medianBlur(gray, gray, 5);
-
-//      std::vector<cv::Vec3f> circles;
-//      cv::HoughCircles(gray,circles, cv::HOUGH_GRADIENT,1,gray.rows,50,20,0,0);
-
-//      if (circles.size() > 0)
-//          circle_bool = 1;
-//      else
-//          circle_bool = 0;
-
-
-//      for( size_t i = 0; i < circles.size(); i++ )
-//      {
-//          cv::Vec3i c = circles[i];
-//          cv::Point center = cv::Point(c[0], c[1]);
-
-//          if (abs(int(c[0])-160)<abs(offset) && int(c[2]) > rad)
-//          {
-//              offset = int(c[0])-160;
-//              rad = int(c[2]);
-//              //std::cout << "off: " << offset << ", rad: " << rad <<  std::endl;
-//          }
-
-//          // circle center
-//          //cv::circle( im, center, 1, cv::Scalar(255,0,0), 3, cv::LINE_AA);
-//          // circle outline
-//          //int radius = c[2];
-//          //cv::circle( im, center, radius, cv::Scalar(255,0,0), 3, cv::LINE_AA);
-//      }
-//  }
-  ////Kuus end
-
   im = im.clone();
   cv::cvtColor(im, im, CV_BGR2RGB);
 
@@ -125,9 +82,7 @@ void computerVision::lidarCallback(ConstLaserScanStampedPtr &msg)
 
   for (int i = 0; i < nranges; i++)
   {
-//    ////Kuus
-//    range_array[i]=std::min(float(msg->scan().ranges(i)), range_max);
-//    ////Kuus end
+
     float angle = angle_min + i * angle_increment;
     float range = std::min(float(msg->scan().ranges(i)), range_max);
 
@@ -157,14 +112,14 @@ void computerVision::lidarCallback(ConstLaserScanStampedPtr &msg)
 //             cv::LINE_AA, 4);
 
 
-    ////kuus
+    //Draw coloured lines
     cv::Point2f startpt(200.5f + range_min * px_per_m * std::cos(angle),
                       200.5f - range_min * px_per_m * std::sin(angle));
     cv::Point2f endpt(200.5f + range * px_per_m * std::cos(angle),
                     200.5f - range * px_per_m * std::sin(angle));
     cv::line(im, startpt * 16, endpt * 16, color, 1,
            cv::LINE_AA, 4);
-    /// Kuus end
+
 
 
   }
