@@ -20,12 +20,17 @@ public:
     cv::Mat getMatCamera();
     std::array<float,200> getLidarAngle();
     std::array<float,200> getLidarRange();
+    bool getCircleBool();
+    int getOffset();
+
 
     void startCamera(gazebo::transport::NodePtr &node);
     void startLidar(gazebo::transport::NodePtr &node);
 
     void seeCamera();
     void seeLidar();
+    void seeLidarNew();
+    void seeCameraNew();
 
 
 private:
@@ -35,6 +40,10 @@ private:
 
     gazebo::transport::SubscriberPtr cameraSubscriber;
     gazebo::transport::SubscriberPtr lidarSubscriber;
+
+
+    int offset=160;
+    bool circle_bool=0;
 
 };
 #endif // COMPUTERVISION_H

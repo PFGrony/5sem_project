@@ -43,9 +43,21 @@ std::array<float,200> computerVision::getLidarRange()
     return lidarRange;
 }
 
-void computerVision::seeCamera()
+bool computerVision::getCircleBool()
 {
-    if(cameraLock==1)
+    return circle_bool;
+}
+
+int computerVision::getOffset()
+{
+    return offset;
+}
+
+
+
+void computerVision::seeLidar()
+{
+    if(lidarLock==1)
     {
         //Show Lidar camera
         cv::Mat im(400, 400, CV_8UC3);
@@ -79,13 +91,140 @@ void computerVision::seeCamera()
     }
 }
 
-void computerVision::seeLidar()
+void computerVision::seeCamera()
 {
     if(cameraLock==1)
     {
         cv::imshow("newCamera",matCamera);
     }
 }
+
+
+void computerVision::seeCameraNew()
+{
+    if(cameraLock==1)
+    {
+
+        //int(height) 240
+        //int(width) 320
+
+        offset = 160;
+        int rad = 0;
+        cv::Mat im;
+        im=matCamera.clone();
+        cv::cvtColor(im, im, CV_RGB2BGR);
+        if (true) // find circles
+        {
+            cv::Mat gray;
+            cv::cvtColor(im, gray, cv::COLOR_BGR2GRAY);
+            cv::medianBlur(gray, gray, 5);
+
+            std::vector<cv::Vec3f> circles;
+            cv::HoughCircles(gray,circles, cv::HOUGH_GRADIENT,1,gray.rows,50,20,0,0);
+
+            if (circles.size() > 0)
+                circle_bool = 1;
+            else
+                circle_bool = 0;
+
+
+            for( size_t i = 0; i < circles.size(); i++ )
+            {
+                cv::Vec3i c = circles.at(i);
+                cv::Point center = cv::Point(c[0], c[1]);
+
+                if (abs(int(c[0])-160)<abs(offset) && int(c[2]) > rad)
+                {
+                    offset = int(c[0])-160;
+                    rad = int(c[2]);
+                    //std::cout << "off: " << offset << ", rad: " << rad <<  std::endl;
+                }
+
+                //             circle center
+                cv::circle( im, center, 1, cv::Scalar(255,0,0), 3, cv::LINE_AA);
+                //             circle outline
+                int radius = c[2];
+                cv::circle( im, center, radius, cv::Scalar(255,0,0), 3, cv::LINE_AA);
+            }
+        }
+
+        im = im.clone();
+        cv::cvtColor(im, im, CV_BGR2RGB);
+
+        cv::imshow("cameraIMPROVED", im);
+    }
+
+
+}
+
+
+void computerVision::seeLidarNew()
+{
+
+    if(lidarLock==1)
+    {
+        //Show Lidar camera
+        cv::Mat im(400, 400, CV_8UC3);
+        im.setTo(0);
+
+        for (int i = 0; i < 200; i++)
+        {
+            float angle = lidarAngle.at(i);
+            float range = lidarRange.at(i);
+            float range_min = 0.08;
+            float range_max = 10;
+            float px_per_m = 200 / range_max;   //20
+
+
+            cv::Scalar color;
+            if (i<60 || i>140)
+                color = cv::Scalar(0,255,255);
+            if (i>59 && i<141)
+                color = cv::Scalar(0,255,0);
+            if (i>89 && i<111)
+                color = cv::Scalar(0,0,255);
+            //    double intensity = msg->scan().intensities(i);
+            cv::Point2f startpt(200.5f + range_min * px_per_m * std::cos(angle),
+                                200.5f - range_min * px_per_m * std::sin(angle));
+            cv::Point2f endpt(200.5f + range * px_per_m * std::cos(angle),
+                              200.5f - range * px_per_m * std::sin(angle));
+            cv::line(im, startpt * 16, endpt * 16, color, 1,
+                     cv::LINE_AA, 4);
+
+        }
+
+        cv::circle(im, cv::Point(200, 200), 2, cv::Scalar(0, 0, 255));
+        cv::putText(im, std::to_string(secCopy) + ":" + std::to_string(nsecCopy),
+                    cv::Point(10, 20), cv::FONT_HERSHEY_PLAIN, 1.0,
+                    cv::Scalar(255, 0, 0));
+
+
+        cv::imshow("LidarIMPROVED",im);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -182,3 +321,6 @@ void computerVision::startLidar(gazebo::transport::NodePtr &node)
 {
     lidarSubscriber= node->Subscribe("~/pioneer2dx/hokuyo/link/laser/scan", lidarCallback);
 }
+
+
+

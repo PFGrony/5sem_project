@@ -11,6 +11,14 @@
 //Classes
 #include "computerVision.h"
 #include "gazeboWorld.h"
+#include "fuzzyController.h"
+
+//Key constants
+const int key_left = 81;
+const int key_up = 82;
+const int key_down = 84;
+const int key_right = 83;
+const int key_esc = 27;
 
 int main()
 {
@@ -30,15 +38,9 @@ int main()
     //resets Gazebo World
     _gazeboWorld.worldReset();
 
-    const int key_left = 81;
-    const int key_up = 82;
-    const int key_down = 84;
-    const int key_right = 83;
-    const int key_esc = 27;
-
-    float speed = 0.0;
-    float dir = 0.0;
-
+    // Start AI of doom
+    fuzzyController AI;
+    AI.fuzzyInit();
 
     // Loop
     while (true)
@@ -54,26 +56,25 @@ int main()
         //Checks key input
         if (key == key_esc)
             break;
-        if ((key == key_up) && (speed <= 1.2f))
-            speed += 0.05;
-        else if ((key == key_down) && (speed >= -1.2f))
-            speed -= 0.05;
-        else if ((key == key_right) && (dir <= 0.4f))
-            dir += 0.05;
-        else if ((key == key_left) && (dir >= -0.4f))
-            dir -= 0.05;
-        else {
-            // slow down
-            speed *= 0.99;
-            dir *= 0.99;
+
+        std::array<float,200> range_array=cvObj.getLidarRange();
+        bool circle_bool=cvObj.getCircleBool();
+        int offset=cvObj.getOffset();
+
+        cvObj.seeCameraNew();
+        cvObj.seeLidarNew();
+
+        if(cvObj.getCameraLock() && cvObj.getLidarLock())
+        {
+            AI.fuzzyUpdate(range_array,circle_bool,offset);
+
+            // Generate a pose
+            _gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
         }
-
-        //Class functions
-        cvObj.seeCamera();
-        cvObj.seeLidar();
-
-        _gazeboWorld.generatePose(speed,dir);
-
+        else
+        {
+            _gazeboWorld.generatePose(0,0);
+        }
     }
 
     // Resets
