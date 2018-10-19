@@ -14,15 +14,18 @@ class computerVision
 public:
     computerVision();
 
-    bool getLock();
+    bool getLidarLock();
+    bool getCameraLock();
 
     cv::Mat getMatCamera();
     std::array<float,200> getLidarAngle();
     std::array<float,200> getLidarRange();
 
-
     void startCamera(gazebo::transport::NodePtr &node);
     void startLidar(gazebo::transport::NodePtr &node);
+
+    void seeCamera();
+    void seeLidar();
 
 
 private:

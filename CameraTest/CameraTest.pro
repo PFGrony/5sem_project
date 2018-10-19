@@ -16,8 +16,7 @@ CONFIG += link_pkgconfig
 PKGCONFIG += opencv
 
 #Fuzzylite
-DISTFILES += \
-ObstacleAvoidance.fll
+DISTFILES +=
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../fuzzylite/release/bin/release/ -lfuzzylite
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../fuzzylite/release/bin/debug/ -lfuzzylite
