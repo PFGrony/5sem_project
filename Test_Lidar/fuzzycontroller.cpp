@@ -131,7 +131,7 @@ void fuzzyController::fuzzyInit()
     mamdani->addRule(Rule::parse("if inRight is far then outSteer is softRight", engine));
 
     mamdani->addRule(Rule::parse("if inFarLeft is far and inFarRight is mid then outSteer is softLeft", engine));
-    mamdani->addRule(Rule::parse("if inFarRight is far and inFarRight is mid then outSteer is softRight", engine));
+    mamdani->addRule(Rule::parse("if inFarRight is far and inFarLeft is mid then outSteer is softRight", engine));
 
     mamdani->addRule(Rule::parse("if inFarLeft is close then outSteer is sharpRight", engine));
     mamdani->addRule(Rule::parse("if inFarRight is close then outSteer is sharpLeft", engine));
