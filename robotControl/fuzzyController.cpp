@@ -131,7 +131,7 @@ void fuzzyController::fuzzyInit()
     mamdani->addRule(Rule::parse("if inRight is far then outSteer is softRight", engine));
 
     mamdani->addRule(Rule::parse("if inFarLeft is far and inFarRight is mid then outSteer is softLeft", engine));
-    mamdani->addRule(Rule::parse("if inFarRight is far and inFarRight is mid then outSteer is softRight", engine));
+    mamdani->addRule(Rule::parse("if inFarRight is far and inFarLeft is mid then outSteer is softRight", engine));
 
     mamdani->addRule(Rule::parse("if inFarLeft is close then outSteer is sharpRight", engine));
     mamdani->addRule(Rule::parse("if inFarRight is close then outSteer is sharpLeft", engine));
@@ -188,40 +188,40 @@ void fuzzyController::fuzzyUpdate(std::array<float,200> arrays,int bo_ci, int of
     //right = right/(rRight-rForward);
     farRight = farRight/(rFarRight-rRight);
 
-    if (bo_ci)
-    {
-        boo_cir = 40;
-        off_cir = off;
-    }
-    else
-    {
-        if (boo_cir != 0)
-            boo_cir--;
-        off_cir = 0;
-    }
+//    if (bo_ci)
+//    {
+//        boo_cir = 40;
+//        off_cir = off;
+//    }
+//    else
+//    {
+//        if (boo_cir != 0)
+//            boo_cir--;
+//        off_cir = 0;
+//    }
 
 
 
 
-    if (boo_cir)
-    {
-        forward = 3;
-        if (off_cir < 0)
-        {
-            right = 3;
-            left = 0;
-        }
-        else if (off_cir > 0)
-        {
-            left = 3;
-            right = 0;
-        }
-        else
-        {
-            left = 3;
-            right = 3;
-        }
-    }
+//    if (boo_cir)
+//    {
+//        forward = 3;
+//        if (off_cir < 0)
+//        {
+//            right = 3;
+//            left = 0;
+//        }
+//        else if (off_cir > 0)
+//        {
+//            left = 3;
+//            right = 0;
+//        }
+//        else
+//        {
+//            left = 3;
+//            right = 3;
+//        }
+//    }
 
 
 
