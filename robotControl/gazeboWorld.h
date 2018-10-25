@@ -15,6 +15,10 @@ public:
     void startPose();
     void generatePose(double speed,double dir);
     void worldReset();
+    double getXPos();
+    double getYPos();
+    double getAngle();
+
 
     gazebo::transport::NodePtr getNode();
 
@@ -23,8 +27,6 @@ public:
 private:
     static void statCallback(ConstWorldStatisticsPtr &_msg);
     static void poseCallback(ConstPosesStampedPtr &_msg);
-
-
 
     gazebo::transport::NodePtr node;
     gazebo::transport::PublisherPtr movementPublisher;

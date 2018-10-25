@@ -1,7 +1,14 @@
 #include "gazeboWorld.h"
 
+static double xPos;
+static double yPos;
+static double angle;
+
 gazeboWorld::gazeboWorld()
 {
+    angle = 0;
+    xPos = 0;
+    yPos = 0;
     // Load gazebo
     gazebo::client::setup();
 
@@ -39,37 +46,15 @@ void gazeboWorld::poseCallback(ConstPosesStampedPtr &_msg) {
   {
     if (_msg->pose(i).name() == "pioneer2dx")
     {
-        // yaw (z-axis rotation)
+        // copy paste fra wiki
         double siny_cosp = +2.0 * (_msg->pose(i).orientation().w() * _msg->pose(i).orientation().z() + _msg->pose(i).orientation().x() * _msg->pose(i).orientation().y());
         double cosy_cosp = +1.0 - 2.0 * (_msg->pose(i).orientation().y() * _msg->pose(i).orientation().y() + _msg->pose(i).orientation().z() * _msg->pose(i).orientation().z());
-        double yaw = atan2(siny_cosp, cosy_cosp);
+        angle = atan2(siny_cosp, cosy_cosp);
 
-        std::cout << std::setprecision(2) << std::fixed << std::setw(6)
-                << _msg->pose(i).position().x() << std::setw(6) // x pos
-                << _msg->pose(i).position().y() << std::setw(6) // y pos
-                << yaw << std::setw(6) << std::endl;    // orientation
-
+        xPos = _msg->pose(i).position().x();
+        yPos = _msg->pose(i).position().y();
     }
   }
-  /*
-    // roll (x-axis rotation)
-    double sinr_cosp = +2.0 * (q.w() * q.x() + q.y() * q.z());
-    double cosr_cosp = +1.0 - 2.0 * (q.x() * q.x() + q.y() * q.y());
-    roll = atan2(sinr_cosp, cosr_cosp);
-
-    // pitch (y-axis rotation)
-    double sinp = +2.0 * (q.w() * q.y() - q.z() * q.x());
-    if (fabs(sinp) >= 1)
-        pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
-    else
-        pitch = asin(sinp);
-
-    // yaw (z-axis rotation)
-    double siny_cosp = +2.0 * (q.w() * q.z() + q.x() * q.y());
-    double cosy_cosp = +1.0 - 2.0 * (q.y() * q.y() + q.z() * q.z());
-    yaw = atan2(siny_cosp, cosy_cosp);
-  */
-
 }
 
 void gazeboWorld::startStat()
@@ -101,4 +86,19 @@ void gazeboWorld::worldReset()
     controlMessage.mutable_reset()->set_all(true);
     worldPublisher->WaitForConnection();
     worldPublisher->Publish(controlMessage);
+}
+
+double gazeboWorld::getXPos()
+{
+    return xPos;
+}
+
+double gazeboWorld::getYPos()
+{
+    return yPos;
+}
+
+double gazeboWorld::getAngle()
+{
+    return angle;
 }

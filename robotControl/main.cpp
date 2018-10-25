@@ -14,10 +14,10 @@
 #include "fuzzyController.h"
 
 //Key constants
-const int key_left = 81;
-const int key_up = 82;
-const int key_down = 84;
-const int key_right = 83;
+//const int key_left = 81;
+//const int key_up = 82;
+//const int key_down = 84;
+//const int key_right = 83;
 const int key_esc = 27;
 
 int main()
@@ -56,6 +56,19 @@ int main()
         //Checks key input
         if (key == key_esc)
             break;
+        //std::cout << std::setprecision(3) << "x: " << _gazeboWorld.getXPos() << " y: " << _gazeboWorld.getYPos() <<" a: "<< _gazeboWorld.getAngle() << std::endl;
+
+        double end_x = 1;
+        double end_y = 1;
+        double start_x = _gazeboWorld.getXPos();
+        double start_y = _gazeboWorld.getYPos();
+
+        double ac_x = end_x - start_x;
+        double ac_y = end_y - start_y;
+
+        double angle_point = asin((ac_x)/sqrt((ac_x*ac_x)+(ac_y*ac_y)));
+
+        std::cout << angle_point << std::endl;
 
         std::array<float,200> range_array=cvObj.getLidarRange();
         bool circle_bool=cvObj.getCircleBool();
