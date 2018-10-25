@@ -46,7 +46,7 @@ int main()
     while (true)
     {
         //Waits for 10ms in gazebo
-        gazebo::common::Time::MSleep(10);
+        gazebo::common::Time::MSleep(20);
 
         //Get key input
         mutex.lock();
@@ -56,72 +56,22 @@ int main()
         //Checks key input
         if (key == key_esc)
             break;
-        //std::cout << std::setprecision(3) << "x: " << _gazeboWorld.getXPos() << " y: " << _gazeboWorld.getYPos() <<" a: "<< _gazeboWorld.getAngle() << std::endl;
-        double pi = 3.14159;
 
-        double end_x = 1;
-        double end_y = 1;
-        double start_x = _gazeboWorld.getXPos();
-        double start_y = _gazeboWorld.getYPos();
-
-        double ac_x = end_x - start_x;
-        double ac_y = end_y - start_y;
-
-        double envek_x = (_gazeboWorld.getXPos()+cos(_gazeboWorld.getAngle()) - _gazeboWorld.getXPos() ) ;
-        double envek_y = (_gazeboWorld.getYPos()+sin(_gazeboWorld.getAngle()) - _gazeboWorld.getYPos() );
-
-        double angle_point = asin((ac_x)/sqrt((ac_x*ac_x)+(ac_y*ac_y)));
-
-        double goal =  acos(((envek_x*ac_x)+(envek_y*ac_y))/(sqrt(envek_x*envek_x+envek_y*envek_y)*sqrt(ac_x*ac_x+ac_y*ac_y)));
-
-        std::cout << goal << std::endl;
-
-        if (goal < (-1*pi))
-        {
-            goal = -1*(goal + 2*abs(goal)-pi);
-        }
-        else if ((_gazeboWorld.getAngle() - angle_point) > (pi))
-        {
-            goal = -1*(goal - 2*(goal-pi));
-        }
-
-
-        std::cout << std::setprecision(3) << goal << std::endl;
-
-        std::array<float,200> range_array=cvObj.getLidarRange();
-        bool circle_bool=cvObj.getCircleBool();
-        int offset=cvObj.getOffset();
+        float* range_array = cvObj.getLidarRange();
 
         cvObj.seeCameraNew();
         cvObj.seeLidarNew();
 
-        double speed;
-        double dir;
+        double rob_x = _gazeboWorld.getXPos();
+        double rob_y = _gazeboWorld.getYPos();
+        double rob_a = _gazeboWorld.getAngle();
 
-        if ((key == key_up) && (speed <= 1.2f))
-          speed += 0.05;
-        else if ((key == key_down) && (speed >= -1.2f))
-          speed -= 0.05;
-        else if ((key == key_right) && (dir <= 0.4f))
-          dir += 0.05;
-        else if ((key == key_left) && (dir >= -0.4f))
-          dir -= 0.05;
-        else {
-          // slow down
-                speed *= 0.99;
-               dir *= 0.99;}
-
-        _gazeboWorld.generatePose(speed,dir);
 
         if(cvObj.getCameraLock() && cvObj.getLidarLock())
         {
-            //AI.fuzzyUpdate(range_array,circle_bool,offset);
-
+            AI.fuzzyUpdate(range_array,rob_x,rob_y,rob_a,20,-2);
             // Generate a pose
-            //_gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
-
-
-
+            _gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
         }
         else
         {

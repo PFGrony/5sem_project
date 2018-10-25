@@ -9,7 +9,7 @@ public:
     fuzzyController();
 
     void fuzzyInit();
-    void fuzzyUpdate(std::array<float,200>,int bo_ci,int off);
+    void fuzzyUpdate(float* arrays,double robot_x,double robot_y,double robot_a, double point_x, double point_y);
     float getSpeed();
     float getSteer();
 private:
@@ -22,6 +22,8 @@ private:
     float right;
     float farRight;
 
+    float goal;
+
     int boo_cir;
     int off_cir;
 
@@ -32,6 +34,7 @@ private:
     fl::InputVariable* inForward;
     fl::InputVariable* inRight;
     fl::InputVariable* inFarRight;
+    fl::InputVariable* inAngle;
 
     fl::OutputVariable* outSteer;
     fl::OutputVariable* outSpeed;

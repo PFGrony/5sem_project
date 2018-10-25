@@ -7,8 +7,11 @@ static bool cameraLock=0;
 //Camera
 static cv::Mat matCamera;
 //Lidar
-static std::array<float,200> lidarAngle;
-static std::array<float,200> lidarRange;
+static float lidarRange[200] = {};
+static float *lR = lidarRange;
+
+float lidarAngle[200] = {};
+float *lA = lidarAngle;
 
 //time
 static int nsecCopy;
@@ -34,13 +37,13 @@ cv::Mat computerVision::getMatCamera()
     return matCamera;
 }
 
-std::array<float,200> computerVision::getLidarAngle()
+float* computerVision::getLidarAngle()
 {
-    return lidarAngle;
+    return lA;
 }
-std::array<float,200> computerVision::getLidarRange()
+float* computerVision::getLidarRange()
 {
-    return lidarRange;
+    return lR;
 }
 
 bool computerVision::getCircleBool()
@@ -65,8 +68,8 @@ void computerVision::seeLidar()
 
         for (int i = 0; i < 200; i++)
         {
-            float angle = lidarAngle.at(i);
-            float range = lidarRange.at(i);
+            float angle = *(lA+i);
+            float range = *(lR+i);
             float range_min = 0.08;
             float range_max = 10;
             float px_per_m = 200 / range_max;   //20
@@ -169,8 +172,8 @@ void computerVision::seeLidarNew()
 
         for (int i = 0; i < 200; i++)
         {
-            float angle = lidarAngle.at(i);
-            float range = lidarRange.at(i);
+            float angle = *(lA+i);
+            float range = *(lR+i);
             float range_min = 0.08;
             float range_max = 10;
             float px_per_m = 200 / range_max;   //20
@@ -244,21 +247,14 @@ void computerVision::cameraCallback(ConstImageStampedPtr &msg)
 
     cameraLock=1;
     matCamera=im.clone();
-
-    //    mutex.lock();
-    //    cv::imshow("camera", im);
-    //    mutex.unlock();
 }
 
 void computerVision::lidarCallback(ConstLaserScanStampedPtr &msg)
 {
-
-    //  std::cout << ">> " << msg->DebugString() << std::endl;
     float angle_min = float(msg->scan().angle_min());
-    //  double angle_max = msg->scan().angle_max();
     float angle_increment = float(msg->scan().angle_step());
 
-    float range_min = float(msg->scan().range_min());   //0.08
+    //float range_min = float(msg->scan().range_min());   //0.08
     float range_max = float(msg->scan().range_max());   //10
 
     int sec = msg->time().sec();
@@ -269,47 +265,17 @@ void computerVision::lidarCallback(ConstLaserScanStampedPtr &msg)
 
     assert(nranges == nintensities);
 
-    int width = 400;
-    int height = 400;
-    float px_per_m = 200 / range_max;   //20
-
-    //    cv::Mat im(height, width, CV_8UC3);
-    //    im.setTo(0);
-
 
     for (int i = 0; i < nranges; i++)
     {
         float angle = angle_min + i * angle_increment;
         float range = std::min(float(msg->scan().ranges(i)), range_max);
-
-
         lidarLock=1;
-        lidarRange.at(i)=range;
-        lidarAngle.at(i)=angle;
-
-
-
-        //        //    double intensity = msg->scan().intensities(i);
-        //        cv::Point2f startpt(200.5f + range_min * px_per_m * std::cos(angle),
-        //                            200.5f - range_min * px_per_m * std::sin(angle));
-        //        cv::Point2f endpt(200.5f + range * px_per_m * std::cos(angle),
-        //                          200.5f - range * px_per_m * std::sin(angle));
-        //        cv::line(im, startpt * 16, endpt * 16, cv::Scalar(255, 255, 255, 255), 1,
-        //                 cv::LINE_AA, 4);
-
+        *(lR+i)=range;
+        *(lA+i)=angle;
     }
-
     nsecCopy=nsec;
     secCopy=sec;
-
-    //    cv::circle(im, cv::Point(200, 200), 2, cv::Scalar(0, 0, 255));
-    //    cv::putText(im, std::to_string(sec) + ":" + std::to_string(nsec),
-    //                cv::Point(10, 20), cv::FONT_HERSHEY_PLAIN, 1.0,
-    //                cv::Scalar(255, 0, 0));
-
-    //    mutex.lock();
-    //    cv::imshow("lidar", im);
-    //    mutex.unlock();
 }
 
 void computerVision::startCamera(gazebo::transport::NodePtr &node)
