@@ -57,6 +57,7 @@ int main()
         if (key == key_esc)
             break;
         //std::cout << std::setprecision(3) << "x: " << _gazeboWorld.getXPos() << " y: " << _gazeboWorld.getYPos() <<" a: "<< _gazeboWorld.getAngle() << std::endl;
+        double pi = 3.14159;
 
         double end_x = 1;
         double end_y = 1;
@@ -68,7 +69,19 @@ int main()
 
         double angle_point = asin((ac_x)/sqrt((ac_x*ac_x)+(ac_y*ac_y)));
 
-        std::cout << angle_point << std::endl;
+        double goal = _gazeboWorld.getAngle() - angle_point;
+
+        if (goal < (-1*pi))
+        {
+            goal = -1*(goal + 2*abs(goal)-pi);
+        }
+        else if ((_gazeboWorld.getAngle() - angle_point) > (pi))
+        {
+            goal = -1*(goal - 2*(goal-pi));
+        }
+
+
+        std::cout << std::setprecision(3) << goal << std::endl;
 
         std::array<float,200> range_array=cvObj.getLidarRange();
         bool circle_bool=cvObj.getCircleBool();
