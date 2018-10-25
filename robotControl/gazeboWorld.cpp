@@ -35,19 +35,41 @@ void gazeboWorld::poseCallback(ConstPosesStampedPtr &_msg) {
   // Dump the message contents to stdout.
   //  std::cout << _msg->DebugString();
 
-  for (int i = 0; i < _msg->pose_size(); i++) {
-    if (_msg->pose(i).name() == "pioneer2dx") {
+  for (int i = 0; i < _msg->pose_size(); i++)
+  {
+    if (_msg->pose(i).name() == "pioneer2dx")
+    {
+        // yaw (z-axis rotation)
+        double siny_cosp = +2.0 * (_msg->pose(i).orientation().w() * _msg->pose(i).orientation().z() + _msg->pose(i).orientation().x() * _msg->pose(i).orientation().y());
+        double cosy_cosp = +1.0 - 2.0 * (_msg->pose(i).orientation().y() * _msg->pose(i).orientation().y() + _msg->pose(i).orientation().z() * _msg->pose(i).orientation().z());
+        double yaw = atan2(siny_cosp, cosy_cosp);
 
-      /*std::cout << std::setprecision(2) << std::fixed << std::setw(6)
-                << _msg->pose(i).position().x() << std::setw(6)
-                << _msg->pose(i).position().y() << std::setw(6)
-                << _msg->pose(i).position().z() << std::setw(6)
-                << _msg->pose(i).orientation().w() << std::setw(6)
-                << _msg->pose(i).orientation().x() << std::setw(6)
-                << _msg->pose(i).orientation().y() << std::setw(6)
-                << _msg->pose(i).orientation().z() << std::endl;*/
+        std::cout << std::setprecision(2) << std::fixed << std::setw(6)
+                << _msg->pose(i).position().x() << std::setw(6) // x pos
+                << _msg->pose(i).position().y() << std::setw(6) // y pos
+                << yaw << std::setw(6) << std::endl;    // orientation
+
     }
   }
+  /*
+    // roll (x-axis rotation)
+    double sinr_cosp = +2.0 * (q.w() * q.x() + q.y() * q.z());
+    double cosr_cosp = +1.0 - 2.0 * (q.x() * q.x() + q.y() * q.y());
+    roll = atan2(sinr_cosp, cosr_cosp);
+
+    // pitch (y-axis rotation)
+    double sinp = +2.0 * (q.w() * q.y() - q.z() * q.x());
+    if (fabs(sinp) >= 1)
+        pitch = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+    else
+        pitch = asin(sinp);
+
+    // yaw (z-axis rotation)
+    double siny_cosp = +2.0 * (q.w() * q.z() + q.x() * q.y());
+    double cosy_cosp = +1.0 - 2.0 * (q.y() * q.y() + q.z() * q.z());
+    yaw = atan2(siny_cosp, cosy_cosp);
+  */
+
 }
 
 void gazeboWorld::startStat()

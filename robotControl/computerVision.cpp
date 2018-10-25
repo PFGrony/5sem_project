@@ -113,7 +113,7 @@ void computerVision::seeCameraNew()
         cv::Mat im;
         im=matCamera.clone();
         cv::cvtColor(im, im, CV_RGB2BGR);
-        if (true) // find circles
+        if (false) // find circles
         {
             cv::Mat gray;
             cv::cvtColor(im, gray, cv::COLOR_BGR2GRAY);
@@ -151,7 +151,7 @@ void computerVision::seeCameraNew()
         im = im.clone();
         cv::cvtColor(im, im, CV_BGR2RGB);
 
-        cv::imshow("cameraIMPROVED", im);
+        cv::imshow("Camera", im);
     }
 
 
@@ -199,7 +199,7 @@ void computerVision::seeLidarNew()
                     cv::Scalar(255, 0, 0));
 
 
-        cv::imshow("LidarIMPROVED",im);
+        cv::imshow("LIDAR",im);
     }
 }
 
