@@ -14,10 +14,10 @@
 #include "fuzzyController.h"
 
 //Key constants
-//const int key_left = 81;
-//const int key_up = 82;
-//const int key_down = 84;
-//const int key_right = 83;
+const int key_left = 81;
+const int key_up = 82;
+const int key_down = 84;
+const int key_right = 83;
 const int key_esc = 27;
 
 int main()
@@ -67,9 +67,14 @@ int main()
         double ac_x = end_x - start_x;
         double ac_y = end_y - start_y;
 
+        double envek_x = (_gazeboWorld.getXPos()+cos(_gazeboWorld.getAngle()) - _gazeboWorld.getXPos() ) ;
+        double envek_y = (_gazeboWorld.getYPos()+sin(_gazeboWorld.getAngle()) - _gazeboWorld.getYPos() );
+
         double angle_point = asin((ac_x)/sqrt((ac_x*ac_x)+(ac_y*ac_y)));
 
-        double goal = _gazeboWorld.getAngle() - angle_point;
+        double goal =  acos(((envek_x*ac_x)+(envek_y*ac_y))/(sqrt(envek_x*envek_x+envek_y*envek_y)*sqrt(ac_x*ac_x+ac_y*ac_y)));
+
+        std::cout << goal << std::endl;
 
         if (goal < (-1*pi))
         {
@@ -90,12 +95,33 @@ int main()
         cvObj.seeCameraNew();
         cvObj.seeLidarNew();
 
+        double speed;
+        double dir;
+
+        if ((key == key_up) && (speed <= 1.2f))
+          speed += 0.05;
+        else if ((key == key_down) && (speed >= -1.2f))
+          speed -= 0.05;
+        else if ((key == key_right) && (dir <= 0.4f))
+          dir += 0.05;
+        else if ((key == key_left) && (dir >= -0.4f))
+          dir -= 0.05;
+        else {
+          // slow down
+                speed *= 0.99;
+               dir *= 0.99;}
+
+        _gazeboWorld.generatePose(speed,dir);
+
         if(cvObj.getCameraLock() && cvObj.getLidarLock())
         {
-            AI.fuzzyUpdate(range_array,circle_bool,offset);
+            //AI.fuzzyUpdate(range_array,circle_bool,offset);
 
             // Generate a pose
-            _gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
+            //_gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
+
+
+
         }
         else
         {
