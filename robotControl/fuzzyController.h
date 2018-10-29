@@ -24,9 +24,6 @@ private:
 
     float goal;
 
-    int boo_cir;
-    int off_cir;
-
     fl::Engine* engine;
 
     fl::InputVariable* inFarLeft;

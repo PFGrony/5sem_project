@@ -14,26 +14,21 @@
 #include "fuzzyController.h"
 
 //Key constants
-const int key_left = 81;
-const int key_up = 82;
-const int key_down = 84;
-const int key_right = 83;
 const int key_esc = 27;
 
 int main()
 {
     //Creata Gazebo World
     gazeboWorld _gazeboWorld;
+
     //Get Gazebo World pointer
     gazebo::transport::NodePtr node= _gazeboWorld.getNode();
-
 
     //Camera Functions class
     computerVision cvObj;
 
     cvObj.startCamera(node);
     cvObj.startLidar(node);
-
 
     //resets Gazebo World
     _gazeboWorld.worldReset();
@@ -57,19 +52,23 @@ int main()
         if (key == key_esc)
             break;
 
-        float* range_array = cvObj.getLidarRange();
+        float* lidarArray = cvObj.getLidarRange();
 
         cvObj.seeCameraNew();
         cvObj.seeLidarNew();
 
-        double rob_x = _gazeboWorld.getXPos();
-        double rob_y = _gazeboWorld.getYPos();
-        double rob_a = _gazeboWorld.getAngle();
+        // Robot pose in gazeboworld
+        double robX = _gazeboWorld.getXPos();
+        double robY = _gazeboWorld.getYPos();
+        double robA = _gazeboWorld.getAngle();
 
+        // Robot distination in gazeboworld
+        double distX = 20;
+        double distY = -10;
 
         if(cvObj.getCameraLock() && cvObj.getLidarLock())
         {
-            AI.fuzzyUpdate(range_array,rob_x,rob_y,rob_a,20,-10);
+            AI.fuzzyUpdate(lidarArray,robX,robY,robA,distX,distY);
             // Generate a pose
             _gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
         }

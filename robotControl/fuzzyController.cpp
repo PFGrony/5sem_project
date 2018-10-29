@@ -243,5 +243,5 @@ float fuzzyController::getSpeed()
 float fuzzyController::getSteer()
 {
     // increased steer speed and making up for not knowing left and right
-    return (-2*steer);
+    return (-1*steer);
 }
