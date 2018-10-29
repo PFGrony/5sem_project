@@ -46,7 +46,7 @@ int main()
     while (true)
     {
         //Waits for 10ms in gazebo
-        gazebo::common::Time::MSleep(20);
+        gazebo::common::Time::MSleep(10);
 
         //Get key input
         mutex.lock();
@@ -69,7 +69,7 @@ int main()
 
         if(cvObj.getCameraLock() && cvObj.getLidarLock())
         {
-            AI.fuzzyUpdate(range_array,rob_x,rob_y,rob_a,20,-2);
+            AI.fuzzyUpdate(range_array,rob_x,rob_y,rob_a,20,-10);
             // Generate a pose
             _gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
         }
