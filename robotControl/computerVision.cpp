@@ -10,8 +10,8 @@ static cv::Mat matCamera;
 static float lidarRange[200] = {};
 static float *lR = lidarRange;
 
-float lidarAngle[200] = {};
-float *lA = lidarAngle;
+static float lidarAngle[200] = {};
+static float *lA = lidarAngle;
 
 //time
 static int nsecCopy;
