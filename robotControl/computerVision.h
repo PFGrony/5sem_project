@@ -18,8 +18,8 @@ public:
     bool getCameraLock();
 
     cv::Mat getMatCamera();
-    std::array<float,200> getLidarAngle();
-    std::array<float,200> getLidarRange();
+    float* getLidarAngle();
+    float* getLidarRange();
     bool getCircleBool();
     int getOffset();
 
@@ -40,7 +40,6 @@ private:
 
     gazebo::transport::SubscriberPtr cameraSubscriber;
     gazebo::transport::SubscriberPtr lidarSubscriber;
-
 
     int offset=160;
     bool circle_bool=0;

@@ -14,26 +14,21 @@
 #include "fuzzyController.h"
 
 //Key constants
-//const int key_left = 81;
-//const int key_up = 82;
-//const int key_down = 84;
-//const int key_right = 83;
 const int key_esc = 27;
 
 int main()
 {
     //Creata Gazebo World
     gazeboWorld _gazeboWorld;
+
     //Get Gazebo World pointer
     gazebo::transport::NodePtr node= _gazeboWorld.getNode();
-
 
     //Camera Functions class
     computerVision cvObj;
 
     cvObj.startCamera(node);
     cvObj.startLidar(node);
-
 
     //resets Gazebo World
     _gazeboWorld.worldReset();
@@ -56,31 +51,24 @@ int main()
         //Checks key input
         if (key == key_esc)
             break;
-        //std::cout << std::setprecision(3) << "x: " << _gazeboWorld.getXPos() << " y: " << _gazeboWorld.getYPos() <<" a: "<< _gazeboWorld.getAngle() << std::endl;
 
-        double end_x = 1;
-        double end_y = 1;
-        double start_x = _gazeboWorld.getXPos();
-        double start_y = _gazeboWorld.getYPos();
-
-        double ac_x = end_x - start_x;
-        double ac_y = end_y - start_y;
-
-        double angle_point = asin((ac_x)/sqrt((ac_x*ac_x)+(ac_y*ac_y)));
-
-        std::cout << angle_point << std::endl;
-
-        std::array<float,200> range_array=cvObj.getLidarRange();
-        bool circle_bool=cvObj.getCircleBool();
-        int offset=cvObj.getOffset();
+        float* lidarArray = cvObj.getLidarRange();
 
         cvObj.seeCameraNew();
         cvObj.seeLidarNew();
 
+        // Robot pose in gazeboworld
+        double robX = _gazeboWorld.getXPos();
+        double robY = _gazeboWorld.getYPos();
+        double robA = _gazeboWorld.getAngle();
+
+        // Robot distination in gazeboworld
+        double distX = 20;
+        double distY = -10;
+
         if(cvObj.getCameraLock() && cvObj.getLidarLock())
         {
-            AI.fuzzyUpdate(range_array,circle_bool,offset);
-
+            AI.fuzzyUpdate(lidarArray,robX,robY,robA,distX,distY);
             // Generate a pose
             _gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
         }

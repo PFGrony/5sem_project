@@ -13,6 +13,16 @@ void fuzzyController::fuzzyInit()
     engine->setName("ObstacleAvoidance");
     engine->setDescription("");
 
+    inAngle = new InputVariable;
+    inAngle->setName("inAngle");
+    inAngle->setDescription("");
+    inAngle->setEnabled(true);
+    inAngle->setRange(-3.200, 3.200);
+    inAngle->setLockValueInRange(false);
+    inAngle->addTerm(new Ramp("left", 0.500, -0.500));
+    inAngle->addTerm(new Ramp("right",-0.500, 0.500));
+    engine->addInputVariable(inAngle);
+
     float close = 0.800;
     float mid = 1.600;
     float far = 2.800;
@@ -120,6 +130,12 @@ void fuzzyController::fuzzyInit()
     mamdani->setDisjunction(new AlgebraicSum);
     mamdani->setImplication(new AlgebraicProduct);
     mamdani->setActivation(new General);
+    //Path finding
+    mamdani->addRule(Rule::parse("if inAngle is left and inLeft is not close then outSteer is sharpLeft", engine));
+    mamdani->addRule(Rule::parse("if inAngle is right and inRight is not close then outSteer is sharpRight", engine));
+
+    mamdani->addRule(Rule::parse("if inAngle is left and inForward is not close then outSteer is sharpLeft", engine));
+    mamdani->addRule(Rule::parse("if inAngle is right and inForward is not close then outSteer is sharpRight", engine));
     //Steer
     mamdani->addRule(Rule::parse("if inLeft is close and inRight is not close then outSteer is sharpRight", engine));
     mamdani->addRule(Rule::parse("if inRight is close and inLeft is not close then outSteer is sharpLeft", engine));
@@ -127,17 +143,18 @@ void fuzzyController::fuzzyInit()
     mamdani->addRule(Rule::parse("if inLeft is mid and inRight is not close then outSteer is sharpRight", engine));
     mamdani->addRule(Rule::parse("if inRight is mid and inLeft is not close then outSteer is sharpLeft", engine));
 
-    mamdani->addRule(Rule::parse("if inLeft is far then outSteer is softLeft", engine));
-    mamdani->addRule(Rule::parse("if inRight is far then outSteer is softRight", engine));
+    mamdani->addRule(Rule::parse("if inLeft is far and inRight is not far then outSteer is softLeft", engine));
+    mamdani->addRule(Rule::parse("if inRight is far and inRight is not far then outSteer is softRight", engine));
 
     mamdani->addRule(Rule::parse("if inFarLeft is far and inFarRight is mid then outSteer is softLeft", engine));
     mamdani->addRule(Rule::parse("if inFarRight is far and inFarLeft is mid then outSteer is softRight", engine));
 
-    mamdani->addRule(Rule::parse("if inFarLeft is close then outSteer is sharpRight", engine));
-    mamdani->addRule(Rule::parse("if inFarRight is close then outSteer is sharpLeft", engine));
+    mamdani->addRule(Rule::parse("if inFarLeft is close and inFarRight is not close then outSteer is sharpRight", engine));
+    mamdani->addRule(Rule::parse("if inFarRight is close and inFarLeft is not close then outSteer is sharpLeft", engine));
 
     mamdani->addRule(Rule::parse("if inForward is close and inFarLeft is not close then outSteer is sharpLeft",engine));
     mamdani->addRule(Rule::parse("if inForward is close and inFarRight is not close then outSteer is sharpRight",engine));
+
     //Speed
     mamdani->addRule(Rule::parse("if inForward is close then outSpeed is slow", engine));
     mamdani->addRule(Rule::parse("if inForward is mid then outSpeed is medium", engine));
@@ -149,8 +166,23 @@ void fuzzyController::fuzzyInit()
         throw Exception("[engine error] engine is not ready:n" + status, FL_AT);
 }
 
-void fuzzyController::fuzzyUpdate(std::array<float,200> arrays,int bo_ci, int off)
+void fuzzyController::fuzzyUpdate(float *arrays, double robot_x, double robot_y, double robot_a, double point_x, double point_y)
 {
+    double ahead_x = cos(robot_a);
+    double ahead_y = sin(robot_a);
+
+    double ac_x = point_x - robot_x;
+    double ac_y = point_y - robot_y;
+
+    goal =  acos(((ahead_x*ac_x)+(ahead_y*ac_y))/(sqrt(ahead_x*ahead_x+ahead_y*ahead_y)*sqrt(ac_x*ac_x+ac_y*ac_y)));
+
+    double left_right = ahead_x*ac_y - ahead_y*ac_x;
+
+    if(left_right < 0)
+        goal *= -1;
+
+    std::cout << goal << std::endl;
+
     // setup to find the lowest value for left and right, and to find the averrage for the rest
     farLeft = 0;
     left = 10.0;
@@ -167,19 +199,19 @@ void fuzzyController::fuzzyUpdate(std::array<float,200> arrays,int bo_ci, int of
     for (int i = 0;i<200;i++)
     {
         if (i<rFarLeft)
-            farLeft += arrays.at(i);
+            farLeft += *(arrays+i);
 
-        if (i > (rFarLeft-1) && i<rLeft && left > arrays.at(i))
-            left = arrays.at(i);
+        if (i > (rFarLeft-1) && i<rLeft && left > *(arrays+i))
+            left = *(arrays+i);
 
         if (i > (rLeft-1) && i<rForward)
-            forward += arrays.at(i);
+            forward += *(arrays+i);
 
-        if (i > (rForward-1) && i<rRight && right > arrays.at(i))
-            right = arrays.at(i);
+        if (i > (rForward-1) && i<rRight && right > *(arrays+i))
+            right = *(arrays+i);
 
         if (i >(rRight-1) && i<rFarRight)
-            farRight += arrays.at(i);
+            farRight += *(arrays+i);
     }
 
     farLeft = farLeft/(rFarLeft);
@@ -188,55 +220,19 @@ void fuzzyController::fuzzyUpdate(std::array<float,200> arrays,int bo_ci, int of
     //right = right/(rRight-rForward);
     farRight = farRight/(rFarRight-rRight);
 
-//    if (bo_ci)
-//    {
-//        boo_cir = 40;
-//        off_cir = off;
-//    }
-//    else
-//    {
-//        if (boo_cir != 0)
-//            boo_cir--;
-//        off_cir = 0;
-//    }
-
-
-
-
-//    if (boo_cir)
-//    {
-//        forward = 3;
-//        if (off_cir < 0)
-//        {
-//            right = 3;
-//            left = 0;
-//        }
-//        else if (off_cir > 0)
-//        {
-//            left = 3;
-//            right = 0;
-//        }
-//        else
-//        {
-//            left = 3;
-//            right = 3;
-//        }
-//    }
-
-
-
     // Load into engine, process it and set the new values for speed and steer
     inFarLeft->setValue(farLeft);
     inLeft->setValue(left);
     inForward->setValue(forward);
     inRight->setValue(right);
     inFarRight->setValue(farRight);
+    inAngle->setValue(goal);
+
 
     engine->process();
 
     speed = outSpeed->getValue();
     steer = outSteer->getValue();
-
 }
 
 float fuzzyController::getSpeed()
@@ -247,5 +243,5 @@ float fuzzyController::getSpeed()
 float fuzzyController::getSteer()
 {
     // increased steer speed and making up for not knowing left and right
-    return (-2*steer);
+    return (-1*steer);
 }
