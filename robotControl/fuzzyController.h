@@ -13,8 +13,8 @@ public:
     float getSpeed();
     float getSteer();
 private:
-    float steer;
-    float speed;
+    float steer = 0;
+    float speed = 0;
 
     float farLeft;
     float left;

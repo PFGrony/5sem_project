@@ -12,7 +12,7 @@ class generateMap
 public:
     generateMap();
     void calculateRobotPos(double speed, double steer);
-    void calculateObstaclePoints(std::array<float,200> arrays);
+    void calculateObstaclePoints(float* arrays);
     void insertPointsOnMap();
 
     void setRobPos(double x, double y, double a);
@@ -27,9 +27,11 @@ private:
     double robotPosY;
     double robotOrien=0;
 
-    int width = 500;
-    int height = 500;
+    int width = 250;
+    int height = 250;
     cv::Mat1b im_map;
+
+    int size_update = 0;
 
     std::vector<int> currObstaclePointsX;
     std::vector<int> currObstaclePointsY;
