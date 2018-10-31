@@ -12,6 +12,7 @@
 #include "computerVision.h"
 #include "gazeboWorld.h"
 #include "fuzzyController.h"
+#include "generateMap.h"
 
 //Key constants
 const int key_left = 81;
@@ -123,6 +124,20 @@ int main()
         {
             _gazeboWorld.generatePose(0,0);
         }
+
+        //mapObj.calculateRobotPos(AI.getSpeed(),AI.getSteer());
+        //mapObj.setRobPos();
+
+        if(cvObj.getLidarLock())
+        {
+            mapObj.calculateObstaclePoints(range_array);
+        }
+
+                mapObj.insertPointsOnMap();
+
+        cv::imshow("bla",mapObj.getMat());
+        cv::imwrite("mappingMap.png",mapObj.getMat());
+
     }
 
     // Resets
