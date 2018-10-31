@@ -195,22 +195,30 @@ void computerVision::seeCameraV2()
 
         std::vector<cv::Vec3f> circles;
 
-        /// Apply the Hough Transform to find the circles
+        // Apply the Hough Transform to find the circles
         cv::HoughCircles( gray, circles, CV_HOUGH_GRADIENT, 1, 60, 200, 20, 0, 0 );
 
 
         int rad=0;
-        /// Draw the circles detected
+        int newrad = 0;
+        // Draw the circles detected
         for( size_t i = 0; i < circles.size(); i++ )
         {
             cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-            rad = cvRound(circles[i][2]);
-            cv::circle( color, center, 3, cv::Scalar(0,255,255), -1);
-            cv::circle( color, center, rad, cv::Scalar(0,0,255), 1 );
 
-            cv::Vec3i c = circles.at(i);
-            cv::Point center1 = cv::Point(c[0], c[1]);
-            offset = int(c[0])-160;
+            newrad = cvRound(circles[i][2]);
+
+            if(newrad != newrad)
+                newrad = 0;
+
+            if (newrad > rad)
+            {
+                rad = newrad;
+                offset = int(circles[i][0])-160;
+            }
+
+            cv::circle( color, center, 3, cv::Scalar(0,255,255), -1);
+            cv::circle( color, center, newrad, cv::Scalar(0,0,255), 1 );
         }
 
         radi=rad;
@@ -296,7 +304,7 @@ void computerVision::seeLidarNew()
                 color = cv::Scalar(0,255,255);
             if (i>59 && i<141)
                 color = cv::Scalar(0,255,0);
-            if (i>89 && i<111)
+            if (i>84 && i<116)
                 color = cv::Scalar(0,0,255);
             //    double intensity = msg->scan().intensities(i);
             cv::Point2f startpt(200.5f + range_min * px_per_m * std::cos(angle),

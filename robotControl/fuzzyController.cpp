@@ -23,7 +23,7 @@ void fuzzyController::fuzzyInit()
     inAngle->addTerm(new Ramp("right",-0.500, 0.500));
     engine->addInputVariable(inAngle);
 
-    float close = 0.800;
+    float close = 0.500;
     float mid = 1.600;
     float far = 2.800;
 
@@ -184,18 +184,18 @@ void fuzzyController::fuzzyUpdate(float *arrays, double robot_x, double robot_y,
     if(left_right < 0)
         goal *= -1;
 
-    std::cout << goal << std::endl;
+    //std::cout << goal << std::endl;
 
     // setup to find the lowest value for left and right, and to find the averrage for the rest
     farLeft = 0;
     left = 10.0;
-    forward = 0;
+    forward = 10.0;
     right = 10.0;
     farRight = 0;
     // The boarder from each space
     int rFarLeft = 60;
-    int rLeft = 90;
-    int rForward = 110;
+    int rLeft = 85;
+    int rForward = 115;
     int rRight = 140;
     int rFarRight = 200;
 
@@ -207,8 +207,8 @@ void fuzzyController::fuzzyUpdate(float *arrays, double robot_x, double robot_y,
         if (i > (rFarLeft-1) && i<rLeft && left > *(arrays+i))
             left = *(arrays+i);
 
-        if (i > (rLeft-1) && i<rForward)
-            forward += *(arrays+i);
+        if (i > (rLeft-1) && i<rForward && forward > *(arrays+i))
+            forward = *(arrays+i);
 
         if (i > (rForward-1) && i<rRight && right > *(arrays+i))
             right = *(arrays+i);
@@ -219,7 +219,7 @@ void fuzzyController::fuzzyUpdate(float *arrays, double robot_x, double robot_y,
 
     farLeft = farLeft/(rFarLeft);
     //left = left/(rLeft-rFarLeft);
-    forward = forward/(rForward-rLeft);
+    //forward = forward/(rForward-rLeft);
     //right = right/(rRight-rForward);
     farRight = farRight/(rFarRight-rRight);
 
@@ -240,11 +240,11 @@ void fuzzyController::fuzzyUpdate(float *arrays, double robot_x, double robot_y,
 
 float fuzzyController::getSpeed()
 {
-    return speed;
+    return 0.5*speed;
 }
 
 float fuzzyController::getSteer()
 {
     // increased steer speed and making up for not knowing left and right
-    return (-2*steer);
+    return (-0.5*steer);
 }

@@ -12,6 +12,7 @@
 #include "computerVision.h"
 #include "gazeboWorld.h"
 #include "fuzzyController.h"
+#include "generateMap.h"
 
 //Key constants
 const int key_left = 81;
@@ -33,6 +34,9 @@ int main()
 
     cvObj.startCamera(node);
     cvObj.startLidar(node);
+
+    //Generate Map
+    generateMap mapObj;
 
     //resets Gazebo World
     _gazeboWorld.worldReset();
@@ -74,9 +78,24 @@ int main()
         double robY = _gazeboWorld.getYPos();
         double robA = _gazeboWorld.getAngle();
 
-        // Robot distination in gazeboworld
-        double distX = 20;
-        double distY = -10;
+        //Mapping
+        mutex.lock();
+//        mapObj.calculateRobotPos(AI.getSpeed(),AI.getSteer());
+        mapObj.setRobPos(robX,robY,robA);
+        mutex.unlock();
+
+
+        mutex.lock();
+        mapObj.insertPointsOnMap();
+        mutex.unlock();
+
+        if(cvObj.getLidarLock())
+        {
+            mutex.lock();
+            mapObj.calculateObstaclePoints(lidarArray);
+            mutex.unlock();
+        }
+
 
         // Ball distance
         if (cvObj.getCircleBool())
@@ -93,16 +112,16 @@ int main()
             mapleX = distance * std::cos(mapleAngle) + robX;
             mapleY = distance * std::sin(mapleAngle) + robY;
 
-            std::cout << mapleX << " : " << mapleY << std::endl;
+            //std::cout << mapleX << " : " << mapleY << std::endl;
         }
 
-        if(true && cvObj.getCameraLock() && cvObj.getLidarLock())
+        if(false && cvObj.getCameraLock() && cvObj.getLidarLock())
         {
             AI.fuzzyUpdate(lidarArray,robX,robY,robA,mapleX,mapleY);
             // Generate a pose
             _gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
         }
-        else if(false)
+        else if(true)
         {
             if ((key == key_up) && (speed <= 1.2f))
               speed += 0.05;
