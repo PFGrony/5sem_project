@@ -47,7 +47,7 @@ private:
     int offset=160;
     bool circle_bool=0;
 
-    float radi=0;
+    float ballRadius=0;
 
 };
 #endif // COMPUTERVISION_H
