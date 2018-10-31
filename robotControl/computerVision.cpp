@@ -179,19 +179,13 @@ void computerVision::seeCameraV2()
         //        cv::namedWindow("input"); cv::imshow("input", color);
 
         cv::Mat canny;
+
         cv::Mat gray;
         cv::cvtColor(color, gray, CV_RGB2GRAY);
 
-        // get binary image
-        cv::Mat mask = gray > 0;
-
-        //erode the edges to obtain sharp/thin edges (undo the blur?)
-        cv::erode(mask, mask, cv::Mat());
-
-
         // compute canny (don't blur with that image quality!!)
         cv::Canny(gray, canny, 200,20);
-        //        cv::namedWindow("canny2"); cv::imshow("canny2", canny>0);
+//        cv::namedWindow("canny2"); cv::imshow("canny2", canny>0);
 
         std::vector<cv::Vec3f> circles;
 
@@ -208,14 +202,14 @@ void computerVision::seeCameraV2()
 
             newrad = cvRound(circles[i][2]);
 
-            if(newrad != newrad)
-                newrad = 0;
+//            if(newrad != newrad)
+//                newrad = 0;
 
-            if (newrad > rad)
-            {
+//            if (newrad > rad)
+//            {
                 rad = newrad;
                 offset = int(circles[i][0])-160;
-            }
+//            }
 
             cv::circle( color, center, 3, cv::Scalar(0,255,255), -1);
             cv::circle( color, center, newrad, cv::Scalar(0,0,255), 1 );
@@ -229,46 +223,46 @@ void computerVision::seeCameraV2()
         else
             circle_bool = 0;
 
-//        std::cout<<"Circle: "<<circle_bool<<"\toffset: "<<offset<<std::endl;
+        //        std::cout<<"Circle: "<<circle_bool<<"\toffset: "<<offset<<std::endl;
 
         //compute distance transform:
         cv::Mat dt;
         cv::distanceTransform(255-(canny>0), dt, CV_DIST_L2 ,3);
-        //        cv::namedWindow("distance transform"); cv::imshow("distance transform", dt/255.0f);
+//        cv::namedWindow("distance transform"); cv::imshow("distance transform", dt/255.0f);
 
-        //            // test for semi-circles:
-        //            float minInlierDist = 2.0f;
-        //            for( size_t i = 0; i < circles.size(); i++ )
-        //            {
-        //                // test inlier percentage:
-        //                // sample the circle and check for distance to the next edge
-        //                unsigned int counter = 0;
-        //                unsigned int inlier = 0;
+        // test for semi-circles:
+        float minInlierDist = 2.0f;
+        for( size_t i = 0; i < circles.size(); i++ )
+        {
+            // test inlier percentage:
+            // sample the circle and check for distance to the next edge
+            unsigned int counter = 0;
+            unsigned int inlier = 0;
 
-        //                cv::Point2f center((circles[i][0]), (circles[i][1]));
-        //                float radius = (circles[i][2]);
-        //                // maximal distance of inlier might depend on the size of the circle
-        //                float maxInlierDist = radius/25.0f;
-        //                if(maxInlierDist<minInlierDist)
-        //                    maxInlierDist = minInlierDist;
+            cv::Point2f center((circles[i][0]), (circles[i][1]));
+            float radius = (circles[i][2]);
+            // maximal distance of inlier might depend on the size of the circle
+            float maxInlierDist = radius/25.0f;
+            if(maxInlierDist<minInlierDist)
+                maxInlierDist = minInlierDist;
 
-        //                //            //TODO: maybe paramter incrementation might depend on circle size!
-        //                //            for(float t =0; t<2*3.14159265359f; t+= 0.1f)
-        //                //            {
-        //                //                counter++;
-        //                //                float cX = radius*cos(t) + circles[i][0];
-        //                //                float cY = radius*sin(t) + circles[i][1];
+                        //TODO: maybe paramter incrementation might depend on circle size!
+                        for(float t =0; t<2*3.14159265359f; t+= 0.1f)
+                        {
+                            counter++;
+                            float cX = radius*cos(t) + circles[i][0];
+                            float cY = radius*sin(t) + circles[i][1];
 
-        //                //                if(dt.at<float>(cY,cX) < maxInlierDist)
-        //                //                {
-        //                //                    inlier++;
-        //                //                    cv::circle(color, cv::Point2i(cX,cY),3, cv::Scalar(0,255,0));
-        //                //                }
-        //                //               else
-        //                //                    cv::circle(color, cv::Point2i(cX,cY),3, cv::Scalar(255,0,0));
-        //                //            }
-        //                //            std::cout << 100.0f*(float)inlier/(float)counter << " % of a circle with radius " << radius << " detected" << std::endl;
-        //            }
+                            if(dt.at<float>(cY,cX) < maxInlierDist)
+                            {
+                                inlier++;
+                                cv::circle(color, cv::Point2i(cX,cY),3, cv::Scalar(0,255,0));
+                            }
+                           else
+                                cv::circle(color, cv::Point2i(cX,cY),3, cv::Scalar(255,0,0));
+                        }
+                        std::cout << 100.0f*(float)inlier/(float)counter << " % of a circle with radius " << radius << " detected" << std::endl;
+        }
 
 
         cv::namedWindow("Camera"); cv::imshow("Camera", color);

@@ -69,7 +69,6 @@ int main()
 
         float* lidarArray = cvObj.getLidarRange();
 
-//        cvObj.seeCameraNew();
         cvObj.seeCameraV2();
         cvObj.seeLidarNew();
 
