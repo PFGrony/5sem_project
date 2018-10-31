@@ -45,6 +45,7 @@ int main()
     float speed = 0.0;
     float dir = 0.0;
 
+    // maple (x,y)
     double mapleX = 1.0;
     double mapleY = 1.0;
 
@@ -74,11 +75,7 @@ int main()
         double robY = _gazeboWorld.getYPos();
         double robA = _gazeboWorld.getAngle();
 
-        // Robot distination in gazeboworld
-        double distX = 20;
-        double distY = -10;
-
-        // Ball distance
+        // Ball detection (skal flyttes til map class)
         if (cvObj.getCircleBool())
         {
             double knownPixRadius = 29.0; // størrelse i pixels på maple i smallworld, når man står i starten
