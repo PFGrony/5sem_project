@@ -202,14 +202,14 @@ void computerVision::seeCameraV2()
 
             newrad = cvRound(circles[i][2]);
 
-//            if(newrad != newrad)
-//                newrad = 0;
+            if(newrad != newrad)
+                newrad = 0;
 
-//            if (newrad > rad)
-//            {
+            if (newrad > rad)
+            {
                 rad = newrad;
                 offset = int(circles[i][0])-160;
-//            }
+            }
 
             cv::circle( color, center, 3, cv::Scalar(0,255,255), -1);
             cv::circle( color, center, newrad, cv::Scalar(0,0,255), 1 );
