@@ -176,6 +176,9 @@ void fuzzyController::fuzzyUpdate(float *arrays, double robot_x, double robot_y,
 
     goal =  acos(((ahead_x*ac_x)+(ahead_y*ac_y))/(sqrt(ahead_x*ahead_x+ahead_y*ahead_y)*sqrt(ac_x*ac_x+ac_y*ac_y)));
 
+    if (goal != goal)
+        goal = 0;
+
     double left_right = ahead_x*ac_y - ahead_y*ac_x;
 
     if(left_right < 0)
@@ -243,5 +246,5 @@ float fuzzyController::getSpeed()
 float fuzzyController::getSteer()
 {
     // increased steer speed and making up for not knowing left and right
-    return (-1*steer);
+    return (-2*steer);
 }

@@ -45,6 +45,9 @@ int main()
     float speed = 0.0;
     float dir = 0.0;
 
+    double mapleX = 1.0;
+    double mapleY = 1.0;
+
     // Loop
     while (true)
     {
@@ -75,13 +78,31 @@ int main()
         double distX = 20;
         double distY = -10;
 
-        if(false && cvObj.getCameraLock() && cvObj.getLidarLock())
+        // Ball distance
+        if (cvObj.getCircleBool())
         {
-            AI.fuzzyUpdate(lidarArray,robX,robY,robA,distX,distY);
+            double knownPixRadius = 29.0; // størrelse i pixels på maple i smallworld, når man står i starten
+            double knownRadius = 0.5; // radius på maples
+            double knownDistance = 5; // afstand fra robotens center (0,0) til maple center (5,0) i smallworld
+
+            double focalLength = (knownPixRadius * knownDistance)/knownRadius;
+            double distance = (knownRadius * focalLength)/cvObj.getRadius();
+
+            double mapleAngle = -1* cvObj.getOffset() * (1.047/320) + robA; // FOV: 1.047 rad, pixel width 320
+
+            mapleX = distance * std::cos(mapleAngle) + robX;
+            mapleY = distance * std::sin(mapleAngle) + robY;
+
+            std::cout << mapleX << " : " << mapleY << std::endl;
+        }
+
+        if(true && cvObj.getCameraLock() && cvObj.getLidarLock())
+        {
+            AI.fuzzyUpdate(lidarArray,robX,robY,robA,mapleX,mapleY);
             // Generate a pose
             _gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
         }
-        else if(true)
+        else if(false)
         {
             if ((key == key_up) && (speed <= 1.2f))
               speed += 0.05;
