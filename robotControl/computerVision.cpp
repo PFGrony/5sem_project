@@ -258,6 +258,11 @@ void computerVision::lidarCallback(ConstLaserScanStampedPtr &msg)
     //  double angle_max = msg->scan().angle_max();
     float angle_increment = float(msg->scan().angle_step());
 
+    //std::cout << "angle_min " << float(msg->scan().angle_min())  << std::endl;
+    //std::cout << "angle_max " << float(msg->scan().angle_max()) << std::endl;
+    //std::cout << "angle_step " << float(msg->scan().angle_step()) << std::endl;
+
+
     float range_min = float(msg->scan().range_min());   //0.08
     float range_max = float(msg->scan().range_max());   //10
 

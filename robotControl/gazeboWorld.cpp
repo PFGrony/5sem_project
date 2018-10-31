@@ -44,11 +44,6 @@ void gazeboWorld::poseCallback(ConstPosesStampedPtr &_msg) {
         double cosy_cosp = +1.0 - 2.0 * (_msg->pose(i).orientation().y() * _msg->pose(i).orientation().y() + _msg->pose(i).orientation().z() * _msg->pose(i).orientation().z());
         double yaw = atan2(siny_cosp, cosy_cosp);
 
-        std::cout << std::setprecision(2) << std::fixed << std::setw(6)
-                << _msg->pose(i).position().x() << std::setw(6) // x pos
-                << _msg->pose(i).position().y() << std::setw(6) // y pos
-                << yaw << std::setw(6) << std::endl;    // orientation
-
     }
   }
   /*
