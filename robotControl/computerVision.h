@@ -22,6 +22,7 @@ public:
     float* getLidarRange();
     bool getCircleBool();
     int getOffset();
+    float getRadius();
 
 
     void startCamera(gazebo::transport::NodePtr &node);
@@ -31,6 +32,8 @@ public:
     void seeLidar();
     void seeLidarNew();
     void seeCameraNew();
+
+    void seeCameraV2();
 
 
 private:
@@ -43,6 +46,8 @@ private:
 
     int offset=160;
     bool circle_bool=0;
+
+    float radi=0;
 
 };
 #endif // COMPUTERVISION_H

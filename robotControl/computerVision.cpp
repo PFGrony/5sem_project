@@ -56,6 +56,11 @@ int computerVision::getOffset()
     return offset;
 }
 
+float computerVision::getRadius()
+{
+    return radi;
+}
+
 
 
 void computerVision::seeLidar()
@@ -116,49 +121,156 @@ void computerVision::seeCameraNew()
         cv::Mat im;
         im=matCamera.clone();
         cv::cvtColor(im, im, CV_RGB2BGR);
-        if (false) // find circles
+
+        cv::Mat gray;
+        cv::cvtColor(im, gray, cv::COLOR_BGR2GRAY);
+        cv::medianBlur(gray, gray, 5);
+
+        std::vector<cv::Vec3f> circles;
+        cv::HoughCircles(gray,circles, cv::HOUGH_GRADIENT,1,gray.rows,50,20,0,0);
+
+        if (circles.size() > 0)
+            circle_bool = 1;
+        else
+            circle_bool = 0;
+
+
+        for( size_t i = 0; i < circles.size(); i++ )
         {
-            cv::Mat gray;
-            cv::cvtColor(im, gray, cv::COLOR_BGR2GRAY);
-            cv::medianBlur(gray, gray, 5);
+            cv::Vec3i c = circles.at(i);
+            cv::Point center = cv::Point(c[0], c[1]);
 
-            std::vector<cv::Vec3f> circles;
-            cv::HoughCircles(gray,circles, cv::HOUGH_GRADIENT,1,gray.rows,50,20,0,0);
-
-            if (circles.size() > 0)
-                circle_bool = 1;
-            else
-                circle_bool = 0;
-
-
-            for( size_t i = 0; i < circles.size(); i++ )
+            if (abs(int(c[0])-160)<abs(offset) && int(c[2]) > rad)
             {
-                cv::Vec3i c = circles.at(i);
-                cv::Point center = cv::Point(c[0], c[1]);
-
-                if (abs(int(c[0])-160)<abs(offset) && int(c[2]) > rad)
-                {
-                    offset = int(c[0])-160;
-                    rad = int(c[2]);
-                    //std::cout << "off: " << offset << ", rad: " << rad <<  std::endl;
-                }
-
-                //             circle center
-                cv::circle( im, center, 1, cv::Scalar(255,0,0), 3, cv::LINE_AA);
-                //             circle outline
-                int radius = c[2];
-                cv::circle( im, center, radius, cv::Scalar(255,0,0), 3, cv::LINE_AA);
+                offset = int(c[0])-160;
+                rad = int(c[2]);
+                //std::cout << "off: " << offset << ", rad: " << rad <<  std::endl;
             }
+
+            //             circle center
+            cv::circle( im, center, 1, cv::Scalar(255,0,0), 3, cv::LINE_AA);
+            //             circle outline
+            int radius = c[2];
+            cv::circle( im, center, radius, cv::Scalar(255,0,0), 3, cv::LINE_AA);
         }
 
+        std::cout<<offset<<std::endl;
         im = im.clone();
         cv::cvtColor(im, im, CV_BGR2RGB);
-
         cv::imshow("Camera", im);
     }
 
 
 }
+
+void computerVision::seeCameraV2()
+{
+    if(cameraLock==1)
+    {
+
+        //int(height) 240
+        //int(width) 320
+
+
+        cv::Mat color;
+        color=matCamera.clone();
+
+
+        //        cv::namedWindow("input"); cv::imshow("input", color);
+
+        cv::Mat canny;
+        cv::Mat gray;
+        cv::cvtColor(color, gray, CV_RGB2GRAY);
+
+        // get binary image
+        cv::Mat mask = gray > 0;
+
+        //erode the edges to obtain sharp/thin edges (undo the blur?)
+        cv::erode(mask, mask, cv::Mat());
+
+
+        // compute canny (don't blur with that image quality!!)
+        cv::Canny(gray, canny, 200,20);
+        //        cv::namedWindow("canny2"); cv::imshow("canny2", canny>0);
+
+        std::vector<cv::Vec3f> circles;
+
+        /// Apply the Hough Transform to find the circles
+        cv::HoughCircles( gray, circles, CV_HOUGH_GRADIENT, 1, 60, 200, 20, 0, 0 );
+
+
+        int rad=0;
+        /// Draw the circles detected
+        for( size_t i = 0; i < circles.size(); i++ )
+        {
+            cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+            rad = cvRound(circles[i][2]);
+            cv::circle( color, center, 3, cv::Scalar(0,255,255), -1);
+            cv::circle( color, center, rad, cv::Scalar(0,0,255), 1 );
+
+            cv::Vec3i c = circles.at(i);
+            cv::Point center1 = cv::Point(c[0], c[1]);
+            offset = int(c[0])-160;
+        }
+
+        radi=rad;
+
+        //Info
+        if (circles.size() > 0)
+            circle_bool = 1;
+        else
+            circle_bool = 0;
+
+//        std::cout<<"Circle: "<<circle_bool<<"\toffset: "<<offset<<std::endl;
+
+        //compute distance transform:
+        cv::Mat dt;
+        cv::distanceTransform(255-(canny>0), dt, CV_DIST_L2 ,3);
+        //        cv::namedWindow("distance transform"); cv::imshow("distance transform", dt/255.0f);
+
+        //            // test for semi-circles:
+        //            float minInlierDist = 2.0f;
+        //            for( size_t i = 0; i < circles.size(); i++ )
+        //            {
+        //                // test inlier percentage:
+        //                // sample the circle and check for distance to the next edge
+        //                unsigned int counter = 0;
+        //                unsigned int inlier = 0;
+
+        //                cv::Point2f center((circles[i][0]), (circles[i][1]));
+        //                float radius = (circles[i][2]);
+        //                // maximal distance of inlier might depend on the size of the circle
+        //                float maxInlierDist = radius/25.0f;
+        //                if(maxInlierDist<minInlierDist)
+        //                    maxInlierDist = minInlierDist;
+
+        //                //            //TODO: maybe paramter incrementation might depend on circle size!
+        //                //            for(float t =0; t<2*3.14159265359f; t+= 0.1f)
+        //                //            {
+        //                //                counter++;
+        //                //                float cX = radius*cos(t) + circles[i][0];
+        //                //                float cY = radius*sin(t) + circles[i][1];
+
+        //                //                if(dt.at<float>(cY,cX) < maxInlierDist)
+        //                //                {
+        //                //                    inlier++;
+        //                //                    cv::circle(color, cv::Point2i(cX,cY),3, cv::Scalar(0,255,0));
+        //                //                }
+        //                //               else
+        //                //                    cv::circle(color, cv::Point2i(cX,cY),3, cv::Scalar(255,0,0));
+        //                //            }
+        //                //            std::cout << 100.0f*(float)inlier/(float)counter << " % of a circle with radius " << radius << " detected" << std::endl;
+        //            }
+
+
+        cv::namedWindow("Camera"); cv::imshow("Camera", color);
+
+    }
+}
+
+//void computerVision::seeCameraV3()
+//{
+//}
 
 
 void computerVision::seeLidarNew()
