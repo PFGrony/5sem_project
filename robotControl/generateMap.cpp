@@ -44,7 +44,7 @@ void generateMap::calculateObstaclePoints(float *arrays)
 
 void generateMap::insertPointsOnMap()
 {
-    // kuus hack
+    // kuus hack - glitch fiks, hvor der var nogen "phantom" linjer rundt omkring, hvor de ikke burde være
     if (size_update < 4)
     {
         size_update++;
@@ -84,4 +84,19 @@ void generateMap::setRobPos(double x, double y, double a)
     robotPosX = (x*5)+height/2;
     robotPosY = (y*5)+width/2;
     robotOrien = a;
+}
+
+double generateMap::getXPos()
+{
+    return (robotPosX - width/2)/5;
+}
+
+double generateMap::getYPos()
+{
+    return (robotPosY - height/2)/5;
+}
+
+double generateMap::getAngle()
+{
+   return robotOrien;
 }

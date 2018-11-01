@@ -17,6 +17,10 @@ public:
 
     void setRobPos(double x, double y, double a);
 
+    double getXPos();
+    double getYPos();
+    double getAngle();
+
     cv::Mat getMat()
     {
         return im_map;

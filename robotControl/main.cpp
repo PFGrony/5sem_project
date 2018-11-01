@@ -81,7 +81,10 @@ int main()
 
         //Mapping
         mutex.lock();
-//        mapObj.calculateRobotPos(AI.getSpeed(),AI.getSteer());
+        mapObj.calculateRobotPos(AI.getSpeed(),AI.getSteer());
+
+        std::cout << std::setprecision(3) << "X: " << (mapObj.getXPos() - robX) << " Y: " << (mapObj.getYPos() - robY) << " A: " << (mapObj.getAngle() - robA) << std::endl;
+
         mapObj.setRobPos(robX,robY,robA);
         mutex.unlock();
 
@@ -116,13 +119,13 @@ int main()
             //std::cout << mapleX << " : " << mapleY << std::endl;
         }
 
-        if(false && cvObj.getCameraLock() && cvObj.getLidarLock())
+        if(true && cvObj.getCameraLock() && cvObj.getLidarLock())
         {
             AI.fuzzyUpdate(lidarArray,robX,robY,robA,mapleX,mapleY);
             // Generate a pose
             _gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
         }
-        else if(true)
+        else if(false)
         {
             if ((key == key_up) && (speed <= 1.2f))
               speed += 0.05;
