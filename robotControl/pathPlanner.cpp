@@ -10,13 +10,9 @@ void pathPlanner::doBrushfire()
     // map
         cv::Mat smallMap;
 
-        smallMap = cv::imread("floor_plan.png",CV_LOAD_IMAGE_GRAYSCALE);
-
-        cv::imshow("test1",smallMap);
+        smallMap = cv::imread("../robotControl/floor_plan.png",CV_LOAD_IMAGE_GRAYSCALE);
 
         char charMap[smallMap.rows][smallMap.cols];
-
-        std::cout << "Antal rows "<< smallMap.rows << "Antal cols " << smallMap.cols << std::endl;
 
         std::cout << smallMap.rows << ":" << smallMap.cols << std::endl;
 
@@ -25,9 +21,29 @@ void pathPlanner::doBrushfire()
             for (int j = 0;j<smallMap.cols;j++)
             {
                 if (smallMap.at<uchar>(i,j) == 0)
-                    charMap[i][j] = '#';
+                    charMap[i][j] = '1';
                 else
                     charMap[i][j] = ' ';
             }
         }
+
+        //Brushfire
+        int valueChanged=true;
+        while(valueChanged)
+        {
+            valueChanged=false;
+            for(int i=0;i<smallMap.rows;i++) //Rows
+            {
+                for(int j=0; j<smallMap.rows;j++) //Columns
+                {
+                    if(charMap[i][j] == ' ') //Checks if "pixel" is empty and should be altered
+                    {
+                        valueChanged=true;
+
+
+                    }
+                }
+            }
+        }
+
 }
