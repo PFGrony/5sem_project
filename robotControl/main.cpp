@@ -21,6 +21,7 @@ const int key_down = 84;
 const int key_right = 83;
 const int key_esc = 27;
 
+
 int main()
 {
     //Creata Gazebo World
@@ -70,13 +71,17 @@ int main()
 
         float* lidarArray = cvObj.getLidarRange();
 
-        cvObj.seeCameraV2();
+        cvObj.seeCamera();
         cvObj.seeLidarNew();
 
         // Robot pose in gazeboworld
         double robX = _gazeboWorld.getXPos();
         double robY = _gazeboWorld.getYPos();
         double robA = _gazeboWorld.getAngle();
+
+        // Template Matching
+//        cvObj.templateMatching();
+
 
         //Mapping
         mutex.lock();
@@ -118,13 +123,13 @@ int main()
             //std::cout << mapleX << " : " << mapleY << std::endl;
         }
 
-        if(true && cvObj.getCameraLock() && cvObj.getLidarLock())
+        if(false && cvObj.getCameraLock() && cvObj.getLidarLock())
         {
             AI.fuzzyUpdate(lidarArray,robX,robY,robA,mapleX,mapleY);
             // Generate a pose
             _gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
         }
-        else if(false)
+        else if(true)
         {
             if ((key == key_up) && (speed <= 1.2f))
               speed += 0.05;

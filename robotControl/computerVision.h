@@ -28,13 +28,14 @@ public:
     void startCamera(gazebo::transport::NodePtr &node);
     void startLidar(gazebo::transport::NodePtr &node);
 
-    void seeCamera();
     void seeLidar();
     void seeLidarNew();
-    void seeCameraNew();
 
+    void seeCamera();
+    void seeCameraNew();
     void seeCameraV2();
 
+    void templateMatching();
 
 private:
     static void cameraCallback(ConstImageStampedPtr &msg);
@@ -48,6 +49,9 @@ private:
     bool circle_bool=0;
 
     float ballRadius=0;
+
+    cv::Mat templ;
+
 
 };
 #endif // COMPUTERVISION_H

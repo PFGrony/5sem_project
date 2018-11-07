@@ -19,6 +19,7 @@ static int secCopy;
 
 computerVision::computerVision()
 {
+    templ=cv::imread("../robotControl/circle3.png",CV_LOAD_IMAGE_ANYCOLOR);
 }
 
 // Locks
@@ -125,9 +126,8 @@ void computerVision::seeCameraNew()
         cv::Mat gray;
         cv::cvtColor(im, gray, cv::COLOR_BGR2GRAY);
         cv::medianBlur(gray, gray, 5);
-
         std::vector<cv::Vec3f> circles;
-        cv::HoughCircles(gray,circles, cv::HOUGH_GRADIENT,1,gray.rows,50,20,0,0);
+        cv::HoughCircles(gray,circles, cv::HOUGH_GRADIENT,1,gray.rows/8,50,20,0,0);
 
         if (circles.size() > 0)
             circle_bool = 1;
@@ -169,25 +169,44 @@ void computerVision::seeCameraV2()
     if(cameraLock==1)
     {
 
+
+
         cv::Mat color;
         color=matCamera.clone();
 
+        cv::Mat rgb[3];   //destination array
+        cv::split(color,rgb);//split source
 
-        //        cv::namedWindow("input"); cv::imshow("input", color);
+        for(int i=0;i<rgb[2].rows;i++)
+        {
+            for(int j=0;j<rgb[2].cols;j++)
+            {
+                if(rgb[2].at<uchar>(i,j)>10)
+                    rgb[2].at<uchar>(i,j)=255;
+            }
+        }
+
+        //Note: OpenCV uses BGR color order
+        //        cv::imshow("blue.png",rgb[2]); //blue channel
+
+
+        //                cv::namedWindow("input"); cv::imshow("input", color);
 
 
         cv::Mat gray;
         cv::cvtColor(color, gray, CV_RGB2GRAY);
 
+
         cv::Mat canny;
         //edge detection
         cv::Canny(gray, canny, 200,20);
-        //        cv::namedWindow("canny2"); cv::imshow("canny2", canny>0);
+        canny=rgb[2].clone();
+        cv::namedWindow("canny2"); cv::imshow("canny2", canny>0);
 
         std::vector<cv::Vec3f> circles;
 
         // Apply the Hough Transform to find the circles
-        cv::HoughCircles( gray, circles, CV_HOUGH_GRADIENT, 1, 60, 50, 20, 3, 100 );
+        cv::HoughCircles( gray, circles, CV_HOUGH_GRADIENT, 1, 60, 50, 20, 1, 100 );
 
 
         int rad=0;
@@ -320,7 +339,63 @@ void computerVision::seeLidarNew()
     }
 }
 
+void computerVision::templateMatching()
+{
+    if(cameraLock==1)
+    {
+        cv::Mat img,imgDisplay;
+        img=matCamera.clone();
+        img.copyTo(imgDisplay);
+        /// Create the result matrix
+        int resultCols =  img.cols - templ.cols + 1;
+        int resultRows = img.rows - templ.rows + 1;
 
+        cv::Mat result(resultRows, resultCols, CV_32FC1 );
+
+        int matchMethod=CV_TM_CCORR_NORMED;
+        /// Do the Matching and Normalize
+        cv::matchTemplate( img, templ, result, matchMethod );
+
+
+//        cv::Mat dilated, thresholdedMatchingSpace,localMaxima,thresholded8bit;
+//        cv::dilate(result,dilated,cv::Mat());
+//        cv::compare(result,dilated,localMaxima,cv::CMP_EQ);
+//        double threshold=0;
+//        cv::threshold(result,thresholdedMatchingSpace,threshold,255,cv::THRESH_BINARY);
+//        thresholdedMatchingSpace.convertTo(thresholded8bit,CV_8U);
+//        cv::bitwise_and(localMaxima,thresholded8bit,localMaxima);
+
+
+
+
+        cv::normalize( result, result, 0, 1, cv::NORM_MINMAX, -1, cv::Mat() );
+
+        /// Localizing the best match with minMaxLoc
+        double minVal, maxVal;
+        cv::Point minLoc,maxLoc, matchLoc;
+
+        cv::minMaxLoc( result, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat() );
+
+        /// For SQDIFF and SQDIFF_NORMED, the best matches are lower values. For all the other methods, the higher the better
+        if( matchMethod  == CV_TM_SQDIFF || matchMethod == CV_TM_SQDIFF_NORMED )
+        { matchLoc = minLoc; }
+        else
+        { matchLoc = maxLoc; }
+
+        cv::rectangle( imgDisplay, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), cv::Scalar::all(0), 2, 8, 0 );
+        cv::rectangle( result, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), cv::Scalar::all(0), 2, 8, 0 );
+
+//          cv::imshow("thresh",localMaxima);
+
+
+
+        cv::imshow( "image_window", imgDisplay );
+//        cv::imshow( "result_window", result );
+
+
+        return;
+    }
+}
 
 
 

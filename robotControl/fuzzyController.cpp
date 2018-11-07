@@ -23,7 +23,7 @@ void fuzzyController::fuzzyInit()
     inAngle->addTerm(new Ramp("right",-0.500, 0.500));
     engine->addInputVariable(inAngle);
 
-    float close = 0.500;
+    float close = 0.800;
     float mid = 1.600;
     float far = 2.800;
 
@@ -246,5 +246,5 @@ float fuzzyController::getSpeed()
 float fuzzyController::getSteer()
 {
     // increased steer speed and making up for not knowing left and right
-    return (-0.5*steer);
+    return (-1*steer);
 }
