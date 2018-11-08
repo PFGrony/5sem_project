@@ -7,7 +7,8 @@ SOURCES += main.cpp \
     gazeboWorld.cpp \
     computerVision.cpp \
     fuzzyController.cpp \
-    generateMap.cpp
+    generateMap.cpp \
+    pathPlanner.cpp
 
 #Gazebo
 PKGCONFIG += gazebo
@@ -35,5 +36,6 @@ HEADERS += \
     gazeboWorld.h \
     computerVision.h \
     fuzzyController.h \
-    generateMap.h
+    generateMap.h \
+    pathPlanner.h
 

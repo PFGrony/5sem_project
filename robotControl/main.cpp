@@ -129,7 +129,7 @@ int main()
             // Generate a pose
             _gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
         }
-        else if(true)
+        else if(false)
         {
             if ((key == key_up) && (speed <= 1.2f))
               speed += 0.05;
