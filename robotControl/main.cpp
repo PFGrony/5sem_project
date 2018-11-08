@@ -13,6 +13,7 @@
 #include "gazeboWorld.h"
 #include "fuzzyController.h"
 #include "generateMap.h"
+#include "pathPlanner.h"
 
 //Key constants
 const int key_left = 81;
@@ -39,6 +40,9 @@ int main()
     //Generate Map
     generateMap mapObj;
 
+    //Path planner
+    pathPlanner plan;
+
     //resets Gazebo World
     _gazeboWorld.worldReset();
 
@@ -54,6 +58,8 @@ int main()
     double mapleX = 1.0;
     double mapleY = 1.0;
 
+
+    int doOnce = 1; //Lavet til PathPlanner - Sandsynligvis ikke brugt efter d.  7-11-2018
     // Loop
     while (true)
     {
@@ -87,7 +93,7 @@ int main()
         mutex.lock();
         mapObj.calculateRobotPos(AI.getSpeed(),AI.getSteer());
 
-        std::cout << std::setprecision(3) << "X: " << (mapObj.getXPos() - robX) << " Y: " << (mapObj.getYPos() - robY) << " A: " << (mapObj.getAngle() - robA) << std::endl;
+       // std::cout << std::setprecision(3) << "X: " << (mapObj.getXPos() - robX) << " Y: " << (mapObj.getYPos() - robY) << " A: " << (mapObj.getAngle() - robA) << std::endl;
 
         mapObj.setRobPos(robX,robY,robA);
         mutex.unlock();
@@ -150,6 +156,14 @@ int main()
         {
             _gazeboWorld.generatePose(0,0);
         }
+
+
+        if(doOnce==1)
+        {
+            plan.doBrushfire();
+            doOnce=0;
+        }
+
     }
 
     // Resets
