@@ -10,9 +10,16 @@
 
 using namespace std;
 
+struct QlPoints
+{
+	double x;
+	double y;
+};
+
 struct state
 {
 	vector<state *> possibleStates;
+	QlPoints posStates;
 	int roomNumber;
 	bool unexplored;
 };

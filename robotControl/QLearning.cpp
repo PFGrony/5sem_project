@@ -141,9 +141,9 @@ void QLearning::printBestActions()
 	for (int i = 0; i < bestActions.size(); i++)
 	{
 		if (bestActions[i].a == 0)
-			cout << "Seach in room " << bestActions[i].s->roomNumber << endl;
+			cout << "Seach in room " << bestActions[i].s->roomNumber << " \t\t" << bestActions[i].s->posStates.x << ":"<< bestActions[i].s->posStates.y << endl;
 		else
-			cout << "Move from room " << bestActions[i].s->roomNumber << " to room " << bestActions[i + 1].s->roomNumber << endl;
+			cout << "Move from room " << bestActions[i].s->roomNumber << " to room " << bestActions[i + 1].s->roomNumber << "\t" << bestActions[i+1].s->posStates.x << ":" << bestActions[i+1].s->posStates.y << endl;
 	}
 }
 
@@ -226,62 +226,119 @@ void QLearning::loadRooms()
 	for (int i = 0; i<allStates.size(); i++)
 		allStates[i].possibleStates.push_back(&allStates[i]);
 
+	allStates[0].posStates.x = ((double) 67 / 8);
+	allStates[0].posStates.y = ((double)61 / 8);
+
 	allStates[0].possibleStates.push_back(&allStates[1]);
+
+	allStates[1].posStates.x = ((double)194 / 8);
+	allStates[1].posStates.y = ((double)74 / 8);
 
 	allStates[1].possibleStates.push_back(&allStates[2]);
 	allStates[1].possibleStates.push_back(&allStates[0]);
 
+	allStates[2].posStates.x = ((double)119 / 8);
+	allStates[2].posStates.y = ((double)191 / 8);
+
 	allStates[2].possibleStates.push_back(&allStates[1]);
 	allStates[2].possibleStates.push_back(&allStates[3]);
 	allStates[2].possibleStates.push_back(&allStates[17]);
+
+	allStates[3].posStates.x = ((double)337 / 8);
+	allStates[3].posStates.y = ((double)126 / 8);
 
 	allStates[3].possibleStates.push_back(&allStates[2]);
 	allStates[3].possibleStates.push_back(&allStates[4]);
 	allStates[3].possibleStates.push_back(&allStates[5]);
 	allStates[3].possibleStates.push_back(&allStates[10]);
 
+	allStates[4].posStates.x = ((double)540 / 8);
+	allStates[4].posStates.y = ((double)81 / 8);
+
 	allStates[4].possibleStates.push_back(&allStates[3]);
 
+	allStates[5].posStates.x = ((double)544 / 8);
+	allStates[5].posStates.y = ((double)208 / 8);
+
 	allStates[5].possibleStates.push_back(&allStates[3]);
+
+	allStates[6].posStates.x = ((double)743 / 8);
+	allStates[6].posStates.y = ((double)143 / 8);
 
 	allStates[6].possibleStates.push_back(&allStates[7]);
 	allStates[6].possibleStates.push_back(&allStates[12]);
 
+	allStates[7].posStates.x = ((double)884 / 8);
+	allStates[7].posStates.y = ((double)114 / 8);
+
 	allStates[7].possibleStates.push_back(&allStates[6]);
 	allStates[7].possibleStates.push_back(&allStates[13]);
+
+	allStates[8].posStates.x = ((double)70 / 8);
+	allStates[8].posStates.y = ((double)327 / 8);
 
 	allStates[8].possibleStates.push_back(&allStates[17]);
 	allStates[8].possibleStates.push_back(&allStates[9]);
 
+	allStates[9].posStates.x = ((double)70 / 8);
+	allStates[9].posStates.y = ((double)506 / 8);
+
 	allStates[9].possibleStates.push_back(&allStates[8]);
+
+	allStates[10].posStates.x = ((double)480 / 8);
+	allStates[10].posStates.y = ((double)313 / 8);
 
 	allStates[10].possibleStates.push_back(&allStates[17]);
 	allStates[10].possibleStates.push_back(&allStates[3]);
 	allStates[10].possibleStates.push_back(&allStates[12]);
 
+	allStates[11].posStates.x = ((double)250 / 8);
+	allStates[11].posStates.y = ((double)484 / 8);
+
 	allStates[11].possibleStates.push_back(&allStates[17]);
+
+	allStates[12].posStates.x = ((double)720 / 8);
+	allStates[12].posStates.y = ((double)300 / 8);
 
 	allStates[12].possibleStates.push_back(&allStates[10]);
 	allStates[12].possibleStates.push_back(&allStates[6]);
 	allStates[12].possibleStates.push_back(&allStates[13]);
 
+	allStates[13].posStates.x = ((double)856 / 8);
+	allStates[13].posStates.y = ((double)377 / 8);
+	
 	allStates[13].possibleStates.push_back(&allStates[12]);
 	allStates[13].possibleStates.push_back(&allStates[14]);
 	allStates[13].possibleStates.push_back(&allStates[7]);
 	allStates[13].possibleStates.push_back(&allStates[16]);
 
+	allStates[14].posStates.x = ((double)550 / 8);
+	allStates[14].posStates.y = ((double)430 / 8);
+
 	allStates[14].possibleStates.push_back(&allStates[13]);
+
+	allStates[15].posStates.x = ((double)619 / 8);
+	allStates[15].posStates.y = ((double)557 / 8);
 
 	allStates[15].possibleStates.push_back(&allStates[16]);
 	allStates[15].possibleStates.push_back(&allStates[18]);
 
+	allStates[16].posStates.x = ((double)835 / 8);
+	allStates[16].posStates.y = ((double)567 / 8);
+
 	allStates[16].possibleStates.push_back(&allStates[13]);
 	allStates[16].possibleStates.push_back(&allStates[15]);
+
+	allStates[17].posStates.x = ((double)219 / 8);
+	allStates[17].posStates.y = ((double)317 / 8);
 
 	allStates[17].possibleStates.push_back(&allStates[8]);
 	allStates[17].possibleStates.push_back(&allStates[10]);
 	allStates[17].possibleStates.push_back(&allStates[11]);
 	allStates[17].possibleStates.push_back(&allStates[2]);
+
+	allStates[18].posStates.x = ((double)440 / 8);
+	allStates[18].posStates.y = ((double)565 / 8);
 
 	allStates[18].possibleStates.push_back(&allStates[15]);
 }
