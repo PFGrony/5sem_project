@@ -7,7 +7,7 @@ QLearning::QLearning()
 	discountRate = 0.5;
 
 	// the threshhold
-	theta = 0.000000001;
+	theta = 0.01;
 
 	// how often will we get a random move (1/e)
 	e = 13;
@@ -48,9 +48,9 @@ void QLearning::runQLearning()
 	int reward				= 0;
 	int t					= 0;
 
-	int aiTableS			= 0;
-	int aiTableSA			= 0;
-	int aiTablenSA			= 0;
+	int aiTableState			= 0;
+	int aiTableStateAction			= 0;
+	int aiTableStateActionState			= 0;
 
 	// Run the AI
 	do {
@@ -84,28 +84,28 @@ void QLearning::runQLearning()
 
 			// caculate the needed placements on the table
 			if (s->unexplored)
-				aiTableS = (s->roomNumber - 1) * 2;
+				aiTableState = (s->roomNumber - 1) * 2;
 			else
-				aiTableS = (s->roomNumber - 1) * 2 + 1;
+				aiTableState = (s->roomNumber - 1) * 2 + 1;
 
 			if (nS->unexplored)
-				aiTableSA = (nS->roomNumber - 1) * 2;
+				aiTableStateAction = (nS->roomNumber - 1) * 2;
 			else
-				aiTableSA = (nS->roomNumber - 1) * 2 + 1;
+				aiTableStateAction = (nS->roomNumber - 1) * 2 + 1;
 
-			if (getNextState(nS, getMaxAction(nS))->unexplored)
-				aiTablenSA = (getNextState(nS, getMaxAction(nS))->roomNumber - 1) * 2;
+			if (getNextState(nS, getNextTableAction(nS))->unexplored)
+				aiTableStateActionState = (getNextState(nS, getMaxAction(nS))->roomNumber - 1) * 2;
 			else
-				aiTablenSA = (getNextState(nS, getMaxAction(nS))->roomNumber - 1) * 2 + 1;
+				aiTableStateActionState = (getNextState(nS, getMaxAction(nS))->roomNumber - 1) * 2 + 1;
 
 			// Save current table value
-			tableBuffer = aiTable[aiTableS][aiTableSA];
+			tableBuffer = aiTable[aiTableState][aiTableStateAction];
 
 			// Caculate Q(s,a)
-			aiTable[aiTableS][aiTableSA] = aiTable[aiTableS][aiTableSA] + learningRate * (getReward(s, a) + (discountRate * aiTable[aiTablenSA][aiTableSA]) - aiTable[aiTableS][aiTableSA]);
+			aiTable[aiTableState][aiTableStateAction] = aiTable[aiTableState][aiTableStateAction] + learningRate * (getReward(s, a) + (discountRate * aiTable[aiTableStateActionState][aiTableStateAction]) - aiTable[aiTableState][aiTableStateAction]);
 
 			// Save biggest diffrence
-			delta = std::max(delta, (double)fabs(tableBuffer - aiTable[aiTableS][aiTableSA]));
+			delta = std::max(delta, (double)fabs(tableBuffer - aiTable[aiTableState][aiTableStateAction]));
 
 			// Check if the state gets explored
 			if (s->unexplored && reward == 1)
@@ -126,7 +126,8 @@ void QLearning::runQLearning()
 		{
 			bestActions = actions;
 		}
-		cout << i << ":" << delta << endl;
+		//cout << i << ":" << delta << endl;
+
 		// clear action vector before rerunning
 		actions.clear();
 		// Run again is delta is above theta
@@ -165,7 +166,7 @@ void QLearning::saveaiTable()
 	myfile.close();
 }
 
-void QLearning::caculateaiTable()
+void QLearning::calculateaiTable()
 {
 	int t				= 0;
 	int a				= 0;

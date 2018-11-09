@@ -35,7 +35,7 @@ public:
 	void printBestActions();
 	void saveaiTable();
 
-	void caculateaiTable();
+	void calculateaiTable();
 private:
 	void loadRooms();
 	void loadMaples();
