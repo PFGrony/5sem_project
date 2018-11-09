@@ -105,7 +105,7 @@ void QLearning::runQLearning()
 			aiTable[aiTableState][aiTableStateAction] = aiTable[aiTableState][aiTableStateAction] + learningRate * (getReward(s, a) + (discountRate * aiTable[aiTableStateActionState][aiTableStateAction]) - aiTable[aiTableState][aiTableStateAction]);
 
 			// Save biggest diffrence
-			delta = std::max(delta, (double)fabs(tableBuffer - aiTable[aiTableState][aiTableStateAction]));
+            delta = std::max(delta, (double) fabs(tableBuffer - aiTable[aiTableState][aiTableStateAction]));
 
 			// Check if the state gets explored
 			if (s->unexplored && reward == 1)
@@ -207,7 +207,12 @@ void QLearning::calculateaiTable()
 		if (roomsExplored == numberOfRooms || t > tMax)
 			break;
 	}
-	bestActions = actions;
+    bestActions = actions;
+}
+
+QlPoints QLearning::getPoint(int x)
+{
+    return bestActions[x].s->posStates;
 }
 
 void QLearning::loadRooms()

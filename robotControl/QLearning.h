@@ -2,6 +2,7 @@
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
+#include <math.h>
 #include <fstream>
 
 #pragma once
@@ -43,6 +44,8 @@ public:
 	void saveaiTable();
 
 	void calculateaiTable();
+
+    QlPoints getPoint(int x);
 private:
 	void loadRooms();
 	void loadMaples();

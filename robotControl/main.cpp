@@ -13,7 +13,7 @@
 #include "gazeboWorld.h"
 #include "fuzzyController.h"
 #include "generateMap.h"
-#include "pathPlanner.h"
+#include "QLearning.h"
 
 //Key constants
 const int key_left = 81;
@@ -21,11 +21,13 @@ const int key_up = 82;
 const int key_down = 84;
 const int key_right = 83;
 const int key_esc = 27;
+const int key_enter = 10;
 
+static boost::mutex mutexRB;
 
 int main()
-{
-    //Creata Gazebo World
+{   
+    //Create a Gazebo World
     gazeboWorld _gazeboWorld;
 
     //Get Gazebo World pointer
@@ -37,14 +39,16 @@ int main()
     cvObj.startCamera(node);
     cvObj.startLidar(node);
 
-    //Generate Map
-    generateMap mapObj;
-
-    //Path planner
-    pathPlanner plan;
-
     //resets Gazebo World
     _gazeboWorld.worldReset();
+
+    //Run Q-Learning
+    QLearning QL;
+    QL.runQLearning();
+
+    QL.calculateaiTable();
+
+    int QLcounter = 0;
 
     // Start AI of doom
     fuzzyController AI;
@@ -55,8 +59,8 @@ int main()
     float dir = 0.0;
 
     // maple (x,y)
-    double mapleX = 1.0;
-    double mapleY = 1.0;
+    double mapleX = -20.0;
+    double mapleY = 0.0;
 
 
     int doOnce = 1; //Lavet til PathPlanner - Sandsynligvis ikke brugt efter d.  7-11-2018
@@ -67,13 +71,15 @@ int main()
         gazebo::common::Time::MSleep(10);
 
         //Get key input
-        mutex.lock();
+        mutexRB.lock();
         int key = cv::waitKey(1);
-        mutex.unlock();
+        mutexRB.unlock();
 
         //Checks key input
         if (key == key_esc)
             break;
+        else if(key == key_enter)
+            QLcounter++;
 
         float* lidarArray = cvObj.getLidarRange();
 
@@ -90,26 +96,10 @@ int main()
 
 
         //Mapping
-        mutex.lock();
-        mapObj.calculateRobotPos(AI.getSpeed(),AI.getSteer());
+        //double imgX = (map.cols/2)+robX*5.6;
+        //double imgY = (map.rows/2)-robY*5.6;
 
        // std::cout << std::setprecision(3) << "X: " << (mapObj.getXPos() - robX) << " Y: " << (mapObj.getYPos() - robY) << " A: " << (mapObj.getAngle() - robA) << std::endl;
-
-        mapObj.setRobPos(robX,robY,robA);
-        mutex.unlock();
-
-
-        mutex.lock();
-        mapObj.insertPointsOnMap();
-        mutex.unlock();
-
-        if(cvObj.getLidarLock())
-        {
-            mutex.lock();
-            mapObj.calculateObstaclePoints(lidarArray);
-            mutex.unlock();
-        }
-
 
         // Ball distance
         if (cvObj.getCircleBool())
@@ -129,9 +119,14 @@ int main()
             //std::cout << mapleX << " : " << mapleY << std::endl;
         }
 
-        if(false && cvObj.getCameraLock() && cvObj.getLidarLock())
+        double x = (QL.getPoint(QLcounter).x-60)/1.5;
+        double y = (40-QL.getPoint(QLcounter).y)/1.5;
+
+        std::cout << x << ":" << y << std::endl;
+
+        if(true && cvObj.getCameraLock() && cvObj.getLidarLock())
         {
-            AI.fuzzyUpdate(lidarArray,robX,robY,robA,mapleX,mapleY);
+            AI.fuzzyUpdate(lidarArray,robX,robY,robA,x,y);
             // Generate a pose
             _gazeboWorld.generatePose(AI.getSpeed(),AI.getSteer());
         }
@@ -158,11 +153,11 @@ int main()
         }
 
 
-        if(doOnce==1)
-        {
-            plan.doBrushfire();
-            doOnce=0;
-        }
+//        if(doOnce==1)
+//        {
+//            plan.doBrushfire();
+//            doOnce=0;
+//        }
 
     }
 

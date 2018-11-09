@@ -71,8 +71,69 @@ void generateMap::insertPointsOnMap()
 
 
         im_map.at<uchar>(currObstaclePointsX.back(),currObstaclePointsY.back())=0;
-        currObstaclePointsX.pop_back();
-        currObstaclePointsY.pop_back();
+
+//        int x1 = currObstaclePointsX.back();
+//        int y1 = currObstaclePointsY.back();
+
+//        int x2 = 0;
+//        int y2 = 0;
+
+//        double xMean = 0;
+//        double yMean = 0;
+
+//        int xSum = x1;
+//        int ySum = y1;
+
+//        double m1 = 0;
+//        double m2 = 0;
+
+//        double b = 0;
+
+//        double fit = 0;
+//        // incremental + least square
+//        int i = 2;
+//        for(;i<currObstaclePointsX.size();i++)
+//        {
+//            x2 = currObstaclePointsX.at(currObstaclePointsX.size()-(i));
+//            y2 = currObstaclePointsY.at(currObstaclePointsY.size()-(i));
+
+//            xSum += x2;
+//            ySum += y2;
+
+//            xMean = xSum/i;
+//            yMean = ySum/i;
+
+//            for (int j = 0;j<i;j++)
+//            {
+//                m1 += (currObstaclePointsX.at(currObstaclePointsX.size()-(j+1))-xMean)*(currObstaclePointsY.at(currObstaclePointsY.size()-(j+1))-yMean);
+//                m2 += (currObstaclePointsX.at(currObstaclePointsX.size()-(j+1))-xMean)*(currObstaclePointsX.at(currObstaclePointsX.size()-(j+1))-xMean);
+//            }
+//            m1 = m1/m2;
+
+//            b=yMean-m1*xMean;
+
+//            for (int j = 0;j<i;j++)
+//            {
+//                fit += currObstaclePointsY.at(currObstaclePointsY.size()-(j+1))-(currObstaclePointsX.at(currObstaclePointsX.size()-(j+1))*m1+b);
+//            }
+//            fit = fit/i;
+//            if (fit > 0.2)
+//                break;
+//        }
+
+//        x2 = currObstaclePointsX.at(currObstaclePointsX.size()-(i-1));
+//        y2 = currObstaclePointsY.at(currObstaclePointsY.size()-(i-1));
+
+//        if (i > 10)
+//        {
+//            cv::line(im_map,cv::Point(x1,y1),cv::Point(x2,y2),0,1,cv::LINE_8,0);
+//        }
+
+//        for (int j = 0;j<i;j++)
+//        {
+            currObstaclePointsX.pop_back();
+            currObstaclePointsY.pop_back();
+//        }
     }
     cv::imshow("Map",im_map);
 

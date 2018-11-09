@@ -23,9 +23,9 @@ void fuzzyController::fuzzyInit()
     inAngle->addTerm(new Ramp("right",-0.500, 0.500));
     engine->addInputVariable(inAngle);
 
-    float close = 0.800;
-    float mid = 1.600;
-    float far = 2.800;
+    float close = 0.500;
+    float mid = 0.750;
+    float far = 1.500;
 
     inFarLeft = new InputVariable;
     inFarLeft->setName("inFarLeft");

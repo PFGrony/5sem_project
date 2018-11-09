@@ -7,8 +7,6 @@
 
 #include "opencv2/opencv.hpp"
 
-static boost::mutex mutex;
-
 class computerVision
 {
 public:
