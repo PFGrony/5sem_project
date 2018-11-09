@@ -19,7 +19,7 @@ static int secCopy;
 
 computerVision::computerVision()
 {
-    templ=cv::imread("../robotControl/circle3.png",CV_LOAD_IMAGE_ANYCOLOR);
+    templ=cv::imread("../robotControl/images/circle3.png",CV_LOAD_IMAGE_ANYCOLOR);
 }
 
 // Locks
@@ -104,7 +104,7 @@ void computerVision::seeCamera()
 {
     if(cameraLock==1)
     {
-        cv::imshow("newCamera",matCamera);
+        cv::imshow("Camera",matCamera);
     }
 }
 
@@ -201,7 +201,7 @@ void computerVision::seeCameraV2()
         //edge detection
         cv::Canny(gray, canny, 200,20);
         canny=rgb[2].clone();
-        cv::namedWindow("canny2"); cv::imshow("canny2", canny>0);
+//        cv::namedWindow("canny2"); cv::imshow("canny2", canny>0);
 
         std::vector<cv::Vec3f> circles;
 
@@ -283,7 +283,7 @@ void computerVision::seeCameraV2()
         //            std::cout << 100.0f*(float)inlier/(float)counter << " % of a circle with radius " << radius << " detected" << std::endl;
         //        }
 
-
+//                cv::imshow("blue",rgb[2]);
         cv::namedWindow("Camera"); cv::imshow("Camera", color);
 
     }
@@ -357,13 +357,13 @@ void computerVision::templateMatching()
         cv::matchTemplate( img, templ, result, matchMethod );
 
 
-//        cv::Mat dilated, thresholdedMatchingSpace,localMaxima,thresholded8bit;
-//        cv::dilate(result,dilated,cv::Mat());
-//        cv::compare(result,dilated,localMaxima,cv::CMP_EQ);
-//        double threshold=0;
-//        cv::threshold(result,thresholdedMatchingSpace,threshold,255,cv::THRESH_BINARY);
-//        thresholdedMatchingSpace.convertTo(thresholded8bit,CV_8U);
-//        cv::bitwise_and(localMaxima,thresholded8bit,localMaxima);
+        //        cv::Mat dilated, thresholdedMatchingSpace,localMaxima,thresholded8bit;
+        //        cv::dilate(result,dilated,cv::Mat());
+        //        cv::compare(result,dilated,localMaxima,cv::CMP_EQ);
+        //        double threshold=0;
+        //        cv::threshold(result,thresholdedMatchingSpace,threshold,255,cv::THRESH_BINARY);
+        //        thresholdedMatchingSpace.convertTo(thresholded8bit,CV_8U);
+        //        cv::bitwise_and(localMaxima,thresholded8bit,localMaxima);
 
 
 
@@ -385,15 +385,59 @@ void computerVision::templateMatching()
         cv::rectangle( imgDisplay, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), cv::Scalar::all(0), 2, 8, 0 );
         cv::rectangle( result, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), cv::Scalar::all(0), 2, 8, 0 );
 
-//          cv::imshow("thresh",localMaxima);
+        //          cv::imshow("thresh",localMaxima);
 
 
 
         cv::imshow( "image_window", imgDisplay );
-//        cv::imshow( "result_window", result );
+        //        cv::imshow( "result_window", result );
 
 
         return;
+    }
+}
+
+void computerVision::haarClassifier()
+{
+    if(cameraLock==1)
+    {
+        cv::CascadeClassifier cascade;
+
+        cv::Mat color;
+        color=matCamera.clone();
+        cv::Mat rgb[3];   //destination array
+        cv::split(color,rgb);//split source
+
+        for(int i=0;i<rgb[2].rows;i++)
+        {
+            for(int j=0;j<rgb[2].cols;j++)
+            {
+                if(rgb[2].at<uchar>(i,j)>10)
+                    rgb[2].at<uchar>(i,j)=255;
+            }
+        }
+        cascade.load("../robotControl/classifiers/classifiers3.xml");
+        if(!cascade.empty())
+        {
+            std::vector<cv::Rect> circles;
+
+            cv::equalizeHist( rgb[2], rgb[2] );
+            cascade.detectMultiScale( rgb[2], circles, 1.1, 10,CV_HAAR_SCALE_IMAGE,cv::Size(30,30));
+
+
+            for( size_t  i= 0; i < circles.size(); i++ )
+            {
+                cv::Point center( circles[i].x+ circles[i].width*0.5, circles[i].y + circles[i].height*0.5 );
+                int radius = cvRound( (circles[i].width + circles[i].height)*0.25 );
+                cv::circle( color, center, radius, cv::Scalar( 255, 0, 255 ), 4, 8, 0 );
+            }
+
+
+
+
+        }
+
+        cv::imshow("color",color);
     }
 }
 

@@ -1,6 +1,8 @@
 #ifndef COMPUTERVISION_H
 #define COMPUTERVISION_H
 
+#include <vector>
+
 #include <gazebo/gazebo_client.hh>
 #include <gazebo/msgs/msgs.hh>
 #include <gazebo/transport/transport.hh>
@@ -36,6 +38,7 @@ public:
     void seeCameraV2();
 
     void templateMatching();
+    void haarClassifier();
 
 private:
     static void cameraCallback(ConstImageStampedPtr &msg);

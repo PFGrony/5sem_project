@@ -71,8 +71,10 @@ int main()
 
         float* lidarArray = cvObj.getLidarRange();
 
-        cvObj.seeCamera();
+        cvObj.seeCameraV2();
         cvObj.seeLidarNew();
+
+        cvObj.haarClassifier();
 
         // Robot pose in gazeboworld
         double robX = _gazeboWorld.getXPos();
