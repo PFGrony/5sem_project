@@ -34,8 +34,7 @@ public:
     void AStar(int goalX,int goalY);
     void addVertex(int x, int y);
     void wavefrontPlanner(int startX,int startY,int goalX,int goalY);
-    bool freePlace(int x,int y);
-    void addAdj(std::deque<pair> queueAdj);
+    void addAdj(std::deque<pair> &queueAdj);
 
 
 
