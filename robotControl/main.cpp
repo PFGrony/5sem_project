@@ -77,7 +77,7 @@ int main()
 
         float* lidarArray = cvObj.getLidarRange();
 
-        cvObj.seeCamera();
+        cvObj.seeCameraV2();
         cvObj.seeLidarNew();
 
         // Robot pose in gazeboworld
@@ -85,30 +85,11 @@ int main()
         double robY = _gazeboWorld.getYPos();
         double robA = _gazeboWorld.getAngle();
 
+
         // Template Matching
 //        cvObj.templateMatching();
 
-
-        //Mapping
-        mutex.lock();
-        mapObj.calculateRobotPos(AI.getSpeed(),AI.getSteer());
-
-       // std::cout << std::setprecision(3) << "X: " << (mapObj.getXPos() - robX) << " Y: " << (mapObj.getYPos() - robY) << " A: " << (mapObj.getAngle() - robA) << std::endl;
-
-        mapObj.setRobPos(robX,robY,robA);
-        mutex.unlock();
-
-
-        mutex.lock();
-        mapObj.insertPointsOnMap();
-        mutex.unlock();
-
-        if(cvObj.getLidarLock())
-        {
-            mutex.lock();
-            mapObj.calculateObstaclePoints(lidarArray);
-            mutex.unlock();
-        }
+//        std::cout<<"X: "<< robX<<std::endl<<"\tY: "<<robY<<std::endl;
 
 
         // Ball distance
@@ -160,9 +141,11 @@ int main()
 
         if(doOnce==1)
         {
-            plan.doBrushfire();
+            plan.wavefrontPlanner(10,10,1,1);
             doOnce=0;
         }
+
+//        cv::imshow("image Map",plan.getMap());
 
     }
 
