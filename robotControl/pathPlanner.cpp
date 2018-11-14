@@ -91,6 +91,7 @@ void pathPlanner::wavefrontRoute(pair start, pair goal)
     routelist.clear();
     routelist.push_back(pair{ start.x,start.y });
     pair temp=pair{start.x,start.y};
+
 //    std::cout<<"x: "<<temp.x<<" y: "<<temp.y<<" counter: "<< newMap[temp.y][temp.x]<<std::endl;
     while(newMap[temp.y][temp.x]!=2)
     {
@@ -120,7 +121,7 @@ void pathPlanner::wavefrontRoute(pair start, pair goal)
             routelist.push_back(pair{ temp.x,temp.y });
         }
         //S
-        else if (newMap[temp.y+1][temp.x] == 0)
+        else if (newMap[temp.y+1][temp.x] ==newMap[temp.y][temp.x]-1)
         {
             temp = pair{ temp.x, temp.y + 1 };
             routelist.push_back(pair{ temp.x,temp.y });
