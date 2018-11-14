@@ -31,20 +31,15 @@ int main()
 	//Get Gazebo World pointer
 	gazebo::transport::NodePtr node = _gazeboWorld.getNode();
 
-	//Camera Functions class
-	computerVision cvObj;
-
-	cvObj.startCamera(node);
-	cvObj.startLidar(node);
-
-	//Generate Map
-	generateMap mapObj;
-
-	//Path planner
-	pathPlanner plan;
-
 	//resets Gazebo World
 	_gazeboWorld.worldReset();
+
+
+    //Camera Functions class
+    computerVision cvObj;
+
+    cvObj.startCamera(node);
+    cvObj.startLidar(node);
 
 	// Start AI of doom
 	fuzzyController AI;
@@ -59,7 +54,16 @@ int main()
 	double mapleY = 1.0;
 
 
-	int doOnce = 1; //Lavet til PathPlanner - Sandsynligvis ikke brugt efter d.  7-11-2018
+    //Path planner
+    pathPlanner plan;
+
+    pair start=pair{1,2};
+    pair goal=pair{60,75};
+    plan.wavefrontPlanner(start,goal);
+    plan.wavefrontRoute(start,goal);
+    plan.drawWavefrontRoute(start,goal);
+
+
 	// Loop
 	while (true)
 	{
@@ -77,7 +81,7 @@ int main()
 
 		float* lidarArray = cvObj.getLidarRange();
 
-		cvObj.seeCamera();
+        cvObj.seeCameraV2();
 		cvObj.seeLidarNew();
 
 		// Robot pose in gazeboworld
@@ -89,26 +93,7 @@ int main()
 //        cvObj.templateMatching();
 
 
-		//Mapping
-		mutex.lock();
-		mapObj.calculateRobotPos(AI.getSpeed(), AI.getSteer());
-
 		// std::cout << std::setprecision(3) << "X: " << (mapObj.getXPos() - robX) << " Y: " << (mapObj.getYPos() - robY) << " A: " << (mapObj.getAngle() - robA) << std::endl;
-
-		mapObj.setRobPos(robX, robY, robA);
-		mutex.unlock();
-
-
-		mutex.lock();
-		mapObj.insertPointsOnMap();
-		mutex.unlock();
-
-		if (cvObj.getLidarLock())
-		{
-			mutex.lock();
-			mapObj.calculateObstaclePoints(lidarArray);
-			mutex.unlock();
-		}
 
 
 		// Ball distance
@@ -158,12 +143,7 @@ int main()
 		}
 
 
-		if (doOnce == 1)
-		{
-			plan.doBrushfire();
-			doOnce = 0;
-		}
-
+        cv::imshow("map",plan.getMapWave());
 	}
 
 	// Resets
