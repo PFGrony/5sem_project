@@ -35,23 +35,30 @@ public:
     void addVertex(int x, int y);
     void wavefrontPlanner(pair start, pair goal);
     void addAdj(std::deque<pair> &queueAdj);
+
+
 	cv::Mat getMapWave()
 	{
 		return mapWave;
 	}
-	cv::Mat mapWaveArry()
-	{
-		return cv::Mat(80,120,CV_16U,&newMap);
-	}
+    void wavefrontRoute(pair start, pair goal);
+    std::deque<pair> getWavefrontRoute();
+    void drawWavefrontRoute(pair start,pair goal);
+    void drawWavefrontBrushfire(pair start,pair goal);
 
 
 private:
-    cv::Mat smallMap=cv::imread("floor_plan.png",CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat smallMap=cv::imread("../robotControl/floor_plan.png",CV_LOAD_IMAGE_GRAYSCALE);
     cv::Mat map;
     std::vector<vertex> ballList;
+
+
+    //Wavefront
     int charMap[80][120];
     int newMap[80][120];
-	cv::Mat mapWave = cv::imread("floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
+    cv::Mat mapWave = cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
+    std::deque<pair> routelist;
+
 
 };
 

@@ -83,7 +83,140 @@ void pathPlanner::addAdj(std::deque<pair> &queueAdj)
 	{
 		queueAdj.push_back(pair{ temp.x,temp.y });
 		newMap[temp.y][temp.x] = counter;
-	}
+    }
+}
+
+void pathPlanner::wavefrontRoute(pair start, pair goal)
+{
+    routelist.clear();
+    routelist.push_back(pair{ start.x,start.y });
+    pair temp=pair{start.x,start.y};
+//    std::cout<<"x: "<<temp.x<<" y: "<<temp.y<<" counter: "<< newMap[temp.y][temp.x]<<std::endl;
+    while(newMap[temp.y][temp.x]!=2)
+    {
+        //N
+        if (newMap[temp.y-1][temp.x] == newMap[temp.y][temp.x]-1)
+        {
+            temp = pair{ temp.x, temp.y - 1 };
+            routelist.push_back(pair{ temp.x,temp.y});
+        }
+        //NE
+        else if (newMap[temp.y-1][temp.x+1]==newMap[temp.y][temp.x]-1)
+        {
+            temp = pair{ temp.x + 1, temp.y - 1 };
+            routelist.push_back(pair{ temp.x,temp.y });
+
+        }
+        //E
+        else if (newMap[temp.y][temp.x+1]==newMap[temp.y][temp.x]-1)
+        {
+            temp = pair{ temp.x + 1, temp.y };
+            routelist.push_back(pair{ temp.x,temp.y });
+        }
+        //SE
+        else if (newMap[temp.y+1][temp.x+1]==newMap[temp.y][temp.x]-1)
+        {
+            temp = pair{ temp.x + 1, temp.y + 1 };
+            routelist.push_back(pair{ temp.x,temp.y });
+        }
+        //S
+        else if (newMap[temp.y+1][temp.x] == 0)
+        {
+            temp = pair{ temp.x, temp.y + 1 };
+            routelist.push_back(pair{ temp.x,temp.y });
+        }
+        //SW
+        else if (newMap[temp.y+1][temp.x-1]==newMap[temp.y][temp.x]-1)
+        {
+            temp = pair{ temp.x - 1, temp.y + 1 };
+            routelist.push_back(pair{ temp.x,temp.y });
+        }
+        //W
+        else if (newMap[temp.y][temp.x-1]==newMap[temp.y][temp.x]-1)
+        {
+            temp = pair{ temp.x - 1, temp.y };
+            routelist.push_back(pair{ temp.x,temp.y });
+        }
+        //NW
+        else if (newMap[temp.y-1][temp.x-1]==newMap[temp.y][temp.x]-1)
+        {
+            temp = pair{ temp.x - 1, temp.y - 1 };
+            routelist.push_back(pair{ temp.x,temp.y });
+        }
+//        std::cout<<"x: "<<temp.x<<" y: "<<temp.y<<" counter: "<< newMap[temp.y][temp.x]<<std::endl;
+
+    }
+}
+
+
+std::deque<pair> pathPlanner::getWavefrontRoute()
+{
+    return routelist;
+}
+
+void pathPlanner::drawWavefrontRoute(pair start,pair goal)
+{
+    mapWave = cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
+
+    for(int i=0;i<routelist.size();i++)
+    {
+        mapWave.at<cv::Vec3b>(routelist.at(i).y,routelist.at(i).x)[0] = 0;
+        mapWave.at<cv::Vec3b>(routelist.at(i).y,routelist.at(i).x)[1] = 255;
+        mapWave.at<cv::Vec3b>(routelist.at(i).y,routelist.at(i).x)[2] = 0;
+    }
+    //Start
+    mapWave.at<cv::Vec3b>(start.y, start.x)[0] = 0;
+    mapWave.at<cv::Vec3b>(start.y, start.x)[1] = 0;
+    mapWave.at<cv::Vec3b>(start.y, start.x)[2] = 255;
+
+    //Goal
+    mapWave.at<cv::Vec3b>(goal.y,goal.x)[0] = 255;
+    mapWave.at<cv::Vec3b>(goal.y,goal.x)[1] = 0;
+    mapWave.at<cv::Vec3b>(goal.y,goal.x)[2] = 0;
+    cv::resize(mapWave, mapWave, cv::Size(), 8, 8, cv::INTER_NEAREST);
+}
+
+void pathPlanner::drawWavefrontBrushfire(pair start,pair goal)
+{
+    mapWave = cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
+    for (int i = 0; i < mapWave.rows; i++)
+    {
+        for (int j = 0; j < mapWave.cols; j++)
+        {
+            if (newMap[i][j] == 1 )
+            {
+                for (int k = 0; k < mapWave.channels(); k++)
+                    mapWave.at<cv::Vec3b>(i, j)[k] = 0;
+            }
+            else if (newMap[i][j] == 0)
+            {
+                for (int k = 0; k < mapWave.channels(); k++)
+                    mapWave.at<cv::Vec3b>(i, j)[k] = 255;
+            }
+            else
+            {
+                    mapWave.at<cv::Vec3b>(i, j)[0] = 0;
+                    mapWave.at<cv::Vec3b>(i, j)[1] = 255 - newMap[i][j];
+                    mapWave.at<cv::Vec3b>(i, j)[2] = 0;
+            }
+
+
+        }
+    }
+
+    //Start
+    mapWave.at<cv::Vec3b>(start.x, start.y)[0] = 0;
+    mapWave.at<cv::Vec3b>(start.x, start.y)[1] = 0;
+    mapWave.at<cv::Vec3b>(start.x, start.y)[2] = 255;
+
+
+    //Goal
+    mapWave.at<cv::Vec3b>(goal.x,goal.y)[0] = 255;
+    mapWave.at<cv::Vec3b>(goal.x,goal.y)[1] = 0;
+    mapWave.at<cv::Vec3b>(goal.x,goal.y)[2] = 0;
+
+
+    cv::resize(mapWave, mapWave, cv::Size(), 8, 8, cv::INTER_NEAREST);
 }
 
 
@@ -133,32 +266,6 @@ void pathPlanner::wavefrontPlanner(pair start, pair goal)
 	//	}
 	//	std::cout << std::endl;
 	//}
-
-	for (int i = 0; i < mapWave.rows; i++)
-	{
-		for (int j = 0; j < mapWave.cols; j++)
-		{
-			if (newMap[i][j] == 1 )
-			{
-				for (int k = 0; k < mapWave.channels(); k++)
-					mapWave.at<cv::Vec3b>(i, j)[k] = 0;
-			}
-			else if (newMap[i][j] == 0)
-			{
-				for (int k = 0; k < mapWave.channels(); k++)
-					mapWave.at<cv::Vec3b>(i, j)[k] = 255;
-			}
-			else
-			{
-					mapWave.at<cv::Vec3b>(i, j)[0] = 0;
-					mapWave.at<cv::Vec3b>(i, j)[1] = 255 - newMap[i][j];
-					mapWave.at<cv::Vec3b>(i, j)[2] = 0;	
-			}
-
-
-		}
-	}
-	cv::resize(mapWave, mapWave, cv::Size(), 8, 8, cv::INTER_NEAREST);
 	
 }
 
