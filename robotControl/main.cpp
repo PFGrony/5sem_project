@@ -27,9 +27,11 @@ int main()
     plan.wavefrontRoute(start,goal);
     std::deque<pair> list=plan.getWavefrontRoute();
 
-//    plan.drawWavefrontRoute(start,goal);
-//    cv::imshow("map", plan.getMapWave());
-//    cv::waitKey();
+    std::cout<<"size: "<<list.size()<<std::endl;
+
+    plan.drawWavefrontRoute(start,goal);
+    cv::imshow("map", plan.getMapWave());
+    cv::waitKey();
 
     std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
 

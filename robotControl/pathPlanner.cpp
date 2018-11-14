@@ -35,13 +35,13 @@ void pathPlanner::addAdj(std::deque<pair> &queueAdj)
 		queueAdj.push_back(pair{ temp.x,temp.y });
 		newMap[temp.y][temp.x] = counter;
 	}
-	//NE
-	temp = pair{ pos.x + 1, pos.y - 1 };
-	if (newMap[temp.y][temp.x] == 0)
-	{
-		queueAdj.push_back(pair{ temp.x,temp.y });
-		newMap[temp.y][temp.x] = counter;
-	}
+//    //NE
+//    temp = pair{ pos.x + 1, pos.y - 1 };
+//    if (newMap[temp.y][temp.x] == 0)
+//    {
+//        queueAdj.push_back(pair{ temp.x,temp.y });
+//        newMap[temp.y][temp.x] = counter;
+//    }
 	//E
 	temp = pair{ pos.x + 1, pos.y };
 	if (newMap[temp.y][temp.x] == 0)
@@ -49,13 +49,13 @@ void pathPlanner::addAdj(std::deque<pair> &queueAdj)
 		queueAdj.push_back(pair{ temp.x,temp.y });
 		newMap[temp.y][temp.x] = counter;
 	}
-	//SE
-	temp = pair{ pos.x + 1, pos.y + 1 };
-	if (newMap[temp.y][temp.x] == 0)
-	{
-		queueAdj.push_back(pair{ temp.x,temp.y });
-		newMap[temp.y][temp.x] = counter;
-	}
+//    //SE
+//    temp = pair{ pos.x + 1, pos.y + 1 };
+//    if (newMap[temp.y][temp.x] == 0)
+//    {
+//        queueAdj.push_back(pair{ temp.x,temp.y });
+//        newMap[temp.y][temp.x] = counter;
+//    }
 	//S
 	temp = pair{ pos.x, pos.y + 1 };
 	if (newMap[temp.y][temp.x] == 0)
@@ -63,13 +63,13 @@ void pathPlanner::addAdj(std::deque<pair> &queueAdj)
 		queueAdj.push_back(pair{ temp.x,temp.y });
 		newMap[temp.y][temp.x] = counter;
 	}
-	//SW
-	temp = pair{ pos.x - 1, pos.y + 1 };
-	if (newMap[temp.y][temp.x] == 0)
-	{
-		queueAdj.push_back(pair{ temp.x,temp.y });
-		newMap[temp.y][temp.x] = counter;
-	}
+//    //SW
+//    temp = pair{ pos.x - 1, pos.y + 1 };
+//    if (newMap[temp.y][temp.x] == 0)
+//    {
+//        queueAdj.push_back(pair{ temp.x,temp.y });
+//        newMap[temp.y][temp.x] = counter;
+//    }
 	//W
 	temp = pair{ pos.x - 1, pos.y };
 	if (newMap[temp.y][temp.x] == 0)
@@ -77,13 +77,13 @@ void pathPlanner::addAdj(std::deque<pair> &queueAdj)
 		queueAdj.push_back(pair{ temp.x,temp.y });
 		newMap[temp.y][temp.x] = counter;
 	}
-	//NW
-	temp = pair{ pos.x - 1, pos.y - 1 };
-	if (newMap[temp.y][temp.x] == 0)
-	{
-		queueAdj.push_back(pair{ temp.x,temp.y });
-		newMap[temp.y][temp.x] = counter;
-    }
+//    //NW
+//    temp = pair{ pos.x - 1, pos.y - 1 };
+//    if (newMap[temp.y][temp.x] == 0)
+//    {
+//        queueAdj.push_back(pair{ temp.x,temp.y });
+//        newMap[temp.y][temp.x] = counter;
+//    }
 }
 
 void pathPlanner::wavefrontRoute(pair start, pair goal)
@@ -101,49 +101,49 @@ void pathPlanner::wavefrontRoute(pair start, pair goal)
             temp = pair{ temp.x, temp.y - 1 };
             routelist.push_back(pair{ temp.x,temp.y});
         }
-        //NE
-        else if (newMap[temp.y-1][temp.x+1]==newMap[temp.y][temp.x]-1)
-        {
-            temp = pair{ temp.x + 1, temp.y - 1 };
-            routelist.push_back(pair{ temp.x,temp.y });
+//        //NE
+//        else if (newMap[temp.y-1][temp.x+1]==newMap[temp.y][temp.x]-1)
+//        {
+//            temp = pair{ temp.x + 1, temp.y - 1 };
+//            routelist.push_back(pair{ temp.x,temp.y });
 
-        }
+//        }
         //E
         else if (newMap[temp.y][temp.x+1]==newMap[temp.y][temp.x]-1)
         {
             temp = pair{ temp.x + 1, temp.y };
             routelist.push_back(pair{ temp.x,temp.y });
         }
-        //SE
-        else if (newMap[temp.y+1][temp.x+1]==newMap[temp.y][temp.x]-1)
-        {
-            temp = pair{ temp.x + 1, temp.y + 1 };
-            routelist.push_back(pair{ temp.x,temp.y });
-        }
+//        //SE
+//        else if (newMap[temp.y+1][temp.x+1]==newMap[temp.y][temp.x]-1)
+//        {
+//            temp = pair{ temp.x + 1, temp.y + 1 };
+//            routelist.push_back(pair{ temp.x,temp.y });
+//        }
         //S
         else if (newMap[temp.y+1][temp.x] ==newMap[temp.y][temp.x]-1)
         {
             temp = pair{ temp.x, temp.y + 1 };
             routelist.push_back(pair{ temp.x,temp.y });
         }
-        //SW
-        else if (newMap[temp.y+1][temp.x-1]==newMap[temp.y][temp.x]-1)
-        {
-            temp = pair{ temp.x - 1, temp.y + 1 };
-            routelist.push_back(pair{ temp.x,temp.y });
-        }
+//        //SW
+//        else if (newMap[temp.y+1][temp.x-1]==newMap[temp.y][temp.x]-1)
+//        {
+//            temp = pair{ temp.x - 1, temp.y + 1 };
+//            routelist.push_back(pair{ temp.x,temp.y });
+//        }
         //W
         else if (newMap[temp.y][temp.x-1]==newMap[temp.y][temp.x]-1)
         {
             temp = pair{ temp.x - 1, temp.y };
             routelist.push_back(pair{ temp.x,temp.y });
         }
-        //NW
-        else if (newMap[temp.y-1][temp.x-1]==newMap[temp.y][temp.x]-1)
-        {
-            temp = pair{ temp.x - 1, temp.y - 1 };
-            routelist.push_back(pair{ temp.x,temp.y });
-        }
+//        //NW
+//        else if (newMap[temp.y-1][temp.x-1]==newMap[temp.y][temp.x]-1)
+//        {
+//            temp = pair{ temp.x - 1, temp.y - 1 };
+//            routelist.push_back(pair{ temp.x,temp.y });
+//        }
 //        std::cout<<"x: "<<temp.x<<" y: "<<temp.y<<" counter: "<< newMap[temp.y][temp.x]<<std::endl;
 
     }
