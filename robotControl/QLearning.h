@@ -39,13 +39,19 @@ public:
 
 	void runQLearning();
 
+	QlPoints getPoint(int x);
+
 	void printBestActions();
+
+	void loadTestWorld();
+private:
 	void saveaiTable();
 
 	void calculateaiTable();
-private:
-	void loadRooms();
-	void loadMaples();
+
+	void loadBigWorld();
+
+	void setExploration();
 
 	state * getNextState(state* s, int a);
 	int getReward(state* s, int a);
@@ -70,5 +76,6 @@ private:
 	vector<moves> bestActions;
 	double aiTable[numberOfRooms * 2][numberOfRooms * 2] = { };
 	bool hasRun;
+	bool test;
 };
 

@@ -4,13 +4,13 @@ QLearning::QLearning()
 {
 	// Learning rate and discount rate determins the values of the Q(s,a)
 	learningRate = 0.8;
-	discountRate = 0.5;
+	discountRate = 0.2;
 
 	// the threshhold
-	theta = 0.01;
+	theta = 0.0001;
 
 	// how often will we get a random move (1/e)
-	e = 13;
+	e = 8;
 
 	// maximum time steps before it terminates the run
 	tMax = 100;
@@ -20,6 +20,9 @@ QLearning::QLearning()
 
 	// if it is false it will load the rooms
 	hasRun = false;
+
+	// init random seed
+	srand(time(NULL));
 }
 
 QLearning::~QLearning()
@@ -28,14 +31,14 @@ QLearning::~QLearning()
 
 void QLearning::runQLearning()
 {
-	// load the rooms
-	loadRooms();
+	// load bigworld if nothing else has been loaded
+	loadBigWorld();
 	// setup all the need data types
 	double delta			= 0;
 	double tableBuffer		= 0;
 
 	vector<moves> actions;
-	vector<moves> temp(tMax);
+	vector<moves> temp(tMax+1);
 	bestActions = temp;
 
 	state * s;
@@ -44,9 +47,9 @@ void QLearning::runQLearning()
 
 	int a					= 0;
 	int roomsExplored		= 0;
-	int i					= 0;
 	int reward				= 0;
 	int t					= 0;
+	int i = 0;
 
 	int aiTableState			= 0;
 	int aiTableStateAction			= 0;
@@ -56,14 +59,17 @@ void QLearning::runQLearning()
 	do {
 		//reset delta
 		delta = 0;
-		// increase iterator
-		i++;
 		// reload maples / unexplored rooms
-		loadMaples();
+		setExploration();
 		// set starting state/room
-		s = &allStates[10];
+		if (test)
+			s = &allStates[3];
+		else
+			s = &allStates[10];
+
 		// set to starting state aswell or else it crashes (??)
-		nS = &allStates[10];
+		nS = s;
+
 		// reset time
 		t = 0;
 		// reset the amout of rooms explored
@@ -77,6 +83,8 @@ void QLearning::runQLearning()
 			a = getNextAction(s);
 			// reward for state with the action
 			reward = getReward(s, a);
+
+			i++;
 			// add to list of moves for bestActions vector
 			actions.push_back(moves{ s,a });
 			// get next state from current state and action
@@ -118,7 +126,7 @@ void QLearning::runQLearning()
 			s = nS;
 
 			// Terminate run if all rooms are explored or the time exceeds tMax
-			if (roomsExplored == numberOfRooms || t > tMax)
+			if (roomsExplored == allStates.size() || t > tMax)
 				break;
 		}
 		// check if current run is better than best run
@@ -132,18 +140,27 @@ void QLearning::runQLearning()
 		actions.clear();
 		// Run again is delta is above theta
 	} while (delta > theta);
-	iteration = i;
+
+	cout << "Q-learning was done in " << i << " iterations." << endl;
+
+	calculateaiTable();
+}
+
+QlPoints QLearning::getPoint(int x)
+{
+	return bestActions[x].s->posStates;
 }
 
 void QLearning::printBestActions()
 {
+	saveaiTable();
 	cout << "Fastest path was done in " << bestActions.size() << " moves" << endl;
 	for (int i = 0; i < bestActions.size(); i++)
 	{
 		if (bestActions[i].a == 0)
-			cout << "Seach in room " << bestActions[i].s->roomNumber << " \t\t" << bestActions[i].s->posStates.x << ":"<< bestActions[i].s->posStates.y << endl;
+			cout << "Seach in room " << bestActions[i].s->roomNumber << endl;
 		else
-			cout << "Move from room " << bestActions[i].s->roomNumber << " to room " << bestActions[i + 1].s->roomNumber << "\t" << bestActions[i+1].s->posStates.x << ":" << bestActions[i+1].s->posStates.y << endl;
+			cout << "Move from room " << bestActions[i].s->roomNumber << " to room " << bestActions[i + 1].s->roomNumber << endl;
 	}
 }
 
@@ -152,14 +169,14 @@ void QLearning::saveaiTable()
 	ofstream myfile;
 	myfile.open("aiTable.txt");
 	myfile << "s/a" << "\t";
-	for (int i = 0; i < 38; i++)
+	for (int i = 0; i < allStates.size() * 2; i++)
 		myfile << "Room" << ((i % 2 == 0) ? " " : "E") << ((i / 2) + 1) << "\t";
 	myfile << endl;
 
-	for (int i = 0; i < 38; i++)
+	for (int i = 0; i < allStates.size() * 2; i++)
 	{
 		myfile << "Room" << ((i % 2 == 0) ? " " : "E") << ((i / 2) + 1) << "\t";
-		for (int j = 0; j < 38; j++)
+		for (int j = 0; j < allStates.size() * 2; j++)
 			myfile << std::setprecision(4) << aiTable[j][i] << "\t";
 		myfile << endl;
 	}
@@ -174,10 +191,17 @@ void QLearning::calculateaiTable()
 	float reward		= 0;
 	vector<moves> actions;
 
-	state * s = &allStates[10];
-	state * nS = &allStates[10];
+	state * s;
+	state * nS;
 
-	loadMaples();
+	if (test)
+		s = &allStates[3];
+	else
+		s = &allStates[10];
+
+	nS = s;
+
+	setExploration();
 
 	while (true)
 	{
@@ -204,16 +228,23 @@ void QLearning::calculateaiTable()
 		s = nS;
 
 		// Terminate run if all rooms are explored or the time exceeds tMax
-		if (roomsExplored == numberOfRooms || t > tMax)
+		if (roomsExplored == allStates.size() || t > tMax)
 			break;
 	}
 	bestActions = actions;
+
+	if (bestActions.size() > tMax)
+		runQLearning();
 }
 
-void QLearning::loadRooms()
+void QLearning::loadBigWorld()
 {
 	if (hasRun)
 		return;
+	else
+		hasRun = true;
+
+	test = false;
 	// Create all rooms
 	for (int i = 0; i < numberOfRooms; i++)
 	{
@@ -343,7 +374,47 @@ void QLearning::loadRooms()
 	allStates[18].possibleStates.push_back(&allStates[15]);
 }
 
-void QLearning::loadMaples()
+void QLearning::loadTestWorld()
+{
+	if (hasRun)
+		return;
+	else
+		hasRun = true;
+
+	test = true;
+
+	for (int i = 0; i < 5; i++)
+	{
+		allStates.push_back(state{});
+		allStates[i].roomNumber = i + 1;
+		allStates[i].unexplored = true;
+	}
+	
+	for (int i = 0; i < allStates.size(); i++)
+	{
+		allStates[i].possibleStates.push_back(&allStates[i]);
+		allStates[i].posStates.x = 0;
+		allStates[i].posStates.y = 0;
+	}
+		
+
+	allStates[0].possibleStates.push_back(&allStates[1]);
+	allStates[0].possibleStates.push_back(&allStates[3]);
+
+	allStates[1].possibleStates.push_back(&allStates[0]);
+	allStates[1].possibleStates.push_back(&allStates[2]);
+	allStates[1].possibleStates.push_back(&allStates[3]);
+
+	allStates[2].possibleStates.push_back(&allStates[1]);
+
+	allStates[3].possibleStates.push_back(&allStates[4]);
+	allStates[3].possibleStates.push_back(&allStates[0]);
+	allStates[3].possibleStates.push_back(&allStates[1]);
+
+	allStates[4].possibleStates.push_back(&allStates[3]);
+}
+
+void QLearning::setExploration()
 {
 	// Set all rooms to unexplored
 	for (int i = 0; i < allStates.size(); i++)
