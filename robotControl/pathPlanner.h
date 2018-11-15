@@ -31,12 +31,11 @@ public:
     pathPlanner();
     cv::Mat getMap();
     void doBrushfire();
-    void AStar(int goalX,int goalY);
-    void addVertex(int x, int y);
+    void AStar(pair start, pair goal);
     void wavefrontPlanner(pair start, pair goal);
-    void addAdj(std::deque<pair> &queueAdj);
 
 
+    //Wavefront
 	cv::Mat getMapWave()
 	{
 		return mapWave;
@@ -46,11 +45,13 @@ public:
     void drawWavefrontRoute(pair start,pair goal);
     void drawWavefrontBrushfire(pair start,pair goal);
 
+    //A Star
+    void voronoiDiagram();
+
 
 private:
     cv::Mat smallMap=cv::imread("../robotControl/floor_plan.png",CV_LOAD_IMAGE_GRAYSCALE);
     cv::Mat map;
-    std::vector<vertex> ballList;
 
 
     //Wavefront

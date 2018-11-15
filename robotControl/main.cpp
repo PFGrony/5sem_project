@@ -57,13 +57,13 @@ int main()
     //Path planner
     pathPlanner plan;
 
-    pair start=pair{1,2};
-    pair goal=pair{60,75};
-    plan.wavefrontPlanner(start,goal);
-    plan.wavefrontRoute(start,goal);
-    plan.drawWavefrontRoute(start,goal);
-
-
+    pair start={1,2};
+    pair goal={60,75};
+//    plan.wavefrontPlanner(start,goal);
+//    plan.wavefrontRoute(start,goal);
+//    plan.drawWavefrontRoute(start,goal);
+//    plan.voronoiDiagram();
+    plan.AStar(start,goal);
 	// Loop
 	while (true)
 	{
@@ -143,7 +143,7 @@ int main()
 		}
 
 
-        cv::imshow("map",plan.getMapWave());
+//        cv::imshow("map",plan.getMap());
 	}
 
 	// Resets
