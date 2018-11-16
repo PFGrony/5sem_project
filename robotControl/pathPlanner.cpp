@@ -200,7 +200,7 @@ void pathPlanner::wavefrontRoute(pair start, pair goal)
 
 void pathPlanner::drawWavefrontBrushfire(pair start,pair goal)
 {
-    mapWave = cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
+    mapWave = map.clone();
     for (int i = 0; i < mapWave.rows; i++)
     {
         for (int j = 0; j < mapWave.cols; j++)
@@ -243,7 +243,7 @@ void pathPlanner::drawWavefrontBrushfire(pair start,pair goal)
 
 void pathPlanner::drawWavefrontRoute(pair start,pair goal)
 {
-    mapWave = cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
+    mapWave = map.clone();
 
     for(int i=0;i<routelist.size();i++)
     {
@@ -268,8 +268,8 @@ void pathPlanner::drawWavefrontRoute(pair start,pair goal)
 void pathPlanner::voronoiDiagram()
 {
 
-    cv::Mat voronoiDiagram=cv::imread("../robotControl/floor_plan.png",CV_LOAD_IMAGE_ANYCOLOR);
-    cv::Mat copyVoronoi=voronoiDiagram.clone();
+	cv::Mat voronoiDiagram = map.clone();
+    cv::Mat copyVoronoi=map.clone();
     bool valueChanged=true;
     cv::Vec3b counter(0,0,0);
     cv::Vec3b offset(18,18,18); //For colouring
@@ -533,25 +533,217 @@ void pathPlanner::doBrushfire()
 }
 
 
-void pathPlanner::AStar(pair start, pair goal)
+std::vector<pair> pathPlanner::AStar(pair start, pair goal)
 {
-    std::vector<vertex> closedSet;
-    std::vector<vertex> openSet;
-//    cv::Mat cameFrom = cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_GRAYSCALE);
+    std::vector<pair> closedSet;
+    std::vector<pair> openSet;
+	openSet.push_back(start);
+//    cv::Mat cameFrom = map.clone();
+	//cv::cvtColor(cameFrom, cameFrom, CV_BGR2GRAY);
 //    cv::Mat gScore=cameFrom.clone();
+	
+	std::vector<pair> cameFrom;
+	int newMap[ROW][COL];
+    double gScore[ROW][COL];
+	double fScore[ROW][COL];
 
-    double gScore[smallMap.rows][smallMap.cols];
-
-    for (int i = 0; i < smallMap.rows; i++)
+    for (int i = 0; i < map.rows; i++)
     {
-        for (int j = 0; j < smallMap.cols; j++)
+        for (int j = 0; j < map.cols; j++)
         {
-            if (smallMap.at<uchar>(i, j) == 0)
-                gScore[i][j] = 1;
-            else
-                gScore[i][j] =INFINITY;
-        }
+			if (smallMap.at<uchar>(i, j) == 0) //<========================================= change from -1 to zero
+			{
+				newMap[i][j] = 1;
+				//gScore[i][j] = 1;
+				//fScore[i][j] = 1;
+			}
+			else
+			{
+				newMap[i][j] = 0;
+			}
+			gScore[i][j] = INFINITY;
+			fScore[i][j] = INFINITY;
+		}
     }
 
+	gScore[start.y][start.x] = 0;
+	fScore[start.y][start.x] = abs(start.x - goal.x) + abs(start.y - goal.y);
 
+
+	while (!openSet.empty())
+	{
+		pair current;
+		double fScoreMin=INFINITY;
+		for (int i = 0; i < map.rows; i++)
+		{
+			for (int j = 0; j < map.cols; j++)
+			{
+				if (fScore[i][j] <=fScoreMin)
+				{
+					fScoreMin = fScore[i][j];
+					current = { j,i };
+				}
+			}
+		}
+
+
+		if (current.x == goal.x && current.y == goal.y)
+		{
+			lister = openSet;
+			return openSet;
+		}
+
+		//for (size_t i = 0; i < openSet.size(); i++)
+		//{
+		//	if (openSet.at(i).x == current.x && openSet.at(i).y == current.y)
+		//	{
+		//		openSet.erase(openSet.begin() + i);
+		//		break;
+		//	}
+		//}
+
+		//closedSet.push_back(current);
+
+
+
+		for (size_t i = 0; i < 8; i++)
+		{
+			bool skip = false;
+			pair neighbour;
+			if (i == 0)
+				neighbour = { current.x, current.y -1};//N
+			else if (i == 1)
+				neighbour = { current.x + 1 , current.y -1};//NE
+			else if (i == 2)
+				neighbour = { current.x + 1 , current.y };//E
+			else if (i == 3)
+				neighbour = { current.x+1, current.y +1};//SE
+			else if (i == 4)
+				neighbour = { current.x, current.y +1};//S
+			else if (i == 5)
+				neighbour = { current.x - 1 , current.y +1};//SW
+			else if (i == 6)
+				neighbour = { current.x - 1 , current.y };//W
+			else if (i == 7)
+				neighbour = { current.x - 1 , current.y -1};//NW
+			
+			if (newMap[neighbour.y][neighbour.x] == 1)
+				continue;
+
+			double tentative_gScore = gScore[current.y][current.x] + 1;
+			if (neighbour.x >= 0 || neighbour.y >= 0 || neighbour.x < map.rows || neighbour.y < map.cols)
+			{
+
+				bool isNeighbourOpen = false;
+				for (size_t i = 0; i < openSet.size(); i++)
+				{
+					if (openSet.at(i).x == neighbour.x && openSet.at(i).y == neighbour.y)
+					{
+						isNeighbourOpen = true;
+						break;
+					}
+				}
+				bool isNeighbourClosed = false;
+				for (size_t i = 0; i < closedSet.size(); i++)
+				{
+					if (closedSet.at(i).x == neighbour.x && closedSet.at(i).y == neighbour.y)
+					{
+						isNeighbourClosed = true;
+						break;
+					}
+				}
+
+				if (isNeighbourOpen)
+				{
+					if (gScore[neighbour.y][neighbour.x] <= tentative_gScore)
+						continue;
+
+				}
+				else if (isNeighbourClosed)
+				{
+					if (gScore[neighbour.y][neighbour.x] <= tentative_gScore)
+						continue;
+
+					for (size_t i = 0; i < closedSet.size(); i++)
+					{
+						if (closedSet.at(i).x == neighbour.x && closedSet.at(i).y == neighbour.y)
+						{
+							closedSet.erase(openSet.begin() + i);
+							break;
+						}
+					}
+					openSet.push_back(neighbour);
+
+				}
+				else
+				{
+					openSet.push_back(neighbour);
+					fScore[neighbour.y][neighbour.x] = tentative_gScore + abs(neighbour.x - goal.x) + abs(neighbour.y - goal.y);
+				}
+				gScore[neighbour.y][neighbour.x] = tentative_gScore;
+				closedSet.push_back(current);
+
+
+			//	for (size_t i = 0; i < closedSet.size(); i++)
+			//	{
+			//		if (closedSet.at(i).x == neighbour.x && closedSet.at(i).y == neighbour.y)
+			//		{
+			//			skip = true;
+			//			break;
+			//		}
+			//	}
+
+			//	if (!skip)
+			//	{
+			//		double tentative_gScore = gScore[current.y][current.x] + 1;
+
+			//		bool isThere = false;
+			//		for (size_t i = 0; i < openSet.size(); i++)
+			//		{
+			//			if (openSet.at(i).x == neighbour.x && openSet.at(i).y == neighbour.y)
+			//			{
+			//				isThere = true;
+			//				break;
+			//			}
+			//		}
+			//		if (!isThere)
+			//			openSet.push_back(neighbour);
+			//		else if (tentative_gScore >= gScore[neighbour.y][neighbour.x])
+			//			skip = true;
+
+			//		if (!skip)
+			//		{
+			//			cameFrom.push_back(neighbour);
+			//			gScore[neighbour.y][neighbour.x] = tentative_gScore;
+			//			fScore[neighbour.y][neighbour.x] = tentative_gScore + abs(neighbour.x - goal.x) + abs(neighbour.y - goal.y);
+			//		}
+			//	}
+			//	skip = false;
+			}
+
+		}
+	}
+	//for (int i = 0; i < cameFrom.size(); i++)
+	//{
+	//	std::cout << "x: "<<cameFrom.at(i).x << " y: " << cameFrom.at(i).y << std::endl;
+	//}
+	std::cout << "ERROR" << std::endl;
+}
+
+void pathPlanner::drawAStar(pair start,pair goal)
+{
+	cv::Mat AStarMap = smallMap.clone();
+
+	int	counter = 0;
+	int offset = 18;
+	for (size_t i = 0; i < lister.size(); i++)
+	{
+		AStarMap.at<uchar>(lister.at(i).y,lister.at(i).x)= counter += offset;
+	}
+	
+	cv::cvtColor(AStarMap, AStarMap, CV_GRAY2BGR);
+	AStarMap.at<cv::Vec3b>(start.y, start.x) = cv::Vec3b(255, 0, 0);	
+	AStarMap.at<cv::Vec3b>(goal.y, goal.x) = cv::Vec3b(0, 255, 0);
+	cv::resize(AStarMap, AStarMap, cv::Size(), 8, 8, cv::INTER_NEAREST);
+	map = AStarMap.clone();
 }

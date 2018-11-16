@@ -7,7 +7,7 @@
 #include <vector>
 #include <deque>
 
-struct vertex
+struct node
 {
     int currentNode;
     int previousNode;
@@ -23,6 +23,10 @@ struct pair
     int y;
 };
 
+
+const int ROW = 80;
+const int COL = 120;
+
 class pathPlanner
 {
 public:
@@ -31,8 +35,6 @@ public:
     pathPlanner();
     cv::Mat getMap();
     void doBrushfire();
-    void AStar(pair start, pair goal);
-    void wavefrontPlanner(pair start, pair goal);
 
 
     //Wavefront
@@ -41,23 +43,27 @@ public:
 		return mapWave;
 	}
     void wavefrontRoute(pair start, pair goal);
+    void wavefrontPlanner(pair start, pair goal);
     std::deque<pair> getWavefrontRoute();
     void drawWavefrontRoute(pair start,pair goal);
     void drawWavefrontBrushfire(pair start,pair goal);
 
     //A Star
+    std::vector<pair> AStar(pair start, pair goal);
     void voronoiDiagram();
-
+	void drawAStar(pair start, pair goal);
 
 private:
     cv::Mat smallMap=cv::imread("../robotControl/floor_plan.png",CV_LOAD_IMAGE_GRAYSCALE);
-    cv::Mat map;
+    cv::Mat map= cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
+
+	std::vector<pair> lister;
 
 
     //Wavefront
-    int charMap[80][120];
-    int newMap[80][120];
-    cv::Mat mapWave = cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
+    int charMap[ROW][COL];
+    int newMap[ROW][COL];
+	cv::Mat mapWave = map.clone();
     std::deque<pair> routelist;
 
 
