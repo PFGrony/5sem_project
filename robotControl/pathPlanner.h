@@ -6,23 +6,47 @@
 #include <array>
 #include <vector>
 #include <deque>
+#include <queue>
+#include <cmath>
+
+
 
 struct node
 {
-    int currentNode;
-    int previousNode;
     int x;
     int y;
-    int g;//distance;
-    int h;//heuristicDistance;
-    int f;
+    double g=0;//distance;
+    double h=0;//heuristicDistance;
+    double f=0;
 };
+
+struct compareHeuristic
+{
+	bool operator()(const node& a, const node& b)
+	{
+		return a.h > b.h;
+	}
+};
+struct compareCost
+{
+	bool operator()(const node& a, const node& b)
+	{
+		return a.f > b.f;
+	}
+};
+struct compare
+{
+	bool operator()(const int& a, const int& b)
+	{
+		return a > b;
+	}
+};
+
 struct pair
 {
     int x;
     int y;
 };
-
 
 const int ROW = 80;
 const int COL = 120;
@@ -35,12 +59,17 @@ public:
     pathPlanner();
     cv::Mat getMap();
     void doBrushfire();
+    void voronoiDiagram();
 
 
     //Wavefront
 	cv::Mat getMapWave()
 	{
 		return mapWave;
+	}
+	cv::Mat getMapCopy()
+	{
+		return mapCopy;
 	}
     void wavefrontRoute(pair start, pair goal);
     void wavefrontPlanner(pair start, pair goal);
@@ -49,23 +78,37 @@ public:
     void drawWavefrontBrushfire(pair start,pair goal);
 
     //A Star
-    std::vector<pair> AStar(pair start, pair goal);
-    void voronoiDiagram();
+	void pairToNode(pair var1, node &var2);
+    //std::vector<node> AStar(pair start, pair goal);
+	void AStar(pair start, pair goal);
+	void BFS(pair start, pair goal);
+	void GBFS(pair start, pair goal);
+	std::deque<pair> getPath(pair start, pair goal);
+	void drawPath(pair start, pair goal);
+
+
+
 	void drawAStar(pair start, pair goal);
+	void printCameFrom();
+
+
 
 private:
     cv::Mat smallMap=cv::imread("../robotControl/floor_plan.png",CV_LOAD_IMAGE_GRAYSCALE);
-    cv::Mat map= cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
-
-	std::vector<pair> lister;
+	cv::Mat map = cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
+	std::vector<node> lister;
 
 
     //Wavefront
-    int charMap[ROW][COL];
-    int newMap[ROW][COL];
+    int intMap[ROW][COL];
+    int cameFromMap[ROW][COL];
 	cv::Mat mapWave = map.clone();
     std::deque<pair> routelist;
 
+	//AStar
+	std::array<std::array<pair, COL>, ROW> cameFrom;
+	cv::Mat mapCopy;
+	/*std::priority_queue< node, std::vector<node>, compare> frontier;*/
 
 };
 
