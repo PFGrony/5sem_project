@@ -10,6 +10,14 @@
 #include <cmath>
 
 
+#define THRESHOLD 4
+
+//Big Map
+#define ROW  80
+#define COL  120
+////Small Map
+//#define ROW  15
+//#define COL  20
 
 struct node
 {
@@ -48,8 +56,15 @@ struct pair
     int y;
 };
 
-const int ROW = 80;
-const int COL = 120;
+struct barVal
+{
+	double val = -1;
+	double amount = 1;
+	pair pairs = {0,0};
+	bool seen = false;
+};
+
+
 
 class pathPlanner
 {
@@ -71,6 +86,10 @@ public:
 	{
 		return mapCopy;
 	}
+	cv::Mat getPoints()
+	{
+		return points;
+	}
     void wavefrontRoute(pair start, pair goal);
     void wavefrontPlanner(pair start, pair goal);
     std::deque<pair> getWavefrontRoute();
@@ -87,7 +106,7 @@ public:
 	void drawPath(pair start, pair goal);
 
 
-
+	void AGP();
 	void drawAStar(pair start, pair goal);
 	void printCameFrom();
 
@@ -109,7 +128,7 @@ private:
 	std::array<std::array<pair, COL>, ROW> cameFrom;
 	cv::Mat mapCopy;
 	/*std::priority_queue< node, std::vector<node>, compare> frontier;*/
-
+	cv::Mat points;
 };
 
 #endif // PATHPLANNER_H
