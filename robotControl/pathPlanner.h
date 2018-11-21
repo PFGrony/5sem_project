@@ -12,12 +12,12 @@
 
 #define THRESHOLD 4.2
 
-////Big Map
-//#define ROW  80
-//#define COL  120
-//Small Map
-#define ROW  15
-#define COL  20
+//Big Map
+#define ROW  80
+#define COL  120
+////Small Map
+//#define ROW  15
+//#define COL  20
 
 struct node
 {
@@ -35,6 +35,7 @@ struct compareHeuristic
 		return a.h > b.h;
 	}
 };
+
 struct compareCost
 {
 	bool operator()(const node& a, const node& b)
@@ -42,6 +43,7 @@ struct compareCost
 		return a.f > b.f;
 	}
 };
+
 struct compare
 {
 	bool operator()(const int& a, const int& b)
@@ -64,7 +66,24 @@ struct barVal
 	bool seen = false;
 };
 
+struct AGPnode
+{
+	struct pairVisited
+	{
+		pair child;
+		bool visited = false;
+	};
+	pair current;
+	std::vector<pairVisited> children;
+};
 
+
+
+struct pairPair
+{
+	pair start;
+	pair goal;
+};
 
 class pathPlanner
 {
@@ -99,7 +118,8 @@ public:
 	{
 		return points;
 	}
-
+	void AGPgraph();
+	std::vector<AGPnode> pointsTree;
 
     //A Star
 	void pairToNode(pair var1, node &var2);
@@ -112,13 +132,17 @@ public:
 	void printCameFrom();
 
 
-
+	void drawGraph();
+	cv::Mat getAGPgraph()
+	{
+		return mapWithPaths;
+	}
 
 
 private:
 	//Init
 	cv::Mat map = cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
-	cv::Mat smallMap; //cv::imread(/*"../robotControl/*/"floor_plan.png",CV_LOAD_IMAGE_GRAYSCALE);
+	cv::Mat grayMap; //cv::imread(/*"../robotControl/*/"floor_plan.png",CV_LOAD_IMAGE_GRAYSCALE);
 
 
     //Wavefront
@@ -134,6 +158,7 @@ private:
 	//AGP
 	std::deque<pair> criticalPoints;
 	cv::Mat points;
+	cv::Mat mapWithPaths;
 
 	//MISC
 	std::vector<node> lister;

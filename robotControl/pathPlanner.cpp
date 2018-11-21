@@ -2,18 +2,19 @@
 
 pathPlanner::pathPlanner()
 {
-	for (int i = 0; i < smallMap.rows; i++)
+	cv::cvtColor(map, grayMap, CV_BGR2GRAY);
+
+	for (int i = 0; i < map.rows; i++)
 	{
-		for (int j = 0; j < smallMap.cols; j++)
+		for (int j = 0; j < map.cols; j++)
 		{
-			if (smallMap.at<uchar>(i, j) == 0)
+			if (grayMap.at<uchar>(i, j) == 0)
 				intMap[i][j] = 1;
 			else
 				intMap[i][j] = 0;
 		}
 	}
 
-	cv::cvtColor(map,smallMap,CV_BGR2GRAY);
 
 }
 
@@ -22,12 +23,11 @@ cv::Mat pathPlanner::getMap()
 	return map;
 }
 
-
 void pathPlanner::printCameFrom()
 {
-	for (int i = 0; i < ROW; i++)
+	for (int i = 0; i < map.rows; i++)
 	{
-		for (int j = 0; j < COL; j++)
+		for (int j = 0; j < map.cols; j++)
 		{
 			std::cout << cameFrom.at(i).at(j).x;
 		}
@@ -101,9 +101,9 @@ void pathPlanner::wavefrontPlanner(pair start, pair goal)
 	}
 
 
-	//for (int i = 0; i < smallMap.rows; i++)
+	//for (int i = 0; i < grayMap.rows; i++)
 	//{
-	//	for (int j = 0; j < smallMap.cols; j++)
+	//	for (int j = 0; j < grayMap.cols; j++)
 	//	{
 	//		if ((j==start.x && i==start.y))
 	//			std::cout<<'!';
@@ -205,7 +205,6 @@ void pathPlanner::drawWavefrontRoute(pair start, pair goal)
 
 
 //Planning Algorithms
-
 void pathPlanner::pairToNode(pair var1, node &var2)
 {
 	var2.x = var1.x;
@@ -262,7 +261,7 @@ void pathPlanner::BFS(pair start, pair goal)
 			else if (i == 7)
 				neighbour = { current.x - 1, current.y - 1 };//NW
 
-			if (neighbour.x < 0 || neighbour.y < 0 || neighbour.x >= COL || neighbour.y >= ROW)
+			if (neighbour.x < 0 || neighbour.y < 0 || neighbour.x >= map.cols || neighbour.y >= map.rows)
 				continue;
 
 			if (cameFromMap[neighbour.y][neighbour.x] == 0)
@@ -272,13 +271,11 @@ void pathPlanner::BFS(pair start, pair goal)
 				cameFrom.at(neighbour.y).at(neighbour.x) = current;
 			}
 		}
-
-
 	}
 
-	for (size_t i = 0; i < ROW; i++)
+	for (size_t i = 0; i < map.rows; i++)
 	{
-		for (size_t j = 0; j < COL; j++)
+		for (size_t j = 0; j < map.cols; j++)
 		{
 			if (i == start.y && j == start.x)
 				std::cout << 'S';
@@ -366,7 +363,7 @@ void pathPlanner::GBFS(pair startPair, pair goalPair)
 			else if (i == 7)
 				neighbour = { current.x - 1, current.y - 1 };//NW
 
-			if (neighbour.x < 0 || neighbour.y < 0 || neighbour.x >= COL || neighbour.y >= ROW)
+			if (neighbour.x < 0 || neighbour.y < 0 || neighbour.x >= map.cols || neighbour.y >= map.rows)
 				continue;
 
 			if (cameFromMap[neighbour.y][neighbour.x] == 0)
@@ -381,9 +378,9 @@ void pathPlanner::GBFS(pair startPair, pair goalPair)
 
 	}
 
-	for (size_t i = 0; i < ROW; i++)
+	for (size_t i = 0; i < map.rows; i++)
 	{
-		for (size_t j = 0; j < COL; j++)
+		for (size_t j = 0; j < map.cols; j++)
 		{
 			if (i == start.y && j == start.x)
 				std::cout << 'S';
@@ -475,7 +472,7 @@ void pathPlanner::AStar(pair startPair, pair goalPair)
 			else if (i == 7)
 				neighbour = { current.x - 1, current.y - 1 };//NW
 
-			if (neighbour.x < 0 || neighbour.y < 0 || neighbour.x >= COL || neighbour.y >= ROW)
+			if (neighbour.x < 0 || neighbour.y < 0 || neighbour.x >= map.cols || neighbour.y >= map.rows)
 				continue;
 
 
@@ -498,9 +495,9 @@ void pathPlanner::AStar(pair startPair, pair goalPair)
 		}
 	}
 
-	for (size_t i = 0; i < ROW; i++)
+	for (size_t i = 0; i < map.rows; i++)
 	{
-		for (size_t j = 0; j < COL; j++)
+		for (size_t j = 0; j < map.cols; j++)
 		{
 			if (i == start.y && j == start.x)
 				std::cout << 'S';
@@ -583,9 +580,9 @@ void pathPlanner::AGP()
 		valueChanged = false;
 
 
-		for (int i = 0; i < smallMap.rows; i++) //Rows
+		for (int i = 0; i < grayMap.rows; i++) //Rows
 		{
-			for (int j = 0; j < smallMap.cols; j++) //Columns
+			for (int j = 0; j < grayMap.cols; j++) //Columns
 			{
 				if (im_brushfire.at<uchar>(i, j) == counter)
 				{
@@ -598,7 +595,7 @@ void pathPlanner::AGP()
 						}
 					}
 
-					if (i + 1 < smallMap.rows) //Checks out-of-bounds
+					if (i + 1 < grayMap.rows) //Checks out-of-bounds
 					{
 						if (im_brushfire.at<uchar>(i + 1, j) == 255) //Change value to the right
 						{
@@ -616,7 +613,7 @@ void pathPlanner::AGP()
 						}
 					}
 
-					if (j + 1 < smallMap.cols) //Checks out-of-bounds
+					if (j + 1 < grayMap.cols) //Checks out-of-bounds
 					{
 						if (im_brushfire.at<uchar>(i, j + 1) == 255) //Change value below
 						{
@@ -634,7 +631,7 @@ void pathPlanner::AGP()
 
 	///Finds local maximas
 	cv::Mat maxims(im_brushfire.size(), im_brushfire.type()); // container for all local maximums
-	cv::dilate(im_brushfire, maxims, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(double(COL / THRESHOLD), double(ROW / THRESHOLD))));
+	cv::dilate(im_brushfire, maxims, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(double(map.cols / THRESHOLD), double(map.rows / THRESHOLD))));
 	cv::compare(im_brushfire, maxims, points, CV_CMP_GE);
 
 	///Sweeps to find centers of local maximas
@@ -757,7 +754,7 @@ void pathPlanner::AGP()
 					else if (k == 7)
 						neighbour = { j - 1, i - 1 };//NW
 
-					if (neighbour.x < 0 || neighbour.y < 0 || neighbour.x >= COL || neighbour.y >= ROW)
+					if (neighbour.x < 0 || neighbour.y < 0 || neighbour.x >= map.cols || neighbour.y >= map.rows)
 						continue;
 
 					if (points.at<cv::Vec3b>(neighbour.y, neighbour.x) == cv::Vec3b(0, 255, 0))
@@ -778,12 +775,11 @@ void pathPlanner::AGP()
 		{
 			if (points.at<cv::Vec3b>(i, j) == cv::Vec3b(0, 255, 0))
 			{
-				criticalPoints.push_back({j,i});
+				criticalPoints.push_back({ j,i });
 			}
 		}
 	}
 
-	//cv::cvtColor(im_brushfire, im_brushfire, CV_GRAY2BGR);
 	im_brushfire = map.clone();
 
 	for (size_t i = 0; i < criticalPoints.size(); i++)
@@ -791,12 +787,157 @@ void pathPlanner::AGP()
 		im_brushfire.at<cv::Vec3b>(criticalPoints.at(i).y, criticalPoints.at(i).x) = cv::Vec3b(0, 255, 0);
 	}
 	mapCopy = im_brushfire.clone();
+	mapWithPaths = im_brushfire.clone();
+
 }
 
 std::deque<pair> pathPlanner::getCriticalPoints()
 {
 	return criticalPoints;
 }
+
+void pathPlanner::drawGraph()
+{
+
+	if (routelist.empty())
+		std::cout << "No path, try executing getPath()" << std::endl;
+
+	for (int i = 0; i < routelist.size(); i++)
+	{
+		mapWithPaths.at<cv::Vec3b>(routelist.at(i).y, routelist.at(i).x) = cv::Vec3b(0, 0, 255);
+	}
+	for (int i = 0; i < map.rows; i++)
+	{
+		for (int j = 0; j < map.cols; j++)
+		{
+			if (points.at<cv::Vec3b>(i, j) == cv::Vec3b(0, 255, 0))
+				mapWithPaths.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 255, 0);
+		}
+	}
+}
+
+
+
+void pathPlanner::AGPgraph()
+{
+		pairPair lengths;
+
+	///Checks every Critical node
+	for (size_t k = 0; k < criticalPoints.size(); k++)
+	{
+		//int k = 10;
+		int amountFound = 0;
+		///resets map for brushfire
+		for (int i = 0; i < map.rows; i++)
+		{
+			for (int j = 0; j < map.cols; j++)
+			{
+				cameFromMap[i][j] = intMap[i][j];
+				cameFrom.at(i).at(j) = { -1,-1 };
+			}
+		}
+		///Brushfire init
+		pair start = criticalPoints.at(k);
+		lengths.start = start;
+
+
+		cameFrom.at(start.y).at(start.x) = start;
+		cameFromMap[start.y][start.x] = 2;
+
+		std::queue<pair> frontier;
+		frontier.push(start);
+
+
+		bool existInTree = false;
+
+		///Begin brushfire
+		while (!frontier.empty())// && amountFound < 4)
+		{
+
+			pair current = frontier.front();
+			frontier.pop();
+
+
+			/// Check if goal
+			for (size_t i = 0; i < criticalPoints.size(); i++)
+			{
+				//Cant connect to itself
+				if (i == k)
+					continue;
+
+				if (current.x == criticalPoints.at(i).x && current.y == criticalPoints.at(i).y)
+				{
+					AGPnode temp;
+					temp.current = start;
+					lengths.goal = criticalPoints.at(i);
+					temp.children.push_back({ lengths.goal,true });
+
+					//for (size_t i = 0; i < pointsTree.size(); i++)
+					//{
+					//	if (pointsTree.at(i).current.x == current.x && pointsTree.at(i).current.y == current.y)
+					//	{
+					//		pointsTree.at(i).children.push_back(temp.children.front());
+					//		amountFound++;
+					//		bool existInTree = true;
+					//		break;
+					//	}
+					//}
+
+
+					if (!existInTree)
+					{
+						amountFound++;
+
+
+						pointsTree.push_back(temp);
+						getPath(lengths.start, lengths.goal);
+						drawGraph();
+					}
+					existInTree = false;
+				}
+			}
+
+			///Brushfire map
+			int counter = (cameFromMap[current.y][current.x]) + 1;
+			pair neighbour;
+			int connectivity = 8;
+			for (size_t i = 0; i < connectivity; i++)
+			{
+				if (i == 0)
+					neighbour = { current.x, current.y - 1 };//N
+				else if (i == 1)
+					neighbour = { current.x + 1, current.y };//E
+				else if (i == 2)
+					neighbour = { current.x, current.y + 1 };//S
+				else if (i == 3)
+					neighbour = { current.x - 1, current.y };//W
+				else if (i == 4)
+					neighbour = { current.x + 1, current.y - 1 };//NE
+				else if (i == 5)
+					neighbour = { current.x + 1, current.y + 1 };//SE
+				else if (i == 6)
+					neighbour = { current.x - 1, current.y + 1 };//SW
+				else if (i == 7)
+					neighbour = { current.x - 1, current.y - 1 };//NW
+
+				if (neighbour.x < 0 || neighbour.y < 0 || neighbour.x >= map.cols || neighbour.y >= map.rows)
+					continue;
+
+				if (cameFromMap[neighbour.y][neighbour.x] == 0)
+				{
+					frontier.push(neighbour);
+					cameFromMap[neighbour.y][neighbour.x] = counter;
+					cameFrom.at(neighbour.y).at(neighbour.x) = current;
+				}
+			}
+		}
+
+
+	}
+}
+
+
+
 
 
 //void pathPlanner::doBrushfire()
@@ -808,13 +949,13 @@ std::deque<pair> pathPlanner::getCriticalPoints()
 //
 //	char charMap[ROW][COL];
 //
-//	//        std::cout << smallMap.rows << ":" << smallMap.cols << std::endl;
+//	//        std::cout << grayMap.rows << ":" << grayMap.cols << std::endl;
 //
-//	for (int i = 0; i < smallMap.rows; i++)
+//	for (int i = 0; i < grayMap.rows; i++)
 //	{
-//		for (int j = 0; j < smallMap.cols; j++)
+//		for (int j = 0; j < grayMap.cols; j++)
 //		{
-//			if (smallMap.at<uchar>(i, j) == 0)
+//			if (grayMap.at<uchar>(i, j) == 0)
 //				charMap[i][j] = '1';
 //			else
 //				charMap[i][j] = '0';
@@ -824,9 +965,9 @@ std::deque<pair> pathPlanner::getCriticalPoints()
 //
 //
 //	////Check before Brushfire
-//	//for (int i = 0; i < smallMap.rows; i++)
+//	//for (int i = 0; i < grayMap.rows; i++)
 //	//{
-//	//	for (int j = 0; j < smallMap.cols; j++)
+//	//	for (int j = 0; j < grayMap.cols; j++)
 //	//	{
 //	//		std::cout << charMap[i][j];
 //	//	}
@@ -843,9 +984,9 @@ std::deque<pair> pathPlanner::getCriticalPoints()
 //		valueChanged = false;
 //		counter++;
 //
-//		for (int i = 0; i < smallMap.rows; i++) //Rows
+//		for (int i = 0; i < grayMap.rows; i++) //Rows
 //		{
-//			for (int j = 0; j < smallMap.cols; j++) //Columns
+//			for (int j = 0; j < grayMap.cols; j++) //Columns
 //			{
 //				if (charMap[i][j] - '0' == counter)
 //				{
@@ -858,7 +999,7 @@ std::deque<pair> pathPlanner::getCriticalPoints()
 //						}
 //					}
 //
-//					if (i + 1 <= smallMap.rows) //Checks out-of-bounds
+//					if (i + 1 <= grayMap.rows) //Checks out-of-bounds
 //					{
 //						if (charMap[i + 1][j] - '0' == 0) //Change value to the right
 //						{
@@ -876,7 +1017,7 @@ std::deque<pair> pathPlanner::getCriticalPoints()
 //						}
 //					}
 //
-//					if (j + 1 <= smallMap.cols) //Checks out-of-bounds
+//					if (j + 1 <= grayMap.cols) //Checks out-of-bounds
 //					{
 //						if (charMap[i][j + 1] - '0' == 0) //Change value below
 //						{
@@ -891,9 +1032,9 @@ std::deque<pair> pathPlanner::getCriticalPoints()
 //	}
 //
 //
-//	for (int i = 0; i < smallMap.rows; i++)
+//	for (int i = 0; i < grayMap.rows; i++)
 //	{
-//		for (int j = 0; j < smallMap.cols; j++)
+//		for (int j = 0; j < grayMap.cols; j++)
 //		{
 //			std::cout << charMap[i][j];
 //		}
@@ -905,7 +1046,7 @@ std::deque<pair> pathPlanner::getCriticalPoints()
 //
 //
 //	//Brushfire - With openCV
-//	cv::Mat im_brushfire = smallMap.clone();
+//	cv::Mat im_brushfire = grayMap.clone();
 //
 //	valueChanged = true;
 //	counter = 0;
@@ -915,9 +1056,9 @@ std::deque<pair> pathPlanner::getCriticalPoints()
 //		valueChanged = false;
 //
 //
-//		for (int i = 0; i < smallMap.rows; i++) //Rows
+//		for (int i = 0; i < grayMap.rows; i++) //Rows
 //		{
-//			for (int j = 0; j < smallMap.cols; j++) //Columns
+//			for (int j = 0; j < grayMap.cols; j++) //Columns
 //			{
 //				if (im_brushfire.at<uchar>(i, j) == counter)
 //				{
@@ -930,7 +1071,7 @@ std::deque<pair> pathPlanner::getCriticalPoints()
 //						}
 //					}
 //
-//					if (i + 1 < smallMap.rows) //Checks out-of-bounds
+//					if (i + 1 < grayMap.rows) //Checks out-of-bounds
 //					{
 //						if (im_brushfire.at<uchar>(i + 1, j) == 255) //Change value to the right
 //						{
@@ -948,7 +1089,7 @@ std::deque<pair> pathPlanner::getCriticalPoints()
 //						}
 //					}
 //
-//					if (j + 1 < smallMap.cols) //Checks out-of-bounds
+//					if (j + 1 < grayMap.cols) //Checks out-of-bounds
 //					{
 //						if (im_brushfire.at<uchar>(i, j + 1) == 255) //Change value below
 //						{
@@ -966,9 +1107,9 @@ std::deque<pair> pathPlanner::getCriticalPoints()
 //
 //	//cv::cvtColor(im_brushfire, im_brushfire, CV_GRAY2RGB);
 //
-//	//for (int i = 0; i < smallMap.rows; i++)
+//	//for (int i = 0; i < grayMap.rows; i++)
 //	//{
-//	//	for (int j = 0; j < smallMap.cols; j++)
+//	//	for (int j = 0; j < grayMap.cols; j++)
 //	//	{
 //	//		if (im_brushfire.at<cv::Vec3b>(i, j)[1] > 120)
 //	//			im_brushfire.at<cv::Vec3b>(i, j)= cv::Vec3b(0, 0, 255);
