@@ -10,10 +10,11 @@ pathPlanner::pathPlanner()
 				intMap[i][j] = 1;
 			else
 				intMap[i][j] = 0;
-
-
 		}
 	}
+
+	cv::cvtColor(map,smallMap,CV_BGR2GRAY);
+
 }
 
 cv::Mat pathPlanner::getMap()
@@ -44,9 +45,9 @@ std::deque<pair> pathPlanner::getWavefrontRoute()
 void pathPlanner::wavefrontPlanner(pair start, pair goal)
 {
 
-	for (int i = 0; i < smallMap.rows; i++)
+	for (int i = 0; i < map.rows; i++)
 	{
-		for (int j = 0; j < smallMap.cols; j++)
+		for (int j = 0; j < map.cols; j++)
 		{
 			cameFromMap[i][j] = intMap[i][j];
 		}
@@ -156,22 +157,22 @@ void pathPlanner::wavefrontRoute(pair start, pair goal)
 
 void pathPlanner::drawWavefrontBrushfire(pair start, pair goal)
 {
-	mapWave = map.clone();
-	for (int i = 0; i < mapWave.rows; i++)
+	mapCopy = map.clone();
+	for (int i = 0; i < map.rows; i++)
 	{
-		for (int j = 0; j < mapWave.cols; j++)
+		for (int j = 0; j < map.cols; j++)
 		{
 			if (cameFromMap[i][j] == 1)
 			{
-				mapWave.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 0);
+				mapCopy.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 0, 0);
 			}
 			else if (cameFromMap[i][j] == 0)
 			{
-				mapWave.at<cv::Vec3b>(i, j) = cv::Vec3b(255, 255, 255);
+				mapCopy.at<cv::Vec3b>(i, j) = cv::Vec3b(255, 255, 255);
 			}
 			else
 			{
-				mapWave.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 255 - cameFromMap[i][j], 0);
+				mapCopy.at<cv::Vec3b>(i, j) = cv::Vec3b(0, 255 - cameFromMap[i][j], 0);
 			}
 
 
@@ -179,35 +180,31 @@ void pathPlanner::drawWavefrontBrushfire(pair start, pair goal)
 	}
 
 	//Start
-	mapWave.at<cv::Vec3b>(start.y, start.x) = cv::Vec3b(0, 0, 255);
-
+	mapCopy.at<cv::Vec3b>(start.y, start.x) = cv::Vec3b(0, 0, 255);
 
 	//Goal
-	mapWave.at<cv::Vec3b>(goal.y, goal.x) = cv::Vec3b(255, 0, 0);
-
-
-	cv::resize(mapWave, mapWave, cv::Size(), 8, 8, cv::INTER_NEAREST);
+	mapCopy.at<cv::Vec3b>(goal.y, goal.x) = cv::Vec3b(255, 0, 0);
 }
 
 void pathPlanner::drawWavefrontRoute(pair start, pair goal)
 {
-	mapWave = map.clone();
+	mapCopy = map.clone();
+
+	if (routelist.empty())
+		std::cout << "empty path" << std::endl;
 
 	for (int i = 0; i < routelist.size(); i++)
-	{
-		mapWave.at<cv::Vec3b>(routelist.at(i).y, routelist.at(i).x) = cv::Vec3b(0, 255, 0);
-	}
+		mapCopy.at<cv::Vec3b>(routelist.at(i).y, routelist.at(i).x) = cv::Vec3b(0, 255, 0);
+
 	//Start
-	mapWave.at<cv::Vec3b>(start.y, start.x) = cv::Vec3b(0, 0, 255);
+	mapCopy.at<cv::Vec3b>(start.y, start.x) = cv::Vec3b(0, 0, 255);
 
 	//Goal
-	mapWave.at<cv::Vec3b>(goal.y, goal.x) = cv::Vec3b(255, 0, 0);
-	cv::resize(mapWave, mapWave, cv::Size(), 8, 8, cv::INTER_NEAREST);
+	mapCopy.at<cv::Vec3b>(goal.y, goal.x) = cv::Vec3b(255, 0, 0);
 }
 
 
-//A Star
-
+//Planning Algorithms
 
 void pathPlanner::pairToNode(pair var1, node &var2)
 {
@@ -215,14 +212,12 @@ void pathPlanner::pairToNode(pair var1, node &var2)
 	var2.y = var1.y;
 }
 
-
-
 void pathPlanner::BFS(pair start, pair goal)
 {
 
-	for (int i = 0; i < smallMap.rows; i++)
+	for (int i = 0; i < map.rows; i++)
 	{
-		for (int j = 0; j < smallMap.cols; j++)
+		for (int j = 0; j < map.cols; j++)
 		{
 			cameFromMap[i][j] = intMap[i][j];
 			cameFrom.at(i).at(j) = { -1,-1 };
@@ -315,9 +310,9 @@ void pathPlanner::BFS(pair start, pair goal)
 void pathPlanner::GBFS(pair startPair, pair goalPair)
 {
 
-	for (int i = 0; i < smallMap.rows; i++)
+	for (int i = 0; i < map.rows; i++)
 	{
-		for (int j = 0; j < smallMap.cols; j++)
+		for (int j = 0; j < map.cols; j++)
 		{
 			cameFromMap[i][j] = intMap[i][j];
 			cameFrom.at(i).at(j) = { -1,-1 };
@@ -410,7 +405,6 @@ void pathPlanner::GBFS(pair startPair, pair goalPair)
 				else if (j > temp.x)
 					std::cout << '<';
 			}
-			//std::cout << char(cameFromMap[i][j] % 8 + '2');
 		}
 		std::cout << std::endl;
 	}
@@ -420,9 +414,9 @@ void pathPlanner::AStar(pair startPair, pair goalPair)
 {
 	double costSoFar[ROW][COL];
 
-	for (int i = 0; i < smallMap.rows; i++)
+	for (int i = 0; i < map.rows; i++)
 	{
-		for (int j = 0; j < smallMap.cols; j++)
+		for (int j = 0; j < map.cols; j++)
 		{
 			cameFromMap[i][j] = intMap[i][j];
 
@@ -536,7 +530,7 @@ void pathPlanner::AStar(pair startPair, pair goalPair)
 
 
 
-//
+//Get Planned Path
 std::deque<pair> pathPlanner::getPath(pair start, pair goal)
 {
 	pair current = goal;
@@ -570,17 +564,16 @@ void pathPlanner::drawPath(pair start, pair goal)
 
 	//Goal
 	mapCopy.at<cv::Vec3b>(goal.y, goal.x) = cv::Vec3b(255, 0, 0);
-	cv::resize(mapCopy, mapCopy, cv::Size(), 8, 8, cv::INTER_NEAREST);
 }
 
 
-//MISC
+//Critical Points
 void pathPlanner::AGP()
 {
 
-
-	//Brushfire - With openCV
-	cv::Mat im_brushfire = smallMap.clone();
+	///Brushfire
+	cv::Mat im_brushfire;
+	cv::cvtColor(map, im_brushfire, CV_BGR2GRAY);
 
 	int valueChanged = true;
 	int counter = 0;
@@ -639,13 +632,12 @@ void pathPlanner::AGP()
 		counter += offset;
 	}
 
-	//Finds local minimas
+	///Finds local maximas
 	cv::Mat maxims(im_brushfire.size(), im_brushfire.type()); // container for all local maximums
-	cv::dilate(im_brushfire, maxims, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(COL / THRESHOLD, ROW / THRESHOLD)));
+	cv::dilate(im_brushfire, maxims, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(double(COL / THRESHOLD), double(ROW / THRESHOLD))));
 	cv::compare(im_brushfire, maxims, points, CV_CMP_GE);
 
-	mapCopy = points;
-
+	///Sweeps to find centers of local maximas
 	std::vector<pair> Highest1;
 	std::vector<pair> Highest2;
 
@@ -660,7 +652,7 @@ void pathPlanner::AGP()
 		{
 			if (points.at<uchar>(i, j) == 0 && bar.at(j).seen)
 			{
-				if(bar.at(j).amount>1)
+				if (bar.at(j).amount > 1)
 					bar.at(j).pairs.y -= (bar.at(j).amount / 2);
 				Highest1.push_back(bar.at(j).pairs);
 				bar.at(j).seen = false;
@@ -683,7 +675,6 @@ void pathPlanner::AGP()
 			}
 		}
 	}
-
 
 	bar.clear();
 	bar.resize(map.rows);
@@ -719,6 +710,7 @@ void pathPlanner::AGP()
 		}
 	}
 
+	///Find intersections
 	cv::cvtColor(points, points, CV_GRAY2BGR);
 	for (size_t i = 0; i < Highest1.size(); i++)
 	{
@@ -728,196 +720,262 @@ void pathPlanner::AGP()
 	for (size_t i = 0; i < Highest2.size(); i++)
 	{
 		//std::cout << Highest.at(i).x << " " << Highest.at(i).y << std::endl;
-		if (points.at<cv::Vec3b>(Highest2.at(i).y, Highest2.at(i).x)== cv::Vec3b(0, 0, 255))
+		if (points.at<cv::Vec3b>(Highest2.at(i).y, Highest2.at(i).x) == cv::Vec3b(0, 0, 255))
 		{
 			points.at<cv::Vec3b>(Highest2.at(i).y, Highest2.at(i).x) = cv::Vec3b(0, 255, 0);
 		}
 		else
-			points.at<cv::Vec3b>(Highest2.at(i).y, Highest2.at(i).x) = cv::Vec3b(255,0, 0);
+			points.at<cv::Vec3b>(Highest2.at(i).y, Highest2.at(i).x) = cv::Vec3b(255, 0, 0);
 	}
 
-	map = im_brushfire.clone();
+	/// reduce clusters of intersections
+	for (int i = 0; i < map.rows; i++)
+	{
+		for (int j = 0; j < map.cols; j++)
+		{
 
+			if (points.at<cv::Vec3b>(i, j) == cv::Vec3b(0, 255, 0))
+			{
+				for (int k = 0; k < 8; k++)
+				{
+
+					pair neighbour;
+					if (k == 0)
+						neighbour = { j, i - 1 };//N
+					else if (k == 1)
+						neighbour = { j + 1, i };//E
+					else if (k == 2)
+						neighbour = { j, i + 1 };//S
+					else if (k == 3)
+						neighbour = { j - 1, i };//W
+					else if (k == 4)
+						neighbour = { j + 1, i - 1 };//NE
+					else if (k == 5)
+						neighbour = { j + 1, i + 1 };//SE
+					else if (k == 6)
+						neighbour = { j - 1, i + 1 };//SW
+					else if (k == 7)
+						neighbour = { j - 1, i - 1 };//NW
+
+					if (neighbour.x < 0 || neighbour.y < 0 || neighbour.x >= COL || neighbour.y >= ROW)
+						continue;
+
+					if (points.at<cv::Vec3b>(neighbour.y, neighbour.x) == cv::Vec3b(0, 255, 0))
+					{
+						points.at<cv::Vec3b>(neighbour.y, neighbour.x) = cv::Vec3b(255, 255, 0);
+					}
+
+				}
+
+			}
+		}
+	}
+
+	/// add critical maximas
+	for (int i = 0; i < map.rows; i++)
+	{
+		for (int j = 0; j < map.cols; j++)
+		{
+			if (points.at<cv::Vec3b>(i, j) == cv::Vec3b(0, 255, 0))
+			{
+				criticalPoints.push_back({j,i});
+			}
+		}
+	}
+
+	//cv::cvtColor(im_brushfire, im_brushfire, CV_GRAY2BGR);
+	im_brushfire = map.clone();
+
+	for (size_t i = 0; i < criticalPoints.size(); i++)
+	{
+		im_brushfire.at<cv::Vec3b>(criticalPoints.at(i).y, criticalPoints.at(i).x) = cv::Vec3b(0, 255, 0);
+	}
+	mapCopy = im_brushfire.clone();
 }
 
-
-void pathPlanner::doBrushfire()
+std::deque<pair> pathPlanner::getCriticalPoints()
 {
-	// map
-
-
-
-
-	char charMap[ROW][COL];
-
-	//        std::cout << smallMap.rows << ":" << smallMap.cols << std::endl;
-
-	for (int i = 0; i < smallMap.rows; i++)
-	{
-		for (int j = 0; j < smallMap.cols; j++)
-		{
-			if (smallMap.at<uchar>(i, j) == 0)
-				charMap[i][j] = '1';
-			else
-				charMap[i][j] = '0';
-		}
-	}
-
-
-
-	////Check before Brushfire
-	//for (int i = 0; i < smallMap.rows; i++)
-	//{
-	//	for (int j = 0; j < smallMap.cols; j++)
-	//	{
-	//		std::cout << charMap[i][j];
-	//	}
-	//	std::cout << std::endl;
-	//}
-
-	//        std::cout << "Linje 42" << std::endl;
-
-			//Brushfire
-	int valueChanged = true;
-	int counter = 0;
-	while (valueChanged)
-	{
-		valueChanged = false;
-		counter++;
-
-		for (int i = 0; i < smallMap.rows; i++) //Rows
-		{
-			for (int j = 0; j < smallMap.cols; j++) //Columns
-			{
-				if (charMap[i][j] - '0' == counter)
-				{
-					if (i - 1 >= 0) //Checks out-of-bounds
-					{
-						if (charMap[i - 1][j] - '0' == 0) //Change value to the left
-						{
-							valueChanged = true;
-							charMap[i - 1][j] = '0' + counter + 1;
-						}
-					}
-
-					if (i + 1 <= smallMap.rows) //Checks out-of-bounds
-					{
-						if (charMap[i + 1][j] - '0' == 0) //Change value to the right
-						{
-							valueChanged = true;
-							charMap[i + 1][j] = '0' + counter + 1;
-						}
-					}
-
-					if (j - 1 >= 0) //Checks out-of-bounds
-					{
-						if (charMap[i][j - 1] - '0' == 0) //Change value above
-						{
-							valueChanged = true;
-							charMap[i][j - 1] = '0' + counter + 1;
-						}
-					}
-
-					if (j + 1 <= smallMap.cols) //Checks out-of-bounds
-					{
-						if (charMap[i][j + 1] - '0' == 0) //Change value below
-						{
-							valueChanged = true;
-							charMap[i][j + 1] = '0' + counter + 1;
-						}
-					}
-
-				}
-			}
-		}
-	}
-
-
-	for (int i = 0; i < smallMap.rows; i++)
-	{
-		for (int j = 0; j < smallMap.cols; j++)
-		{
-			std::cout << charMap[i][j];
-		}
-		std::cout << std::endl;
-	}
-
-	std::cout << "Counter " << counter << std::endl;
-
-
-
-	//Brushfire - With openCV
-	cv::Mat im_brushfire = smallMap.clone();
-
-	valueChanged = true;
-	counter = 0;
-	int offset = 18;
-	while (valueChanged)
-	{
-		valueChanged = false;
-
-
-		for (int i = 0; i < smallMap.rows; i++) //Rows
-		{
-			for (int j = 0; j < smallMap.cols; j++) //Columns
-			{
-				if (im_brushfire.at<uchar>(i, j) == counter)
-				{
-					if (i - 1 >= 0) //Checks out-of-bounds
-					{
-						if (im_brushfire.at<uchar>(i - 1, j) == 255) //Change value to the left
-						{
-							valueChanged = true;
-							im_brushfire.at<uchar>(i - 1, j) = counter + offset;
-						}
-					}
-
-					if (i + 1 < smallMap.rows) //Checks out-of-bounds
-					{
-						if (im_brushfire.at<uchar>(i + 1, j) == 255) //Change value to the right
-						{
-							valueChanged = true;
-							im_brushfire.at<uchar>(i + 1, j) = counter + offset;
-						}
-					}
-
-					if (j - 1 >= 0) //Checks out-of-bounds
-					{
-						if (im_brushfire.at<uchar>(i, j - 1) == 255) //Change value above
-						{
-							valueChanged = true;
-							im_brushfire.at<uchar>(i, j - 1) = counter + offset;
-						}
-					}
-
-					if (j + 1 < smallMap.cols) //Checks out-of-bounds
-					{
-						if (im_brushfire.at<uchar>(i, j + 1) == 255) //Change value below
-						{
-							valueChanged = true;
-							im_brushfire.at<uchar>(i, j + 1) = counter + offset;
-						}
-					}
-
-				}
-			}
-		}
-
-		counter += offset;
-	}
-
-	//cv::cvtColor(im_brushfire, im_brushfire, CV_GRAY2RGB);
-
-	//for (int i = 0; i < smallMap.rows; i++)
-	//{
-	//	for (int j = 0; j < smallMap.cols; j++)
-	//	{
-	//		if (im_brushfire.at<cv::Vec3b>(i, j)[1] > 120)
-	//			im_brushfire.at<cv::Vec3b>(i, j)= cv::Vec3b(0, 0, 255);
-	//	}
-	//}
-	cv::resize(im_brushfire, im_brushfire, cv::Size(), 8, 8, cv::INTER_NEAREST);
-	map = im_brushfire.clone();
-
+	return criticalPoints;
 }
+
+
+//void pathPlanner::doBrushfire()
+//{
+//	// map
+//
+//
+//
+//
+//	char charMap[ROW][COL];
+//
+//	//        std::cout << smallMap.rows << ":" << smallMap.cols << std::endl;
+//
+//	for (int i = 0; i < smallMap.rows; i++)
+//	{
+//		for (int j = 0; j < smallMap.cols; j++)
+//		{
+//			if (smallMap.at<uchar>(i, j) == 0)
+//				charMap[i][j] = '1';
+//			else
+//				charMap[i][j] = '0';
+//		}
+//	}
+//
+//
+//
+//	////Check before Brushfire
+//	//for (int i = 0; i < smallMap.rows; i++)
+//	//{
+//	//	for (int j = 0; j < smallMap.cols; j++)
+//	//	{
+//	//		std::cout << charMap[i][j];
+//	//	}
+//	//	std::cout << std::endl;
+//	//}
+//
+//	//        std::cout << "Linje 42" << std::endl;
+//
+//			//Brushfire
+//	int valueChanged = true;
+//	int counter = 0;
+//	while (valueChanged)
+//	{
+//		valueChanged = false;
+//		counter++;
+//
+//		for (int i = 0; i < smallMap.rows; i++) //Rows
+//		{
+//			for (int j = 0; j < smallMap.cols; j++) //Columns
+//			{
+//				if (charMap[i][j] - '0' == counter)
+//				{
+//					if (i - 1 >= 0) //Checks out-of-bounds
+//					{
+//						if (charMap[i - 1][j] - '0' == 0) //Change value to the left
+//						{
+//							valueChanged = true;
+//							charMap[i - 1][j] = '0' + counter + 1;
+//						}
+//					}
+//
+//					if (i + 1 <= smallMap.rows) //Checks out-of-bounds
+//					{
+//						if (charMap[i + 1][j] - '0' == 0) //Change value to the right
+//						{
+//							valueChanged = true;
+//							charMap[i + 1][j] = '0' + counter + 1;
+//						}
+//					}
+//
+//					if (j - 1 >= 0) //Checks out-of-bounds
+//					{
+//						if (charMap[i][j - 1] - '0' == 0) //Change value above
+//						{
+//							valueChanged = true;
+//							charMap[i][j - 1] = '0' + counter + 1;
+//						}
+//					}
+//
+//					if (j + 1 <= smallMap.cols) //Checks out-of-bounds
+//					{
+//						if (charMap[i][j + 1] - '0' == 0) //Change value below
+//						{
+//							valueChanged = true;
+//							charMap[i][j + 1] = '0' + counter + 1;
+//						}
+//					}
+//
+//				}
+//			}
+//		}
+//	}
+//
+//
+//	for (int i = 0; i < smallMap.rows; i++)
+//	{
+//		for (int j = 0; j < smallMap.cols; j++)
+//		{
+//			std::cout << charMap[i][j];
+//		}
+//		std::cout << std::endl;
+//	}
+//
+//	std::cout << "Counter " << counter << std::endl;
+//
+//
+//
+//	//Brushfire - With openCV
+//	cv::Mat im_brushfire = smallMap.clone();
+//
+//	valueChanged = true;
+//	counter = 0;
+//	int offset = 18;
+//	while (valueChanged)
+//	{
+//		valueChanged = false;
+//
+//
+//		for (int i = 0; i < smallMap.rows; i++) //Rows
+//		{
+//			for (int j = 0; j < smallMap.cols; j++) //Columns
+//			{
+//				if (im_brushfire.at<uchar>(i, j) == counter)
+//				{
+//					if (i - 1 >= 0) //Checks out-of-bounds
+//					{
+//						if (im_brushfire.at<uchar>(i - 1, j) == 255) //Change value to the left
+//						{
+//							valueChanged = true;
+//							im_brushfire.at<uchar>(i - 1, j) = counter + offset;
+//						}
+//					}
+//
+//					if (i + 1 < smallMap.rows) //Checks out-of-bounds
+//					{
+//						if (im_brushfire.at<uchar>(i + 1, j) == 255) //Change value to the right
+//						{
+//							valueChanged = true;
+//							im_brushfire.at<uchar>(i + 1, j) = counter + offset;
+//						}
+//					}
+//
+//					if (j - 1 >= 0) //Checks out-of-bounds
+//					{
+//						if (im_brushfire.at<uchar>(i, j - 1) == 255) //Change value above
+//						{
+//							valueChanged = true;
+//							im_brushfire.at<uchar>(i, j - 1) = counter + offset;
+//						}
+//					}
+//
+//					if (j + 1 < smallMap.cols) //Checks out-of-bounds
+//					{
+//						if (im_brushfire.at<uchar>(i, j + 1) == 255) //Change value below
+//						{
+//							valueChanged = true;
+//							im_brushfire.at<uchar>(i, j + 1) = counter + offset;
+//						}
+//					}
+//
+//				}
+//			}
+//		}
+//
+//		counter += offset;
+//	}
+//
+//	//cv::cvtColor(im_brushfire, im_brushfire, CV_GRAY2RGB);
+//
+//	//for (int i = 0; i < smallMap.rows; i++)
+//	//{
+//	//	for (int j = 0; j < smallMap.cols; j++)
+//	//	{
+//	//		if (im_brushfire.at<cv::Vec3b>(i, j)[1] > 120)
+//	//			im_brushfire.at<cv::Vec3b>(i, j)= cv::Vec3b(0, 0, 255);
+//	//	}
+//	//}
+//	cv::resize(im_brushfire, im_brushfire, cv::Size(), 8, 8, cv::INTER_NEAREST);
+//	map = im_brushfire.clone();
+//
+//}
 
