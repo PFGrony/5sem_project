@@ -1,12 +1,12 @@
+#include "mapPlanning.h"
 #include <vector>
 #include <iostream>
 #include <iomanip>
 #include <algorithm>
-#include <fstream>
+#include <list>
+#include <queue>
 
 #pragma once
-
-#define numberOfRooms 19
 
 using namespace std;
 
@@ -19,17 +19,24 @@ struct QlPoints
 struct state
 {
 	vector<state *> possibleStates;
+	vector<int> cost;
 	QlPoints posStates;
 	int roomNumber;
-	bool unexplored;
 };
 
 struct moves
 {
 	state * s;
 	int a;
+	int battery;
 };
 
+struct valueState
+{
+	int state;
+	int action;
+	double value;
+};
 
 class QLearning
 {
@@ -44,10 +51,21 @@ public:
 	void printBestActions();
 
 	void loadTestWorld();
-private:
-	void saveaiTable();
+	void importMap(vector<paths> pathVec, int rooms);
 
+	void setE(int x);
+	void setDiscountRate(double x);
+	void setLearningRate(double x);
+
+	void printAiList();
+
+	int getBestSize();
+private:
 	void calculateaiTable();
+
+	void setAiList();
+	void insertValueAiList(int room, int state, int action, double value);
+	double getValueAiList(int room, int state, int action);
 
 	void loadBigWorld();
 
@@ -57,8 +75,6 @@ private:
 	int getReward(state* s, int a);
 	int getNextAction(state* s);
 
-	int getMaxAction(state* s);
-
 	int getNextTableAction(state * s);
 
 	double learningRate;
@@ -66,16 +82,31 @@ private:
 
 	double theta;
 
+	int runs;
+
 	int e;
 
-	int tMax;
+	int numberOfRooms;
+	int startingRoom;
+	int maxCost;
+
+	int statesUsed;
 
 	int iteration;
 
 	vector<state> allStates;
 	vector<moves> bestActions;
-	double aiTable[numberOfRooms * 2][numberOfRooms * 2] = { };
+	vector<bool> worldUnExp;
+
+	int numberOfMarbles;
+	int finalMarblesFound;
+	vector<int> marbles;
+
+	int batteryStart;
+
+	list<list<valueState>*> aiList;
+
+	//double aiTable[320][10] = { };
 	bool hasRun;
 	bool test;
 };
-
