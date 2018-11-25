@@ -151,6 +151,11 @@ void mapPlanning::findCriticalPoints()
 	cv::dilate(im_brushfire, maxims, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(double(map.cols / THRESHOLD), double(map.rows / THRESHOLD))));
 	cv::compare(im_brushfire, maxims, points, CV_CMP_GE);
 
+	
+	
+	
+	
+	
 	///Sweeps to find centers of local maximas
 	std::vector<coordinate> Highest1;
 	std::vector<coordinate> Highest2;
@@ -298,6 +303,49 @@ void mapPlanning::findCriticalPoints()
 		}
 	}
 
+/* 		points.convertTo(points, CV_8U);
+	bitwise_and(points, points, points);
+
+	std::vector<std::vector<cv::Point>> contours;
+	std::vector<cv::Vec4i> hierarchy;
+	cv::findContours(points, contours, hierarchy,
+		CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
+
+	cv::cvtColor(points, points, CV_GRAY2BGR);
+	for (int contour = 0; (contour < contours.size()); contour++)
+	{
+		cv::Scalar colour(rand() & 0xFF, rand() & 0xFF, rand() & 0xFF);
+		cv::drawContours(points, contours, contour, colour,
+			CV_FILLED, 8, hierarchy);
+	}
+
+	std::vector<cv::Point> liste;
+
+
+	for (size_t i = 0; i < contours.size(); i++)
+	{
+		cv::Point temp = cv::Point(0, 0);
+		for (size_t j = 0; j < contours.at(i).size(); j++)
+		{
+			temp += contours.at(i).at(j);
+			std::cout << contours.at(i).at(j) << std::endl;
+
+			//points.at<cv::Vec3b>(contours.at(i).at(j).y, contours.at(i).at(j).x) = cv::Vec3b(255, 255, 255);
+		}
+		
+		temp.x = int(temp.x/contours.at(i).size());
+		temp.y = int(temp.y/contours.at(i).size());
+		std::cout <<"result: "<< temp << std::endl;
+		liste.push_back(temp);
+	}
+	mapCopy=map.clone();
+	for (size_t i = 0; i < liste.size(); i++)
+	{
+		//std::cout << liste.at(i) << std::endl;
+		mapCopy.at<cv::Vec3b>(liste.at(i).y, liste.at(i).x) = cv::Vec3b(0, 0, 255);
+	} */
+	
+	
 	im_brushfire = map.clone();
 
 	for (size_t i = 0; i < criticalPoints.size(); i++)
