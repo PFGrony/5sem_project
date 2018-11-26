@@ -57,7 +57,7 @@ void mapPlanning::setImgPath(string path)
 void mapPlanning::showMap()
 {
 	cv::namedWindow("Map", CV_WINDOW_FREERATIO);
-	cv::imshow("Map", mapWithPaths); 
+	cv::imshow("Map", mapWithPaths);
 	cv::waitKey(0);
 	cv::destroyWindow("Map");
 }
@@ -151,11 +151,11 @@ void mapPlanning::findCriticalPoints()
 	cv::dilate(im_brushfire, maxims, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(double(map.cols / THRESHOLD), double(map.rows / THRESHOLD))));
 	cv::compare(im_brushfire, maxims, points, CV_CMP_GE);
 
-	
-	
-	
-	
-	
+
+
+
+
+
 	///Sweeps to find centers of local maximas
 	std::vector<coordinate> Highest1;
 	std::vector<coordinate> Highest2;
@@ -303,49 +303,49 @@ void mapPlanning::findCriticalPoints()
 		}
 	}
 
-/* 		points.convertTo(points, CV_8U);
-	bitwise_and(points, points, points);
+	/* 		points.convertTo(points, CV_8U);
+		bitwise_and(points, points, points);
 
-	std::vector<std::vector<cv::Point>> contours;
-	std::vector<cv::Vec4i> hierarchy;
-	cv::findContours(points, contours, hierarchy,
-		CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
+		std::vector<std::vector<cv::Point>> contours;
+		std::vector<cv::Vec4i> hierarchy;
+		cv::findContours(points, contours, hierarchy,
+			CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
 
-	cv::cvtColor(points, points, CV_GRAY2BGR);
-	for (int contour = 0; (contour < contours.size()); contour++)
-	{
-		cv::Scalar colour(rand() & 0xFF, rand() & 0xFF, rand() & 0xFF);
-		cv::drawContours(points, contours, contour, colour,
-			CV_FILLED, 8, hierarchy);
-	}
-
-	std::vector<cv::Point> liste;
-
-
-	for (size_t i = 0; i < contours.size(); i++)
-	{
-		cv::Point temp = cv::Point(0, 0);
-		for (size_t j = 0; j < contours.at(i).size(); j++)
+		cv::cvtColor(points, points, CV_GRAY2BGR);
+		for (int contour = 0; (contour < contours.size()); contour++)
 		{
-			temp += contours.at(i).at(j);
-			std::cout << contours.at(i).at(j) << std::endl;
-
-			//points.at<cv::Vec3b>(contours.at(i).at(j).y, contours.at(i).at(j).x) = cv::Vec3b(255, 255, 255);
+			cv::Scalar colour(rand() & 0xFF, rand() & 0xFF, rand() & 0xFF);
+			cv::drawContours(points, contours, contour, colour,
+				CV_FILLED, 8, hierarchy);
 		}
-		
-		temp.x = int(temp.x/contours.at(i).size());
-		temp.y = int(temp.y/contours.at(i).size());
-		std::cout <<"result: "<< temp << std::endl;
-		liste.push_back(temp);
-	}
-	mapCopy=map.clone();
-	for (size_t i = 0; i < liste.size(); i++)
-	{
-		//std::cout << liste.at(i) << std::endl;
-		mapCopy.at<cv::Vec3b>(liste.at(i).y, liste.at(i).x) = cv::Vec3b(0, 0, 255);
-	} */
-	
-	
+
+		std::vector<cv::Point> liste;
+
+
+		for (size_t i = 0; i < contours.size(); i++)
+		{
+			cv::Point temp = cv::Point(0, 0);
+			for (size_t j = 0; j < contours.at(i).size(); j++)
+			{
+				temp += contours.at(i).at(j);
+				std::cout << contours.at(i).at(j) << std::endl;
+
+				//points.at<cv::Vec3b>(contours.at(i).at(j).y, contours.at(i).at(j).x) = cv::Vec3b(255, 255, 255);
+			}
+
+			temp.x = int(temp.x/contours.at(i).size());
+			temp.y = int(temp.y/contours.at(i).size());
+			std::cout <<"result: "<< temp << std::endl;
+			liste.push_back(temp);
+		}
+		mapCopy=map.clone();
+		for (size_t i = 0; i < liste.size(); i++)
+		{
+			//std::cout << liste.at(i) << std::endl;
+			mapCopy.at<cv::Vec3b>(liste.at(i).y, liste.at(i).x) = cv::Vec3b(0, 0, 255);
+		} */
+
+
 	im_brushfire = map.clone();
 
 	for (size_t i = 0; i < criticalPoints.size(); i++)
@@ -386,7 +386,7 @@ void mapPlanning::planMap()
 		queue<coordinate> frontier;
 		frontier.push(connectedPoints.back());
 		bool pointUnConnected = true;
-		
+
 		// first brushfire
 		while (!frontier.empty() && pointUnConnected)
 		{
@@ -398,7 +398,7 @@ void mapPlanning::planMap()
 				if (current.x == criticalPoints[i].x && current.y == criticalPoints[i].y)
 				{
 					connectedPoints.push_back(criticalPoints[i]);
-					criticalPoints.erase(criticalPoints.begin()+i);
+					criticalPoints.erase(criticalPoints.begin() + i);
 					pointUnConnected = false;
 				}
 			}
@@ -436,7 +436,7 @@ void mapPlanning::planMap()
 				}
 			}
 		}
-		
+
 		pointUnConnected = true;
 		copyIntMap = intMap;
 
@@ -467,7 +467,7 @@ void mapPlanning::planMap()
 			current = frontier.front();
 			counter = (copyIntMap[current.y][current.x]) + 1;
 			frontier.pop();
-			
+
 			if (ToDistance == 1000)
 			{
 				for (size_t i = 0; i < connectedPoints.size() - 1; i++)
@@ -475,7 +475,7 @@ void mapPlanning::planMap()
 					if (current.x == connectedPoints[i].x && current.y == connectedPoints[i].y)
 					{
 						connectionsVec.push_back(current);
-						distance = sqrt(pow(current.x - connectedPoints[i].x,2) + pow(current.y - connectedPoints[i].y,2));
+						distance = sqrt(pow(current.x - connectedPoints[i].x, 2) + pow(current.y - connectedPoints[i].y, 2));
 						ToDistance = counter * 1.5;
 					}
 				}
@@ -589,10 +589,10 @@ void mapPlanning::planPath(vector<coordinate> conVec)
 				}
 				if (breakNow)
 					break;
-				
+
 			}
-			
-			
+
+
 			if (breakNow)
 				break;
 		}
@@ -604,10 +604,7 @@ void mapPlanning::planPath(vector<coordinate> conVec)
 		{
 			mapWithPaths.at<cv::Vec3b>(path.at(i).y, path.at(i).x) = cv::Vec3b(0, 20, 255);
 		}
-		/*cv::namedWindow("Map", CV_WINDOW_FREERATIO);
-		cv::imshow("Map", mapWithPaths);
-		cv::waitKey(0);
-		cv::destroyWindow("Map");*/
+		//showMap();
 	}
 
 }

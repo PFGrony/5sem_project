@@ -3,19 +3,19 @@
 QLearning::QLearning()
 {
 	// Learning rate and discount rate determins the values of the Q(s,a)
-	learningRate = 0.70;
-	discountRate = 0.20;
+	learningRate = 0.50;
+	discountRate = 0.25;
 
 	// the threshhold
 	theta = 0.01;
-	runs = 10000;
+	runs = 1000;
 
 	// how often will we get a random move (1/e)
 	e = 10;
 
 	// the number of marbles
 	numberOfMarbles = 16;
-	batteryStart = 300;
+	batteryStart = 250;
 
 	// how many iterations did it run
 	iteration = 0;
@@ -487,37 +487,12 @@ void QLearning::loadTestWorld()
 	allStates[4].possibleStates.push_back(&allStates[3]);
 }
 
-void QLearning::importMap(vector<paths> pathVec, int rooms)
+void QLearning::importMap(vector<paths> pathVec)
 {
 	if (hasRun)
 		return;
 	else
 		hasRun = true;
-
-	numberOfRooms = rooms;
-
-	test = false;
-
-	// Create all rooms
-	for (int i = 0; i < numberOfRooms; i++)
-	{
-		allStates.push_back(state{});
-		allStates[i].roomNumber = i + 1;
-		
-	}
-
-	// add all room connections + the ability to stay in the room
-	for (int i = 0; i < numberOfRooms; i++)
-	{
-		allStates[i].cost.push_back(0);
-		allStates[i].possibleStates.push_back(&allStates[i]);
-	}
-
-	for (int i = 0; i < numberOfRooms; i++)
-	{
-		worldUnExp.push_back(bool(true));
-		marbles.push_back(0);
-	}
 
 	vector<coordinate> roomCoord;
 
@@ -544,6 +519,30 @@ void QLearning::importMap(vector<paths> pathVec, int rooms)
 			roomCoord.push_back(pathVec[j].end);
 	}
 
+	numberOfRooms = roomCoord.size();
+
+	test = false;
+
+	// Create all rooms
+	for (int i = 0; i < numberOfRooms; i++)
+	{
+		allStates.push_back(state{});
+		allStates[i].roomNumber = i + 1;
+
+	}
+
+	// add all room connections + the ability to stay in the room
+	for (int i = 0; i < numberOfRooms; i++)
+	{
+		allStates[i].cost.push_back(0);
+		allStates[i].possibleStates.push_back(&allStates[i]);
+	}
+
+	for (int i = 0; i < numberOfRooms; i++)
+	{
+		worldUnExp.push_back(bool(true));
+		marbles.push_back(0);
+	}
 	maxCost = 0;
 
 	for (int i = 0; i < roomCoord.size(); i++)
@@ -654,7 +653,7 @@ int QLearning::getReward(state * s, int a)
 	else
 	{
 		if (worldUnExp[getNextState(s, a)->roomNumber - 1])
-			return -2;
+			return 2;
 		else
 			return -5;
 	}

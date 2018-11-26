@@ -51,7 +51,7 @@ public:
 	void printBestActions();
 
 	void loadTestWorld();
-	void importMap(vector<paths> pathVec, int rooms);
+	void importMap(vector<paths> pathVec);
 
 	void setE(int x);
 	void setDiscountRate(double x);
