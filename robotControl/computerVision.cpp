@@ -201,7 +201,7 @@ void computerVision::seeCameraV2()
         //edge detection
         cv::Canny(gray, canny, 200,20);
         canny=rgb[2].clone();
-        cv::namedWindow("canny2"); cv::imshow("canny2", canny>0);
+//        cv::namedWindow("canny2"); cv::imshow("canny2", canny>0);
 
         std::vector<cv::Vec3f> circles;
 

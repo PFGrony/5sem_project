@@ -3,23 +3,30 @@
 QLearning::QLearning()
 {
 	// Learning rate and discount rate determins the values of the Q(s,a)
-	learningRate = 0.8;
-	discountRate = 0.5;
+	learningRate = 0.50;
+	discountRate = 0.25;
 
 	// the threshhold
 	theta = 0.01;
+	runs = 1000;
 
 	// how often will we get a random move (1/e)
-	e = 13;
+	e = 10;
 
-	// maximum time steps before it terminates the run
-	tMax = 100;
+	// the number of marbles
+	numberOfMarbles = 16;
+	batteryStart = 250;
 
 	// how many iterations did it run
 	iteration = 0;
+	statesUsed = 0;
 
 	// if it is false it will load the rooms
 	hasRun = false;
+
+	// init random seed
+	srand(time(NULL));
+	srand(rand() % 30 + 1);
 }
 
 QLearning::~QLearning()
@@ -28,142 +35,136 @@ QLearning::~QLearning()
 
 void QLearning::runQLearning()
 {
-	// load the rooms
-	loadRooms();
+	// load bigworld if nothing else has been loaded
+	loadBigWorld();
+	// load aiList
+	setAiList();
 	// setup all the need data types
 	double delta			= 0;
-	double tableBuffer		= 0;
-
-	vector<moves> actions;
-	vector<moves> temp(tMax);
-	bestActions = temp;
 
 	state * s;
 	state * nS;
 
-
 	int a					= 0;
 	int roomsExplored		= 0;
-	int i					= 0;
+	int marblesFound		= 0;
 	int reward				= 0;
 	int t					= 0;
+	int skalar				= 0;
+	int battery				= 0;
 
 	int aiTableState			= 0;
 	int aiTableStateAction			= 0;
 	int aiTableStateActionState			= 0;
 
+	double Qsa = 0;
+	double argmaxQsa = 0;
+	double newQsa = 0;
+
 	// Run the AI
 	do {
 		//reset delta
 		delta = 0;
-		// increase iterator
-		i++;
 		// reload maples / unexplored rooms
-		loadMaples();
+		setExploration();
 		// set starting state/room
-		s = &allStates[10];
+
+		s = &allStates[startingRoom];
+
 		// set to starting state aswell or else it crashes (??)
-		nS = &allStates[10];
+		nS = s;
+
 		// reset time
-		t = 0;
+		t++;
 		// reset the amout of rooms explored
 		roomsExplored = 0;
+		marblesFound = 0;
+		battery = batteryStart;
 
 		while (true)
 		{
-			// time of specific run increased
-			t++;
+			// Check if the state gets explored
+			if (worldUnExp[s->roomNumber - 1] && marbles[s->roomNumber - 1] == 0)
+			{
+				roomsExplored++;
+				worldUnExp[s->roomNumber - 1] = false;
+			}
 			// get action
 			a = getNextAction(s);
 			// reward for state with the action
 			reward = getReward(s, a);
-			// add to list of moves for bestActions vector
-			actions.push_back(moves{ s,a });
 			// get next state from current state and action
 			nS = getNextState(s, a);
-
+			
+			// battery update
+			if (reward == 10)
+				battery += 50;
+			battery += (s->cost[a] * -1);
 			// caculate the needed placements on the table
-			if (s->unexplored)
-				aiTableState = (s->roomNumber - 1) * 2;
-			else
-				aiTableState = (s->roomNumber - 1) * 2 + 1;
 
-			if (nS->unexplored)
-				aiTableStateAction = (nS->roomNumber - 1) * 2;
-			else
-				aiTableStateAction = (nS->roomNumber - 1) * 2 + 1;
-
-			if (getNextState(nS, getNextTableAction(nS))->unexplored)
-				aiTableStateActionState = (getNextState(nS, getMaxAction(nS))->roomNumber - 1) * 2;
-			else
-				aiTableStateActionState = (getNextState(nS, getMaxAction(nS))->roomNumber - 1) * 2 + 1;
-
-			// Save current table value
-			tableBuffer = aiTable[aiTableState][aiTableStateAction];
-
-			// Caculate Q(s,a)
-			aiTable[aiTableState][aiTableStateAction] = aiTable[aiTableState][aiTableStateAction] + learningRate * (getReward(s, a) + (discountRate * aiTable[aiTableStateActionState][aiTableStateAction]) - aiTable[aiTableState][aiTableStateAction]);
-
-			// Save biggest diffrence
-            delta = std::max(delta, (double) fabs(tableBuffer - aiTable[aiTableState][aiTableStateAction]));
-
-			// Check if the state gets explored
-			if (s->unexplored && reward == 1)
+			skalar = 0;
+			for (int i = 0; i < allStates.size(); i++)
 			{
-				roomsExplored++;
-				s->unexplored = false;
+				if (worldUnExp[i] == true)
+					skalar = skalar + 1 * pow(2, i);
 			}
 
+			Qsa = getValueAiList(s->roomNumber, skalar, a);
+
+			argmaxQsa = getValueAiList(nS->roomNumber, skalar, getNextTableAction(nS));
+
+			newQsa = Qsa + learningRate * (getReward(s, a) + (discountRate * argmaxQsa) - Qsa);
+
+			insertValueAiList(s->roomNumber, skalar, a, newQsa);
+
+			delta = std::max(delta, (double)fabs(Qsa - newQsa));
+
+			if (a == 0 && marbles[s->roomNumber - 1] != 0)
+			{
+				marblesFound++;
+				marbles[s->roomNumber - 1]--;
+			}
 			// Set current state to next state
 			s = nS;
 
 			// Terminate run if all rooms are explored or the time exceeds tMax
-			if (roomsExplored == numberOfRooms || t > tMax)
+			if (marblesFound == numberOfMarbles || battery <= 0 )
 				break;
 		}
-		// check if current run is better than best run
-		if (actions.size() < bestActions.size())
-		{
-			bestActions = actions;
-		}
-		//cout << i << ":" << delta << endl;
+		//cout << delta << endl;
 
-		// clear action vector before rerunning
-		actions.clear();
-		// Run again is delta is above theta
-	} while (delta > theta);
-	iteration = i;
+		// Run again is delta is above theta // delta > theta
+	} while (t < runs);
+
+	//cout << "Q-learning was done in " << i << " iterations." << endl;
+
+	calculateaiTable();
+}
+
+QlPoints QLearning::getPoint(int x)
+{
+	return bestActions[x].s->posStates;
 }
 
 void QLearning::printBestActions()
 {
-	cout << "Fastest path was done in " << bestActions.size() << " moves" << endl;
-	for (int i = 0; i < bestActions.size(); i++)
+	cout << "States used: " << statesUsed << endl;
+	cout << "Marbles found: " << finalMarblesFound << endl;
+	cout << "The path was done in " << bestActions.size() << " moves" << endl;
+	int length;
+	if (finalMarblesFound == numberOfMarbles)
+		length = bestActions.size();
+	else
+		length = bestActions.size() - 1;
+
+	for (int i = 0; i < length; i++)
 	{
 		if (bestActions[i].a == 0)
-			cout << "Seach in room " << bestActions[i].s->roomNumber << " \t\t" << bestActions[i].s->posStates.x << ":"<< bestActions[i].s->posStates.y << endl;
+			cout << "Seach in room " << bestActions[i].s->roomNumber << endl;
 		else
-			cout << "Move from room " << bestActions[i].s->roomNumber << " to room " << bestActions[i + 1].s->roomNumber << "\t" << bestActions[i+1].s->posStates.x << ":" << bestActions[i+1].s->posStates.y << endl;
+			cout << "Move from room " << bestActions[i].s->roomNumber << " to room " << bestActions[i + 1].s->roomNumber << endl;
+		cout << "Battery: " << bestActions[i].battery << endl;
 	}
-}
-
-void QLearning::saveaiTable()
-{
-	ofstream myfile;
-	myfile.open("aiTable.txt");
-	myfile << "s/a" << "\t";
-	for (int i = 0; i < 38; i++)
-		myfile << "Room" << ((i % 2 == 0) ? " " : "E") << ((i / 2) + 1) << "\t";
-	myfile << endl;
-
-	for (int i = 0; i < 38; i++)
-	{
-		myfile << "Room" << ((i % 2 == 0) ? " " : "E") << ((i / 2) + 1) << "\t";
-		for (int j = 0; j < 38; j++)
-			myfile << std::setprecision(4) << aiTable[j][i] << "\t";
-		myfile << endl;
-	}
-	myfile.close();
 }
 
 void QLearning::calculateaiTable()
@@ -171,65 +172,157 @@ void QLearning::calculateaiTable()
 	int t				= 0;
 	int a				= 0;
 	int roomsExplored	= 0;
+	int marblesFound	= 0;
+	int battery			= batteryStart;
 	float reward		= 0;
 	vector<moves> actions;
 
-	state * s = &allStates[10];
-	state * nS = &allStates[10];
+	state * s;
+	state * nS;
 
-	loadMaples();
+
+	s = &allStates[startingRoom];
+
+	nS = s;
+
+	setExploration();
 
 	while (true)
 	{
 		// time of specific run increased
 		t++;
+		// Check if the state gets explored
+		if (worldUnExp[s->roomNumber - 1] && marbles[s->roomNumber - 1] == 0)
+		{
+			roomsExplored++;
+			worldUnExp[s->roomNumber - 1] = false;
+		}
 		// get action
 		a = getNextTableAction(s);
 		// reward for state with the action
 		reward = getReward(s, a);
+
+		if (reward == 10)
+			battery += 50;
+		battery += (s->cost[a] * -1);
+		//
+		if (a == 0 && marbles[s->roomNumber - 1] != 0)
+		{
+			marblesFound++;
+			marbles[s->roomNumber - 1]--;
+		}
 		// add to list of moves for bestActions vector
-		actions.push_back(moves{ s,a });
+		actions.push_back(moves{ s,a,battery });
 		// get next state from current state and action
 		nS = getNextState(s, a);
-
-
-		// Check if the state gets explored
-		if (s->unexplored && reward == 1)
-		{
-			roomsExplored++;
-			s->unexplored = false;
-		}
 
 		// Set current state to next state
 		s = nS;
 
 		// Terminate run if all rooms are explored or the time exceeds tMax
-		if (roomsExplored == numberOfRooms || t > tMax)
+		if (marblesFound == numberOfMarbles || battery <= 0)
 			break;
 	}
-    bestActions = actions;
+	finalMarblesFound = marblesFound;
+	bestActions = actions;
 }
 
-QlPoints QLearning::getPoint(int x)
+void QLearning::setAiList()
 {
-    return bestActions[x].s->posStates;
+	if (aiList.empty())
+	{
+		for (int i = 0; i < allStates.size(); i++)
+			aiList.push_back(new list<valueState>);
+	}
+	else
+	{
+		for (list<list<valueState>*>::iterator it = aiList.begin(); it != aiList.end(); ++it)
+			(*it)->clear();
+	}
 }
 
-void QLearning::loadRooms()
+void QLearning::insertValueAiList(int room, int state, int action, double value)
+{
+
+	list<list<valueState>*>::iterator it = aiList.begin();
+
+	for (int i = 0; i < room - 1; i++)
+		++it;
+
+	list<valueState>::iterator it2 = (*it)->begin();
+
+	while (it2 != (*it)->end() && (*it2).state > state )
+		++it2;
+		
+	while (it2 != (*it)->end() && (*it2).state == state)
+	{
+		if ((*it2).action == action)
+		{
+			(*it2).value = value;
+			return;
+		}
+		++it2;
+	}
+
+	statesUsed++;
+
+	if (it2 == (*it)->end())
+		(*it)->push_back(valueState{ state,action,value });
+	else if ((*it2).state != state)
+		(*it)->insert(it2, valueState{ state,action,value });
+
+}
+
+double QLearning::getValueAiList(int room, int state, int action)
+{
+	list<list<valueState>*>::iterator it = aiList.begin();
+
+	for (int i = 0; i < room - 1; i++)
+		++it;
+
+	list<valueState>::iterator it2 = (*it)->begin();
+
+	while (it2 != (*it)->end() && (*it2).state > state )
+		++it2;
+	
+	while (it2 != (*it)->end() && (*it2).state == state)
+	{
+		if ((*it2).action == action)
+			return (*it2).value;
+		++it2;
+	}
+
+	return -10.0;
+}
+
+void QLearning::loadBigWorld()
 {
 	if (hasRun)
 		return;
+	else
+		hasRun = true;
+
+	numberOfRooms = 19;
+
+	test = false;
 	// Create all rooms
 	for (int i = 0; i < numberOfRooms; i++)
 	{
 		allStates.push_back(state{});
 		allStates[i].roomNumber = i + 1;
-		allStates[i].unexplored = true;
 	}
 
 	// add all room connections + the ability to stay in the room
-	for (int i = 0; i<allStates.size(); i++)
+	for (int i = 0; i< numberOfRooms; i++)
 		allStates[i].possibleStates.push_back(&allStates[i]);
+
+	for (int i = 0; i < numberOfRooms; i++)
+	{
+		worldUnExp.push_back(bool(true));
+		marbles.push_back(0);
+	}
+		
+
 
 	allStates[0].posStates.x = ((double) 67 / 8);
 	allStates[0].posStates.y = ((double)61 / 8);
@@ -348,13 +441,195 @@ void QLearning::loadRooms()
 	allStates[18].possibleStates.push_back(&allStates[15]);
 }
 
-void QLearning::loadMaples()
+void QLearning::loadTestWorld()
 {
-	// Set all rooms to unexplored
+	if (hasRun)
+		return;
+	else
+		hasRun = true;
+
+	numberOfRooms = 5;
+
+	test = true;
+
+	for (int i = 0; i < 5; i++)
+	{
+		worldUnExp.push_back(bool(true));
+	}
+
+	for (int i = 0; i < 5; i++)
+	{
+		allStates.push_back(state{});
+		allStates[i].roomNumber = i + 1;
+	}
+	
 	for (int i = 0; i < allStates.size(); i++)
 	{
-		allStates[i].unexplored = true;
+		allStates[i].possibleStates.push_back(&allStates[i]);
+		allStates[i].posStates.x = 0;
+		allStates[i].posStates.y = 0;
 	}
+		
+
+	allStates[0].possibleStates.push_back(&allStates[1]);
+	allStates[0].possibleStates.push_back(&allStates[3]);
+
+	allStates[1].possibleStates.push_back(&allStates[2]);
+	allStates[1].possibleStates.push_back(&allStates[3]);
+	allStates[1].possibleStates.push_back(&allStates[0]);
+
+	allStates[2].possibleStates.push_back(&allStates[1]);
+
+	allStates[3].possibleStates.push_back(&allStates[4]);
+	allStates[3].possibleStates.push_back(&allStates[0]);
+	allStates[3].possibleStates.push_back(&allStates[1]);
+
+	allStates[4].possibleStates.push_back(&allStates[3]);
+}
+
+void QLearning::importMap(vector<paths> pathVec)
+{
+	if (hasRun)
+		return;
+	else
+		hasRun = true;
+
+	vector<coordinate> roomCoord;
+
+	for (int j = 0;j<pathVec.size();j++)
+	{
+		bool notThere = true;
+		for (int i = 0; i < roomCoord.size(); i++)
+		{
+			if (roomCoord[i].x == pathVec[j].start.x && roomCoord[i].y == pathVec[j].start.y)
+				notThere = false;
+		}
+
+		if (notThere)
+			roomCoord.push_back(pathVec[j].start);
+
+		notThere = true;
+		for (int i = 0; i < roomCoord.size(); i++)
+		{
+			if (roomCoord[i].x == pathVec[j].end.x && roomCoord[i].y == pathVec[j].end.y)
+				notThere = false;
+		}
+
+		if (notThere)
+			roomCoord.push_back(pathVec[j].end);
+	}
+
+	numberOfRooms = roomCoord.size();
+
+	test = false;
+
+	// Create all rooms
+	for (int i = 0; i < numberOfRooms; i++)
+	{
+		allStates.push_back(state{});
+		allStates[i].roomNumber = i + 1;
+
+	}
+
+	// add all room connections + the ability to stay in the room
+	for (int i = 0; i < numberOfRooms; i++)
+	{
+		allStates[i].cost.push_back(0);
+		allStates[i].possibleStates.push_back(&allStates[i]);
+	}
+
+	for (int i = 0; i < numberOfRooms; i++)
+	{
+		worldUnExp.push_back(bool(true));
+		marbles.push_back(0);
+	}
+	maxCost = 0;
+
+	for (int i = 0; i < roomCoord.size(); i++)
+	{
+		if (roomCoord[i].x == 64 && roomCoord[i].y == 39)
+			startingRoom = i;
+
+		cout << "Node " << i+1 << "; " << roomCoord[i].x << ":" << roomCoord[i].y << endl;
+		allStates[i].posStates.x = roomCoord[i].x;
+		allStates[i].posStates.y = roomCoord[i].y;
+		for (int j = 0; j < pathVec.size(); j++)
+		{
+			if (roomCoord[i].x == pathVec[j].start.x && roomCoord[i].y == pathVec[j].start.y)
+			{
+				for (int k = 0; k < roomCoord.size(); k++)
+				{
+					if (roomCoord[k].x == pathVec[j].end.x && roomCoord[k].y == pathVec[j].end.y)
+					{
+						if (pathVec[j].cost > maxCost)
+							maxCost = pathVec[j].cost;
+
+						allStates[i].cost.push_back(pathVec[j].cost);
+						allStates[i].possibleStates.push_back(&allStates[k]);
+						allStates[k].cost.push_back(pathVec[j].cost);
+						allStates[k].possibleStates.push_back(&allStates[i]);
+						break;
+					}
+				}
+			}
+		}
+	}
+	//cout << "MaxCost: " << maxCost << endl;
+
+}
+
+void QLearning::setE(int x)
+{
+	e = x;
+}
+
+void QLearning::setDiscountRate(double x)
+{
+	discountRate = x;
+}
+
+void QLearning::setLearningRate(double x)
+{
+	learningRate = x;
+}
+
+void QLearning::printAiList()
+{
+	int counter = 0;
+	list<list<valueState>*>::iterator it = aiList.begin();
+	while (it != aiList.end())
+	{
+		list<valueState>::iterator it2 = (*it)->begin();
+		while (it2 != (*it)->end())
+		{
+			cout << "s: " << (*it2).state << "; a: " << (*it2).action << "; v: " << (*it2).value << endl;
+			++it2;
+			counter++;
+		}
+		++it;
+		cout << endl;
+	}
+	cout << "States used: " << counter << endl;
+}
+
+int QLearning::getBestSize()
+{
+	return bestActions.size();
+}
+
+void QLearning::setExploration()
+{
+	// Set all rooms to unexplored
+	for (int i = 0; i < numberOfRooms; i++)
+	{
+		worldUnExp[i] = true;
+		marbles[i] = 0;
+	}
+		
+
+	for (int i = 0; i < numberOfMarbles; i++)
+		marbles[rand() % numberOfRooms] += 1;
+
 }
 
 state * QLearning::getNextState(state * s, int a)
@@ -368,32 +643,33 @@ int QLearning::getReward(state * s, int a)
 	// Check the state and action to give the right reward: -2, -1, 0 or 1
 	if (a == 0)
 	{
-		if (s->unexplored != 0)
+		if (worldUnExp[s->roomNumber - 1])
 		{
-			return 1;
+			return 10;
 		}
 		else
-			return -2;
+			return -20;
 	}
 	else
 	{
-		if (getNextState(s, a)->unexplored != 0)
-			return 0;
+		if (worldUnExp[getNextState(s, a)->roomNumber - 1])
+			return 2;
 		else
-			return -1;
+			return -5;
 	}
 }
 
 int QLearning::getNextAction(state * s)
 {
-	int maxReward = -3;
+	int maxReward = -10000;
 	int reward;
-	int bestAction;
+
+	vector<int> vec;
 
 	// Find the best action (greedy) or do something random
 	if (rand() % e + 1 == e)
 	{
-		bestAction = rand() % s->possibleStates.size();
+		vec.push_back(rand() % s->possibleStates.size());
 	}
 	else
 	{
@@ -402,65 +678,54 @@ int QLearning::getNextAction(state * s)
 			reward = getReward(s, i);
 			if (reward > maxReward)
 			{
-				bestAction = i;
+				vec.clear();
+				vec.push_back(i);
 				maxReward = reward;
+			}
+			else if (reward == maxReward)
+			{
+				vec.push_back(i);
 			}
 		}
 	}
 
-	return bestAction;
-}
-
-int QLearning::getMaxAction(state * s)
-{
-	int maxReward = -3;
-	int bestAction = 0;
-
-	// find the best action (greedy)
-	for (int i = 0; i < s->possibleStates.size(); i++)
-	{
-		if (getReward(s, i) > maxReward)
-		{
-			bestAction = i;
-			maxReward = getReward(s, i);
-		}
-	}
-
-	return bestAction;
+	if (vec.size() == 1)
+		return vec[0];
+	else
+		return vec[rand() % vec.size()];
 }
 
 int QLearning::getNextTableAction(state * s)
 {
-	float maxReward = -100000;
-	float reward = 0;
-	int bestAction = 0;
+	double maxReward = -100000;
+	double reward = 0;
+	int skalar = 0;
 
-	int aiTableS, aiTableSA;
+	for (int i = 0; i < allStates.size(); i++)
+	{
+		if (worldUnExp[i] == true)
+			skalar = skalar + 1 * pow(2, i);
+	}
 
-	if (s->unexplored)
-		aiTableS = (s->roomNumber - 1) * 2;
-	else
-		aiTableS = (s->roomNumber - 1) * 2 + 1;
-
-	state * nS;
+	vector<int> vec;
 
 	// find the best action (greedy)
 	for (int i = 0; i < s->possibleStates.size(); i++)
 	{
-		nS = getNextState(s, i);
+		reward = getValueAiList(s->roomNumber, skalar, i);
 
-		if (nS->unexplored)
-			aiTableSA = (nS->roomNumber - 1) * 2;
-		else
-			aiTableSA = (nS->roomNumber - 1) * 2 + 1;
-
-		reward = (aiTable[aiTableS][aiTableSA]);
 		if (reward > maxReward)
 		{
-			bestAction = i;
+			vec.clear();
+			vec.push_back(i);
 			maxReward = reward;
 		}
+		else if (reward == maxReward)
+			vec.push_back(i);
 	}
 
-	return bestAction;
+	if (vec.size() == 1)
+		return vec[0];
+	else
+		return vec[rand() % vec.size()];
 }

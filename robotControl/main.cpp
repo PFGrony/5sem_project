@@ -30,8 +30,12 @@ int main()
     //Create a Gazebo World
     gazeboWorld _gazeboWorld;
 
-    //Get Gazebo World pointer
-    gazebo::transport::NodePtr node= _gazeboWorld.getNode();
+	//Get Gazebo World pointer
+	gazebo::transport::NodePtr node = _gazeboWorld.getNode();
+
+	//resets Gazebo World
+	_gazeboWorld.worldReset();
+
 
     //Camera Functions class
     computerVision cvObj;
@@ -55,20 +59,19 @@ int main()
     AI.fuzzyInit();
 
 
-    float speed = 0.0;
-    float dir = 0.0;
+    //Path planner
+    pathPlanner plan;
 
     // maple (x,y)
     double mapleX = -20.0;
     double mapleY = 0.0;
 
 
-    int doOnce = 1; //Lavet til PathPlanner - Sandsynligvis ikke brugt efter d.  7-11-2018
-    // Loop
-    while (true)
-    {
-        //Waits for 10ms in gazebo
-        gazebo::common::Time::MSleep(10);
+	// Loop
+	while (true)
+	{
+		//Waits for 10ms in gazebo
+		gazebo::common::Time::MSleep(10);
 
         //Get key input
         mutexRB.lock();
@@ -81,17 +84,17 @@ int main()
         else if(key == key_enter)
             QLcounter++;
 
-        float* lidarArray = cvObj.getLidarRange();
+		float* lidarArray = cvObj.getLidarRange();
 
-        cvObj.seeCamera();
-        cvObj.seeLidarNew();
+        cvObj.seeCameraV2();
+		cvObj.seeLidarNew();
 
-        // Robot pose in gazeboworld
-        double robX = _gazeboWorld.getXPos();
-        double robY = _gazeboWorld.getYPos();
-        double robA = _gazeboWorld.getAngle();
+		// Robot pose in gazeboworld
+		double robX = _gazeboWorld.getXPos();
+		double robY = _gazeboWorld.getYPos();
+		double robA = _gazeboWorld.getAngle();
 
-        // Template Matching
+		// Template Matching
 //        cvObj.templateMatching();
 
 
@@ -99,7 +102,6 @@ int main()
         //double imgX = (map.cols/2)+robX*5.6;
         //double imgY = (map.rows/2)-robY*5.6;
 
-       // std::cout << std::setprecision(3) << "X: " << (mapObj.getXPos() - robX) << " Y: " << (mapObj.getYPos() - robY) << " A: " << (mapObj.getAngle() - robA) << std::endl;
 
         // Ball distance
         if (cvObj.getCircleBool())
@@ -108,13 +110,14 @@ int main()
             double knownRadius = 0.5; // radius på maples
             double knownDistance = 5; // afstand fra robotens center (0,0) til maple center (5,0) i smallworld
 
-            double focalLength = (knownPixRadius * knownDistance)/knownRadius;
-            double distance = (knownRadius * focalLength)/cvObj.getRadius();
 
-            double mapleAngle = -1* cvObj.getOffset() * (1.047/320) + robA; // FOV: 1.047 rad, pixel width 320
+        cv::imshow("map",plan.getMapWave());
+	}
 
-            mapleX = distance * std::cos(mapleAngle) + robX;
-            mapleY = distance * std::sin(mapleAngle) + robY;
+	// Resets
+	_gazeboWorld.generatePose(0, 0);
+	// Make sure to shut everything down.
+	gazebo::client::shutdown();
 
             //std::cout << mapleX << " : " << mapleY << std::endl;
         }

@@ -131,11 +131,8 @@ void fuzzyController::fuzzyInit()
     mamdani->setImplication(new AlgebraicProduct);
     mamdani->setActivation(new General);
     //Path finding
-    mamdani->addRule(Rule::parse("if inAngle is left and inLeft is not close then outSteer is sharpLeft", engine));
-    mamdani->addRule(Rule::parse("if inAngle is right and inRight is not close then outSteer is sharpRight", engine));
-
-    mamdani->addRule(Rule::parse("if inAngle is left and inForward is not close then outSteer is sharpLeft", engine));
-    mamdani->addRule(Rule::parse("if inAngle is right and inForward is not close then outSteer is sharpRight", engine));
+    mamdani->addRule(Rule::parse("if inAngle is left and inLeft is not close and inForward is not close then outSteer is sharpLeft", engine));
+    mamdani->addRule(Rule::parse("if inAngle is right and inRight is not close and inForward is not close then outSteer is sharpRight", engine));
     //Steer
     mamdani->addRule(Rule::parse("if inLeft is close and inRight is not close then outSteer is sharpRight", engine));
     mamdani->addRule(Rule::parse("if inRight is close and inLeft is not close then outSteer is sharpLeft", engine));
