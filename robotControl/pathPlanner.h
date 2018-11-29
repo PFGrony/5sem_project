@@ -6,22 +6,83 @@
 #include <array>
 #include <vector>
 #include <deque>
-#include <string>
+#include <queue>
+#include <cmath>
 
-struct vertex
+
+#define THRESHOLD 4.2
+
+//Big Map
+#define ROW  80
+#define COL  120
+////Small Map
+//#define ROW  15
+//#define COL  20
+
+struct node
 {
-    int currentNode;
-    int previousNode;
     int x;
     int y;
-    int g;//distance;
-    int h;//heuristicDistance;
-    int f;
+    double g=0;//distance;
+    double h=0;//heuristicDistance;
+    double f=0;
 };
+
+struct compareHeuristic
+{
+	bool operator()(const node& a, const node& b)
+	{
+		return a.h > b.h;
+	}
+};
+
+struct compareCost
+{
+	bool operator()(const node& a, const node& b)
+	{
+		return a.f > b.f;
+	}
+};
+
+struct compare
+{
+	bool operator()(const int& a, const int& b)
+	{
+		return a > b;
+	}
+};
+
 struct pair
 {
     int x;
     int y;
+};
+
+struct barVal
+{
+	double val = -1;
+	double amount = 1;
+	pair pairs = {0,0};
+	bool seen = false;
+};
+
+struct AGPnode
+{
+	struct pairVisited
+	{
+		pair child;
+		bool visited = false;
+	};
+	pair current;
+	std::vector<pairVisited> children;
+};
+
+
+
+struct pairPair
+{
+	pair start;
+	pair goal;
 };
 
 class pathPlanner
@@ -32,35 +93,75 @@ public:
     explicit pathPlanner(std::string path);
     cv::Mat getMap();
     void doBrushfire();
-    void AStar(int goalX,int goalY);
-    void addVertex(int x, int y);
-    void wavefrontPlanner(pair start, pair goal);
-    void addAdj(std::deque<pair> &queueAdj);
+    void voronoiDiagram();
 
 
+    //Wavefront
 	cv::Mat getMapWave()
 	{
 		return mapWave;
 	}
+	cv::Mat getMapCopy()
+	{
+		return mapCopy;
+	}
     void wavefrontRoute(pair start, pair goal);
+    void wavefrontPlanner(pair start, pair goal);
     std::deque<pair> getWavefrontRoute();
     void drawWavefrontRoute(pair start,pair goal);
     void drawWavefrontBrushfire(pair start,pair goal);
 
+	//AGP
+	void AGP();
+	std::deque<pair> getCriticalPoints();
+	cv::Mat getPoints()
+	{
+		return points;
+	}
+	void AGPgraph();
+	std::vector<AGPnode> pointsTree;
+
+    //A Star
+	void pairToNode(pair var1, node &var2);
+	void AStar(pair start, pair goal);
+	void BFS(pair start, pair goal);
+	void GBFS(pair start, pair goal);
+	std::deque<pair> getPath(pair start, pair goal);
+	void drawPath(pair start, pair goal);
+	void drawAStar(pair start, pair goal);
+	void printCameFrom();
+
+
+	void drawGraph();
+	cv::Mat getAGPgraph()
+	{
+		return mapWithPaths;
+	}
+
 
 private:
-    cv::Mat smallMap=cv::imread("../robotControl/floor_plan.png",CV_LOAD_IMAGE_GRAYSCALE);
-    cv::Mat map;
-    std::vector<vertex> ballList;
+	//Init
+	cv::Mat map = cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
+	cv::Mat grayMap; //cv::imread(/*"../robotControl/*/"floor_plan.png",CV_LOAD_IMAGE_GRAYSCALE);
 
 
     //Wavefront
-    int charMap[80][120];
-    int newMap[80][120];
-    cv::Mat mapWave = cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
+    int intMap[ROW][COL];
+    int cameFromMap[ROW][COL];
+	cv::Mat mapWave = map.clone();
     std::deque<pair> routelist;
 
+	//BFS,GBFS, AStar
+	std::array<std::array<pair, COL>, ROW> cameFrom;
+	cv::Mat mapCopy;
 
+	//AGP
+	std::deque<pair> criticalPoints;
+	cv::Mat points;
+	cv::Mat mapWithPaths;
+
+	//MISC
+	std::vector<node> lister;
 };
 
 #endif // PATHPLANNER_H
