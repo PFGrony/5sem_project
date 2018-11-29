@@ -1,11 +1,6 @@
 #include "mapPlanning.h"
 
 
-
-mapPlanning::mapPlanning()
-{
-}
-
 mapPlanning::mapPlanning(std::string path)
 {
 	map = cv::imread(path, CV_LOAD_IMAGE_ANYCOLOR);

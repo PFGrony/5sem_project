@@ -96,6 +96,7 @@ void computerVision::seeLidar()
         cv::putText(im, std::to_string(secCopy) + ":" + std::to_string(nsecCopy),
                     cv::Point(10, 20), cv::FONT_HERSHEY_PLAIN, 1.0,
                     cv::Scalar(255, 0, 0));
+        cv::namedWindow("Lidar",cv::WINDOW_FREERATIO);
         cv::imshow("Lidar",im);
     }
 }
@@ -104,7 +105,8 @@ void computerVision::seeCamera()
 {
     if(cameraLock)
     {
-        cv::imshow("newCamera",matCamera);
+        cv::namedWindow("Camera",cv::WINDOW_FREERATIO);
+        cv::imshow("Camera",matCamera);
     }
 }
 
@@ -157,6 +159,7 @@ void computerVision::seeCameraV1()
         std::cout<<offset<<std::endl;
         im = im.clone();
         cv::cvtColor(im, im, CV_BGR2RGB);
+        cv::namedWindow("Camera",cv::WINDOW_FREERATIO);
         cv::imshow("Camera", im);
     }
 
@@ -168,127 +171,99 @@ void computerVision::seeCameraV2()
 {
     if(cameraLock)
     {
-        cv::Mat color;
-        color=matCamera.clone();
+        cv::Mat color=matCamera.clone();
 
-        cv::Mat rgb[3];   //destination array
-        cv::split(color,rgb);//split source
+        //        cv::Mat rgb[3];   //destination array
+        //        cv::split(color,rgb);//split source
 
-        for(int i=0;i<rgb[2].rows;i++)
+        //        for(int i=0;i<rgb[2].rows;i++)
+        //        {
+        //            for(int j=0;j<rgb[2].cols;j++)
+        //            {
+        //                if(rgb[2].at<uchar>(i,j)>10)
+        //                    rgb[2].at<uchar>(i,j)=255;
+        //            }
+        //        }
+
+        //        cv::imshow("blue.png",rgb[2]); //blue channel
+
+        cv::Mat blue=color.clone();
+
+        for(int i=0;i<blue.rows;i++)
         {
-            for(int j=0;j<rgb[2].cols;j++)
+            cv::Vec3b* pixel=blue.ptr<cv::Vec3b>(i);
+            for(int j=0;j<blue.cols;j++)
             {
-                if(rgb[2].at<uchar>(i,j)>10)
-                    rgb[2].at<uchar>(i,j)=255;
+                if(/*blue.at<cv::Vec3b>(i,j)[2]*/pixel[j][2]>10)
+                    /*blue.at<cv::Vec3b>(i,j)*/pixel[j]=cv::Vec3b(0,0,0);
+                else
+                    /*blue.at<cv::Vec3b>(i,j)*/pixel[j]=cv::Vec3b(255,0,0);
             }
         }
 
-        //Note: OpenCV uses BGR color order
-        //        cv::imshow("blue.png",rgb[2]); //blue channel
-
-
-        //                cv::namedWindow("input"); cv::imshow("input", color);
-
-
         cv::Mat gray;
         cv::cvtColor(color, gray, CV_RGB2GRAY);
+//        cv::imshow("sdf",gray);
 
-
-        cv::Mat canny;
-        //edge detection
-        cv::Canny(gray, canny, 200,20);
-        canny=rgb[2].clone();
-//        cv::namedWindow("canny2"); cv::imshow("canny2", canny>0);
+        //        cv::Mat canny;
+        ////        edge detection
+        //        cv::Canny(gray, canny, 200,20);
+        ////        canny=rgb[2].clone();
+        //        cv::namedWindow("canny2"); cv::imshow("canny2", canny>0);
 
         std::vector<cv::Vec3f> circles;
 
         // Apply the Hough Transform to find the circles
-        cv::HoughCircles( gray, circles, CV_HOUGH_GRADIENT, 1, 60, 50, 20, 1, 100 );
+        cv::HoughCircles( gray, circles, CV_HOUGH_GRADIENT, 1, gray.rows/8, 50, 20, 1, 100 );
 
-        int rad=0;
-        int newrad = 0;
-        // Draw the circles detected
+//        int rad=0;
+//        int newrad = 0;
+//        // Draw the circles detected
+//        for( size_t i = 0; i < circles.size(); i++ )
+//        {
+//            cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
+
+//            newrad = cvRound(circles[i][2]);
+
+//            //Hvad er dette kuus??
+//            if(newrad != newrad)
+//                newrad = 0;
+
+//            if (newrad > rad)
+//            {
+//                rad = newrad;
+//                offset = int(circles[i][0])-160;
+//            }
+
+//            cv::circle( color, center, 3, cv::Scalar(0,255,255), -1);
+//            cv::circle( color, center, newrad, cv::Scalar(0,0,255), 1 );
+//        }
+
+//        //Info
+//        ballRadius=rad;
+
+//        if (circles.size() > 0)
+//            circle_bool = 1;
+//        else
+//            circle_bool = 0;
+
+        /// Draw the circles detected
         for( size_t i = 0; i < circles.size(); i++ )
         {
             cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-
-            newrad = cvRound(circles[i][2]);
-
-            //Hvad er dette kuus??
-            if(newrad != newrad)
-                newrad = 0;
-
-            if (newrad > rad)
-            {
-                rad = newrad;
-                offset = int(circles[i][0])-160;
-            }
-
-            cv::circle( color, center, 3, cv::Scalar(0,255,255), -1);
-            cv::circle( color, center, newrad, cv::Scalar(0,0,255), 1 );
-        }
-
-        //Info
-        ballRadius=rad;
-
-        if (circles.size() > 0)
-            circle_bool = 1;
-        else
-            circle_bool = 0;
-
-        //        std::cout<<"Circle: "<<circle_bool<<"\toffset: "<<offset<<std::endl;
-
-        ///See circle percentage match
-
-        //        //compute distance transform:
-        //        cv::Mat dt;
-        //        cv::distanceTransform(255-(canny>0), dt, CV_DIST_L2 ,3);
-        //        //        cv::namedWindow("distance transform"); cv::imshow("distance transform", dt/255.0f);
-
-        //        // test for semi-circles:
-        //        float minInlierDist = 2.0f;
-        //        for( size_t i = 0; i < circles.size(); i++ )
-        //        {
-        //            // test inlier percentage:
-        //            // sample the circle and check for distance to the next edge
-        //            unsigned int counter = 0;
-        //            unsigned int inlier = 0;
-
-        //            cv::Point2f center((circles[i][0]), (circles[i][1]));
-        //            float radius = (circles[i][2]);
-        //            // maximal distance of inlier might depend on the size of the circle
-        //            float maxInlierDist = radius/25.0f;
-        //            if(maxInlierDist<minInlierDist)
-        //                maxInlierDist = minInlierDist;
-
-        //            //TODO: maybe paramter incrementation might depend on circle size!
-        //            for(float t =0; t<2*3.14159265359f; t+= 0.1f)
-        //            {
-        //                counter++;
-        //                float cX = radius*cos(t) + circles[i][0];
-        //                float cY = radius*sin(t) + circles[i][1];
-
-        //                if(dt.at<float>(cY,cX) < maxInlierDist)
-        //                {
-        //                    inlier++;
-        ////                    cv::circle(color, cv::Point2i(cX,cY),3, cv::Scalar(0,255,0));
-        //                }
-        ////                else
-        ////                    cv::circle(color, cv::Point2i(cX,cY),3, cv::Scalar(255,0,0));
-        //            }
-        //            std::cout << 100.0f*(float)inlier/(float)counter << " % of a circle with radius " << radius << " detected" << std::endl;
-        //        }
+            int radius = cvRound(circles[i][2]);
+            // circle center
+            cv::circle( color, center, 3, cv::Scalar(0,255,0), -1, 8, 0 );
+            // circle outline
+            cv::circle( color, center, radius, cv::Scalar(0,0,255), 3, 8, 0 );
+         }
 
 
-        cv::namedWindow("Camera"); cv::imshow("Camera", color);
+        cv::namedWindow("Camera",cv::WINDOW_FREERATIO);
+        cv::imshow("Camera", color);
 
     }
 }
-
-//void computerVision::seeCameraV3()
-//{
-//}
-
 
 void computerVision::seeLidarV1()
 {
@@ -331,6 +306,7 @@ void computerVision::seeLidarV1()
                     cv::Scalar(255, 0, 0));
 
 
+        cv::namedWindow("LIDAR",cv::WINDOW_FREERATIO);
         cv::imshow("LIDAR",im);
     }
 }
@@ -353,13 +329,13 @@ void computerVision::templateMatching()
         cv::matchTemplate( img, templ, result, matchMethod );
 
 
-//        cv::Mat dilated, thresholdedMatchingSpace,localMaxima,thresholded8bit;
-//        cv::dilate(result,dilated,cv::Mat());
-//        cv::compare(result,dilated,localMaxima,cv::CMP_EQ);
-//        double threshold=0;
-//        cv::threshold(result,thresholdedMatchingSpace,threshold,255,cv::THRESH_BINARY);
-//        thresholdedMatchingSpace.convertTo(thresholded8bit,CV_8U);
-//        cv::bitwise_and(localMaxima,thresholded8bit,localMaxima);
+        //        cv::Mat dilated, thresholdedMatchingSpace,localMaxima,thresholded8bit;
+        //        cv::dilate(result,dilated,cv::Mat());
+        //        cv::compare(result,dilated,localMaxima,cv::CMP_EQ);
+        //        double threshold=0;
+        //        cv::threshold(result,thresholdedMatchingSpace,threshold,255,cv::THRESH_BINARY);
+        //        thresholdedMatchingSpace.convertTo(thresholded8bit,CV_8U);
+        //        cv::bitwise_and(localMaxima,thresholded8bit,localMaxima);
 
 
 
@@ -381,12 +357,12 @@ void computerVision::templateMatching()
         cv::rectangle( imgDisplay, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), cv::Scalar::all(0), 2, 8, 0 );
         cv::rectangle( result, matchLoc, cv::Point( matchLoc.x + templ.cols , matchLoc.y + templ.rows ), cv::Scalar::all(0), 2, 8, 0 );
 
-//          cv::imshow("thresh",localMaxima);
+        //          cv::imshow("thresh",localMaxima);
 
 
 
         cv::imshow( "image_window", imgDisplay );
-//        cv::imshow( "result_window", result );
+        //        cv::imshow( "result_window", result );
 
 
         return;
