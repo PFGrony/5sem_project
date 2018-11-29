@@ -8,12 +8,13 @@
 //OpenCV
 #include "opencv2/opencv.hpp"
 
-//Classes
+////Classes
 #include "computerVision.h"
 #include "gazeboWorld.h"
 #include "fuzzyController.h"
-#include "generateMap.h"
 #include "pathPlanner.h"
+#include "mapPlanning.h"
+
 
 //Key constants
 const int key_left = 81;
@@ -23,133 +24,125 @@ const int key_right = 83;
 const int key_esc = 27;
 
 
+const std::string imaegePath="../robotControl/floor_plan.png";
+
 int main()
 {
-	//Creata Gazebo World
-	gazeboWorld _gazeboWorld;
 
-	//Get Gazebo World pointer
-	gazebo::transport::NodePtr node = _gazeboWorld.getNode();
+    //Creata Gazebo World
+    gazeboWorld _gazeboWorld;
 
-	//resets Gazebo World
-	_gazeboWorld.worldReset();
+    //Get Gazebo World pointer
+    gazebo::transport::NodePtr node = _gazeboWorld.getNode();
 
+    //resets Gazebo World
+    _gazeboWorld.worldReset();
 
     //Camera Functions class
     computerVision cvObj;
-
     cvObj.startCamera(node);
     cvObj.startLidar(node);
 
-	// Start AI of doom
-	fuzzyController AI;
-	AI.fuzzyInit();
+    //Start AI of doom
+    fuzzyController AI;
+    AI.fuzzyInit();
 
+    //Start Map Graph Creation
+    mapPlanning planner(imaegePath);
+    planner.calculateMap();
+    planner.showMap();
+    cv::waitKey();
 
-	float speed = 0.0;
-	float dir = 0.0;
+    float speed = 0.0;
+    float dir = 0.0;
 
-	// maple (x,y)
-	double mapleX = 1.0;
-	double mapleY = 1.0;
+    // marble (x,y)
+    double marbleX = 1.0;
+    double marbleY = 1.0;
 
+    // Loop
+    while (true)
+    {
+        //Waits for 10ms in gazebo
+        gazebo::common::Time::MSleep(10);
 
-    //Path planner
-    pathPlanner plan;
+        //Get key input
+        mutex.lock();
+        int key = cv::waitKey(1);
+        mutex.unlock();
 
-    pair start=pair{1,2};
-    pair goal=pair{60,75};
-    plan.wavefrontPlanner(start,goal);
-    plan.wavefrontRoute(start,goal);
-    plan.drawWavefrontRoute(start,goal);
+        //Checks key input
+        if (key == key_esc)
+            break;
 
-
-	// Loop
-	while (true)
-	{
-		//Waits for 10ms in gazebo
-		gazebo::common::Time::MSleep(10);
-
-		//Get key input
-		mutex.lock();
-		int key = cv::waitKey(1);
-		mutex.unlock();
-
-		//Checks key input
-		if (key == key_esc)
-			break;
-
-		float* lidarArray = cvObj.getLidarRange();
+        float* lidarArray = cvObj.getLidarRange();
 
         cvObj.seeCameraV2();
-		cvObj.seeLidarNew();
+        cvObj.seeLidarV1();
 
-		// Robot pose in gazeboworld
-		double robX = _gazeboWorld.getXPos();
-		double robY = _gazeboWorld.getYPos();
-		double robA = _gazeboWorld.getAngle();
+        // Robot pose in gazeboworld
+        double robX = _gazeboWorld.getXPos();
+        double robY = _gazeboWorld.getYPos();
+        double robA = _gazeboWorld.getAngle();
 
-		// Template Matching
+        // Template Matching
 //        cvObj.templateMatching();
 
 
-		// std::cout << std::setprecision(3) << "X: " << (mapObj.getXPos() - robX) << " Y: " << (mapObj.getYPos() - robY) << " A: " << (mapObj.getAngle() - robA) << std::endl;
+        // std::cout << std::setprecision(3) << "X: " << (mapObj.getXPos() - robX) << " Y: " << (mapObj.getYPos() - robY) << " A: " << (mapObj.getAngle() - robA) << std::endl;
 
 
-		// Ball distance
-		if (cvObj.getCircleBool())
-		{
-			double knownPixRadius = 29.0; // størrelse i pixels på maple i smallworld, når man står i starten
-			double knownRadius = 0.5; // radius på maples
-			double knownDistance = 5; // afstand fra robotens center (0,0) til maple center (5,0) i smallworld
+        // Ball distance
+        if (cvObj.getCircleBool())
+        {
+            double knownPixRadius = 29.0; // størrelse i pixels på marble i smallworld, når man står i starten
+            double knownRadius = 0.5; // radius på marbles
+            double knownDistance = 5; // afstand fra robotens center (0,0) til marble center (5,0) i smallworld
 
-			double focalLength = (knownPixRadius * knownDistance) / knownRadius;
-			double distance = (knownRadius * focalLength) / cvObj.getRadius();
+            double focalLength = (knownPixRadius * knownDistance) / knownRadius;
+            double distance = (knownRadius * focalLength) / cvObj.getRadius();
 
-			double mapleAngle = -1 * cvObj.getOffset() * (1.047 / 320) + robA; // FOV: 1.047 rad, pixel width 320
+            double marbleAngle = -1 * cvObj.getOffset() * (1.047 / 320) + robA; // FOV: 1.047 rad, pixel width 320
 
-			mapleX = distance * std::cos(mapleAngle) + robX;
-			mapleY = distance * std::sin(mapleAngle) + robY;
+            marbleX = distance * std::cos(marbleAngle) + robX;
+            marbleY = distance * std::sin(marbleAngle) + robY;
 
-			//std::cout << mapleX << " : " << mapleY << std::endl;
-		}
+            //std::cout << marbleX << " : " << marbleY << std::endl;
+        }
 
-		if (false && cvObj.getCameraLock() && cvObj.getLidarLock())
-		{
-			AI.fuzzyUpdate(lidarArray, robX, robY, robA, mapleX, mapleY);
-			// Generate a pose
-			_gazeboWorld.generatePose(AI.getSpeed(), AI.getSteer());
-		}
-		else if (true)
-		{
-			if ((key == key_up) && (speed <= 1.2f))
-				speed += 0.05;
-			else if ((key == key_down) && (speed >= -1.2f))
-				speed -= 0.05;
-			else if ((key == key_right) && (dir <= 0.4f))
-				dir += 0.05;
-			else if ((key == key_left) && (dir >= -0.4f))
-				dir -= 0.05;
-			else {
-				// slow down
-				speed *= 0.99;
-				dir *= 0.99;
-			}
-			_gazeboWorld.generatePose(speed, dir);
-		}
-		else
-		{
-			_gazeboWorld.generatePose(0, 0);
-		}
+        if (false && cvObj.getCameraLock() && cvObj.getLidarLock())
+        {
+            AI.fuzzyUpdate(lidarArray, robX, robY, robA, marbleX, marbleY);
+            // Generate a pose
+            _gazeboWorld.generatePose(AI.getSpeed(), AI.getSteer());
+        }
+        else if (true)
+        {
+            if ((key == key_up) && (speed <= 1.2f))
+                speed += 0.05;
+            else if ((key == key_down) && (speed >= -1.2f))
+                speed -= 0.05;
+            else if ((key == key_right) && (dir <= 0.4f))
+                dir += 0.05;
+            else if ((key == key_left) && (dir >= -0.4f))
+                dir -= 0.05;
+            else {
+                // slow down
+                speed *= 0.99;
+                dir *= 0.99;
+            }
+            _gazeboWorld.generatePose(speed, dir);
+        }
+        else
+        {
+            _gazeboWorld.generatePose(0, 0);
+        }
+    }
 
-
-        cv::imshow("map",plan.getMapWave());
-	}
-
-	// Resets
-	_gazeboWorld.generatePose(0, 0);
-	// Make sure to shut everything down.
-	gazebo::client::shutdown();
+    // Resets
+    _gazeboWorld.generatePose(0, 0);
+    // Make sure to shut everything down.
+    gazebo::client::shutdown();
 
 	return 0;
 }

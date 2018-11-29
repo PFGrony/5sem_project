@@ -1,7 +1,10 @@
 #include "pathPlanner.h"
 
-pathPlanner::pathPlanner()
+pathPlanner::pathPlanner(std::string path)
 {
+    smallMap=cv::imread(path,CV_LOAD_IMAGE_GRAYSCALE);
+    mapWave = cv::imread(path, CV_LOAD_IMAGE_ANYCOLOR);
+
 	for (int i = 0; i < smallMap.rows; i++)
 	{
 		for (int j = 0; j < smallMap.cols; j++)

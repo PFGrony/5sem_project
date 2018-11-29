@@ -29,10 +29,10 @@ public:
     void startLidar(gazebo::transport::NodePtr &node);
 
     void seeLidar();
-    void seeLidarNew();
+    void seeLidarV1();
 
     void seeCamera();
-    void seeCameraNew();
+    void seeCameraV1();
     void seeCameraV2();
 
     void templateMatching();

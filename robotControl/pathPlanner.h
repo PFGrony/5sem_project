@@ -6,6 +6,7 @@
 #include <array>
 #include <vector>
 #include <deque>
+#include <string>
 
 struct vertex
 {
@@ -28,7 +29,7 @@ class pathPlanner
 public:
 
 
-    pathPlanner();
+    explicit pathPlanner(std::string path);
     cv::Mat getMap();
     void doBrushfire();
     void AStar(int goalX,int goalY);

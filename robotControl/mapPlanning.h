@@ -4,8 +4,6 @@
 
 #pragma once
 
-using namespace std;
-
 #define THRESHOLD 4.3
 
 struct coordinate
@@ -19,7 +17,7 @@ struct paths
 	coordinate start;
 	coordinate end;
 	int cost;
-	deque<coordinate> path;
+    std::deque<coordinate> path;
 };
 
 struct barVal
@@ -33,31 +31,30 @@ struct barVal
 class mapPlanning
 {
 public:
-	mapPlanning();
-	mapPlanning(string path);
+    explicit mapPlanning(std::string path);
 	~mapPlanning();
 
-	void setImgPath(string path);
+    void setImgPath(std::string path);
 	void showMap();
 	void calculateMap();
 
 	int getCrits();
 	int getPathsCount();
-	vector<paths> getPathVec();
+    std::vector<paths> getPathVec();
 
 private:
 	void findCriticalPoints();
 	int critPoints;
 
 	void planMap();
-	void planPath(vector<coordinate> conVec);
+    void planPath(std::vector<coordinate> conVec);
 
 	int **intMap;
 
-	vector<coordinate> criticalPoints;
-	vector<coordinate> connectedPoints;
+    std::vector<coordinate> criticalPoints;
+    std::vector<coordinate> connectedPoints;
 
-	vector<paths> pathVec;
+    std::vector<paths> pathVec;
 
 	cv::Mat map;
 	cv::Mat grayMap;

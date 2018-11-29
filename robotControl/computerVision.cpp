@@ -2,8 +2,8 @@
 
 ///Sensor Data
 //If lock==0 data containers is empty
-static bool lidarLock=0;
-static bool cameraLock=0;
+static bool lidarLock=false;
+static bool cameraLock=false;
 //Camera
 static cv::Mat matCamera;
 //Lidar
@@ -66,7 +66,7 @@ float computerVision::getRadius()
 
 void computerVision::seeLidar()
 {
-    if(lidarLock==1)
+    if(lidarLock)
     {
         //Show Lidar camera
         cv::Mat im(400, 400, CV_8UC3);
@@ -102,16 +102,16 @@ void computerVision::seeLidar()
 
 void computerVision::seeCamera()
 {
-    if(cameraLock==1)
+    if(cameraLock)
     {
         cv::imshow("newCamera",matCamera);
     }
 }
 
 
-void computerVision::seeCameraNew()
+void computerVision::seeCameraV1()
 {
-    if(cameraLock==1)
+    if(cameraLock)
     {
 
         //int(height) 240
@@ -166,11 +166,8 @@ void computerVision::seeCameraNew()
 //Hough+Canny
 void computerVision::seeCameraV2()
 {
-    if(cameraLock==1)
+    if(cameraLock)
     {
-
-
-
         cv::Mat color;
         color=matCamera.clone();
 
@@ -207,7 +204,6 @@ void computerVision::seeCameraV2()
 
         // Apply the Hough Transform to find the circles
         cv::HoughCircles( gray, circles, CV_HOUGH_GRADIENT, 1, 60, 50, 20, 1, 100 );
-
 
         int rad=0;
         int newrad = 0;
@@ -294,10 +290,10 @@ void computerVision::seeCameraV2()
 //}
 
 
-void computerVision::seeLidarNew()
+void computerVision::seeLidarV1()
 {
 
-    if(lidarLock==1)
+    if(lidarLock)
     {
         //Show Lidar camera
         cv::Mat im(400, 400, CV_8UC3);
@@ -416,12 +412,6 @@ void computerVision::templateMatching()
 
 
 
-
-
-
-
-
-
 //Gazebo functinality
 
 void computerVision::cameraCallback(ConstImageStampedPtr &msg)
@@ -434,7 +424,7 @@ void computerVision::cameraCallback(ConstImageStampedPtr &msg)
     im = im.clone();
     cv::cvtColor(im, im, CV_BGR2RGB);
 
-    cameraLock=1;
+    cameraLock=true;
     matCamera=im.clone();
 }
 
@@ -459,7 +449,7 @@ void computerVision::lidarCallback(ConstLaserScanStampedPtr &msg)
     {
         float angle = angle_min + i * angle_increment;
         float range = std::min(float(msg->scan().ranges(i)), range_max);
-        lidarLock=1;
+        lidarLock=true;
         *(lR+i)=range;
         *(lA+i)=angle;
     }
