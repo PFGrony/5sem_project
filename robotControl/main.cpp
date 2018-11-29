@@ -24,7 +24,7 @@ const int key_right = 83;
 const int key_esc = 27;
 
 
-const std::string imaegePath="../robotControl/floor_plan.png";
+const std::string imagePath="../robotControl/floor_plan.png";
 
 int main()
 {
@@ -48,7 +48,7 @@ int main()
     AI.fuzzyInit();
 
     //Start Map Graph Creation
-    mapPlanning planner(imaegePath);
+    mapPlanning planner(imagePath);
     planner.calculateMap();
     planner.showMap();
     cv::waitKey();

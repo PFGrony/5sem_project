@@ -20,13 +20,13 @@ struct paths
     std::deque<coordinate> path;
 };
 
-struct barVal
-{
-	double val = -1;
-	double amount = 1;
-	coordinate pairs = { 0,0 };
-	bool seen = false;
-};
+//struct barVal
+//{
+//	double val = -1;
+//	double amount = 1;
+//	coordinate pairs = { 0,0 };
+//	bool seen = false;
+//};
 
 class mapPlanning
 {

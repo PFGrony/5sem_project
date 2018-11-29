@@ -6,11 +6,8 @@
 #include <array>
 #include <vector>
 #include <deque>
-#include <queue>
 #include <cmath>
-
-
-#define THRESHOLD 4.2
+#include <string>
 
 //Big Map
 #define ROW  80
@@ -58,32 +55,6 @@ struct pair
     int y;
 };
 
-struct barVal
-{
-	double val = -1;
-	double amount = 1;
-	pair pairs = {0,0};
-	bool seen = false;
-};
-
-struct AGPnode
-{
-	struct pairVisited
-	{
-		pair child;
-		bool visited = false;
-	};
-	pair current;
-	std::vector<pairVisited> children;
-};
-
-
-
-struct pairPair
-{
-	pair start;
-	pair goal;
-};
 
 class pathPlanner
 {
@@ -92,9 +63,6 @@ public:
 
     explicit pathPlanner(std::string path);
     cv::Mat getMap();
-    void doBrushfire();
-    void voronoiDiagram();
-
 
     //Wavefront
 	cv::Mat getMapWave()
@@ -111,38 +79,22 @@ public:
     void drawWavefrontRoute(pair start,pair goal);
     void drawWavefrontBrushfire(pair start,pair goal);
 
-	//AGP
-	void AGP();
-	std::deque<pair> getCriticalPoints();
-	cv::Mat getPoints()
-	{
-		return points;
-	}
-	void AGPgraph();
-	std::vector<AGPnode> pointsTree;
-
     //A Star
-	void pairToNode(pair var1, node &var2);
 	void AStar(pair start, pair goal);
 	void BFS(pair start, pair goal);
 	void GBFS(pair start, pair goal);
 	std::deque<pair> getPath(pair start, pair goal);
+
+    //MISC
+    void pairToNode(pair var1, node &var2);
 	void drawPath(pair start, pair goal);
 	void drawAStar(pair start, pair goal);
 	void printCameFrom();
 
-
-	void drawGraph();
-	cv::Mat getAGPgraph()
-	{
-		return mapWithPaths;
-	}
-
-
 private:
 	//Init
-	cv::Mat map = cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
-	cv::Mat grayMap; //cv::imread(/*"../robotControl/*/"floor_plan.png",CV_LOAD_IMAGE_GRAYSCALE);
+    cv::Mat map;
+    cv::Mat grayMap;
 
 
     //Wavefront
@@ -154,11 +106,6 @@ private:
 	//BFS,GBFS, AStar
 	std::array<std::array<pair, COL>, ROW> cameFrom;
 	cv::Mat mapCopy;
-
-	//AGP
-	std::deque<pair> criticalPoints;
-	cv::Mat points;
-	cv::Mat mapWithPaths;
 
 	//MISC
 	std::vector<node> lister;
