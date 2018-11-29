@@ -88,7 +88,6 @@ int main()
         // Template Matching
 //        cvObj.templateMatching();
 
-
         // std::cout << std::setprecision(3) << "X: " << (mapObj.getXPos() - robX) << " Y: " << (mapObj.getYPos() - robY) << " A: " << (mapObj.getAngle() - robA) << std::endl;
 
 

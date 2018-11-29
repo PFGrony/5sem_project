@@ -166,11 +166,13 @@ void computerVision::seeCameraV1()
 
 }
 
-//Hough+Canny
+//Hough
 void computerVision::seeCameraV2()
 {
+
     if(cameraLock)
     {
+        mutex.lock();
         cv::Mat color=matCamera.clone();
 
         //        cv::Mat rgb[3];   //destination array
@@ -189,15 +191,15 @@ void computerVision::seeCameraV2()
 
         cv::Mat blue=color.clone();
 
-        for(int i=0;i<blue.rows;i++)
+        for(int i=0;i<blue.rows;++i)
         {
             cv::Vec3b* pixel=blue.ptr<cv::Vec3b>(i);
-            for(int j=0;j<blue.cols;j++)
+            for(int j=0;j<blue.cols;++j)
             {
-                if(/*blue.at<cv::Vec3b>(i,j)[2]*/pixel[j][2]>10)
-                    /*blue.at<cv::Vec3b>(i,j)*/pixel[j]=cv::Vec3b(0,0,0);
+                if(pixel[j][2]>10)
+                    pixel[j]=cv::Vec3b(0,0,0);
                 else
-                    /*blue.at<cv::Vec3b>(i,j)*/pixel[j]=cv::Vec3b(255,0,0);
+                    pixel[j]=cv::Vec3b(255,0,0);
             }
         }
 
@@ -216,53 +218,42 @@ void computerVision::seeCameraV2()
         // Apply the Hough Transform to find the circles
         cv::HoughCircles( gray, circles, CV_HOUGH_GRADIENT, 1, gray.rows/8, 50, 20, 1, 100 );
 
-//        int rad=0;
-//        int newrad = 0;
-//        // Draw the circles detected
-//        for( size_t i = 0; i < circles.size(); i++ )
-//        {
-//            cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-
-//            newrad = cvRound(circles[i][2]);
-
-//            //Hvad er dette kuus??
-//            if(newrad != newrad)
-//                newrad = 0;
-
-//            if (newrad > rad)
-//            {
-//                rad = newrad;
-//                offset = int(circles[i][0])-160;
-//            }
-
-//            cv::circle( color, center, 3, cv::Scalar(0,255,255), -1);
-//            cv::circle( color, center, newrad, cv::Scalar(0,0,255), 1 );
-//        }
-
-//        //Info
-//        ballRadius=rad;
-
-//        if (circles.size() > 0)
-//            circle_bool = 1;
-//        else
-//            circle_bool = 0;
-
-        /// Draw the circles detected
+        int rad=0;
+        int newrad = 0;
+        // Draw the circles detected
         for( size_t i = 0; i < circles.size(); i++ )
         {
             cv::Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-            int radius = cvRound(circles[i][2]);
-            // circle center
-            cv::circle( color, center, 3, cv::Scalar(0,255,0), -1, 8, 0 );
-            // circle outline
-            cv::circle( color, center, radius, cv::Scalar(0,0,255), 3, 8, 0 );
-         }
 
+            newrad = cvRound(circles[i][2]);
+
+            //Hvad er dette kuus??
+            if(newrad != newrad)
+                newrad = 0;
+
+            if (newrad > rad)
+            {
+                rad = newrad;
+                offset = int(circles[i][0])-160;
+            }
+
+            cv::circle( color, center, 3, cv::Scalar(0,255,255), -1);
+            cv::circle( color, center, newrad, cv::Scalar(0,0,255), 1 );
+        }
+
+        //Info
+        ballRadius=rad;
+
+        if (circles.size() > 0)
+            circle_bool = 1;
+        else
+            circle_bool = 0;
 
         cv::namedWindow("Camera",cv::WINDOW_FREERATIO);
         cv::imshow("Camera", color);
 
     }
+
 }
 
 void computerVision::seeLidarV1()
