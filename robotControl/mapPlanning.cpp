@@ -195,7 +195,7 @@ void mapPlanning::findCriticalPoints()
 	for (size_t i = 0; i < criticalPoints.size(); i++)
 	{
 		im_brushfire.at<cv::Vec3b>(criticalPoints.at(i).y, criticalPoints.at(i).x) = cv::Vec3b(0, 255, 0);
-	}
+    }
 
 
 	mapWithCrits = im_brushfire.clone();

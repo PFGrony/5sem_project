@@ -129,7 +129,7 @@ void computerVision::seeCameraV1()
         cv::cvtColor(im, gray, cv::COLOR_BGR2GRAY);
         cv::medianBlur(gray, gray, 5);
         std::vector<cv::Vec3f> circles;
-        cv::HoughCircles(gray,circles, cv::HOUGH_GRADIENT,1,gray.rows/8,50,20,0,0);
+        cv::HoughCircles(gray,circles, cv::HOUGH_GRADIENT,1,gray.rows/8,50,20,1,100);
 
         if (circles.size() > 0)
             circle_bool = 1;
@@ -172,7 +172,6 @@ void computerVision::seeCameraV2()
 
     if(cameraLock)
     {
-        mutex.lock();
         cv::Mat color=matCamera.clone();
 
         //        cv::Mat rgb[3];   //destination array
@@ -207,16 +206,16 @@ void computerVision::seeCameraV2()
         cv::cvtColor(color, gray, CV_RGB2GRAY);
 //        cv::imshow("sdf",gray);
 
-        //        cv::Mat canny;
-        ////        edge detection
-        //        cv::Canny(gray, canny, 200,20);
-        ////        canny=rgb[2].clone();
-        //        cv::namedWindow("canny2"); cv::imshow("canny2", canny>0);
+//                cv::Mat canny;
+//        //        edge detection
+//                cv::Canny(blue, canny, 200/3,200);
+//        //        canny=rgb[2].clone();
+//                cv::namedWindow("canny2"); cv::imshow("canny2", canny);
 
         std::vector<cv::Vec3f> circles;
 
         // Apply the Hough Transform to find the circles
-        cv::HoughCircles( gray, circles, CV_HOUGH_GRADIENT, 1, gray.rows/8, 50, 20, 1, 100 );
+        cv::HoughCircles( gray, circles, CV_HOUGH_GRADIENT, 1, gray.rows/8, 200, 20, 1, 100 );
 
         int rad=0;
         int newrad = 0;

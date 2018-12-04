@@ -1,14 +1,4 @@
-#include <iostream>
-
-//Gazebo
-#include <gazebo/gazebo_client.hh>
-#include <gazebo/msgs/msgs.hh>
-#include <gazebo/transport/transport.hh>
-
-//OpenCV
-#include "opencv2/opencv.hpp"
-
-////Classes
+///Classes
 #include "computerVision.h"
 #include "gazeboWorld.h"
 #include "fuzzyController.h"
