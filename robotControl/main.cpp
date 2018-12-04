@@ -50,6 +50,11 @@ int main()
     double marbleX = 1.0;
     double marbleY = 1.0;
 
+    std::fstream fs1, fs2;
+    fs1.open ("marblePos1.txt", std::fstream::in | std::fstream::out | std::fstream::app);
+    fs2.open ("robotPos1.txt", std::fstream::in | std::fstream::out | std::fstream::app);
+    int q=0;
+    
     // Loop
     while (true)
     {
@@ -96,8 +101,16 @@ int main()
             marbleX = distance * std::cos(marbleAngle) + robX;
             marbleY = distance * std::sin(marbleAngle) + robY;
 
-            //std::cout << marbleX << " : " << marbleY << std::endl;
+//            std::cout<<q++%100<<std::endl;
+//            std::cout<<"Calculated: ("<<marbleX<<","<<marbleY<<")"<<std::endl;
+            std::cout<<"Own position: ("<<robX<<","<<robY<<")"<<std::endl;
+            std::cout<<"Angle: "<<robA<<std::endl;
+
+//            fs1 << marbleX<<","<<marbleY<< std::endl;
+//            fs2 << robX<<","<<robY<< std::endl;
         }
+
+
 
         if (false && cvObj.getCameraLock() && cvObj.getLidarLock())
         {
@@ -127,6 +140,8 @@ int main()
             _gazeboWorld.generatePose(0, 0);
         }
     }
+    fs1.close();
+    fs2.close();
 
     // Resets
     _gazeboWorld.generatePose(0, 0);
