@@ -1,9 +1,10 @@
 ///Classes
-#include "computerVision.h"
-#include "gazeboWorld.h"
-#include "fuzzyController.h"
+//#include "computerVision.h"
+//#include "gazeboWorld.h"
+//#include "fuzzyController.h"
 #include "pathPlanner.h"
-#include "mapPlanning.h"
+#include "fstream"
+//#include "mapPlanning.h"
 
 
 //Key constants
@@ -15,123 +16,95 @@ const int key_esc = 27;
 
 
 const std::string imagePath="../robotControl/floor_plan.png";
+std::fstream data;
 
+void timeMethods(pair start, pair goal);
+
+pathPlanner pathObj(imagePath);
 int main()
 {
 
-    //Creata Gazebo World
-    gazeboWorld _gazeboWorld;
+    pair start={7,7};
+    pair goal1={22,9},goal2={20,23},goal3={34,41},goal4={64,39},goal5={93,32},goal6={105,56},goal7={78,70},goal8={54,70};
 
-    //Get Gazebo World pointer
-    gazebo::transport::NodePtr node = _gazeboWorld.getNode();
 
-    //resets Gazebo World
-    _gazeboWorld.worldReset();
+//    //Test 1
 
-    //Camera Functions class
-    computerVision cvObj;
-    cvObj.startCamera(node);
-    cvObj.startLidar(node);
+//    pathObj.BFSPlan(start,goal8);
+//    pathObj.drawBrushfire();
+//    pathObj.drawPath();
+//    pathObj.viewPath();
+//    cv::waitKey();
 
-    //Start AI of doom
-    fuzzyController AI;
-    AI.fuzzyInit();
-
-    //Start Map Graph Creation
-    mapPlanning planner(imagePath);
-    planner.calculateMap();
-    planner.showMap();
+    pathObj.AStarPlan(start,goal8);
+    pathObj.drawBrushfire();
+    pathObj.drawPath();
+    pathObj.viewPath();
     cv::waitKey();
 
-    float speed = 0.0;
-    float dir = 0.0;
 
-    // marble (x,y)
-    double marbleX = 1.0;
-    double marbleY = 1.0;
+//    //Test 2
 
-    // Loop
-    while (true)
-    {
-        //Waits for 10ms in gazebo
-        gazebo::common::Time::MSleep(10);
+//    data.open ("../robotControl/timeGraph.txt", std::fstream::in | std::fstream::out | std::fstream::app);
+//    data<<"pathLenghth,AStar,BFS"<<"\n";
 
-        //Get key input
-        mutex.lock();
-        int key = cv::waitKey(1);
-        mutex.unlock();
+//    std::cout<<"Test 2"<<std::endl;
+//    for(int i=0;i<5;i++)
+//    {
+//        timeMethods(start,goal1);
+//    }
+//    for(int i=0;i<5;i++)
+//    {
+//        timeMethods(start,goal2);
+//    }
+//    for(int i=0;i<5;i++)
+//    {
+//        timeMethods(start,goal3);
+//    }
+//    for(int i=0;i<5;i++)
+//    {
+//     timeMethods(start,goal4);
+//    }
+//    for(int i=0;i<5;i++)
+//    {
+//        timeMethods(start,goal5);
+//    }
+//    for(int i=0;i<5;i++)
+//    {
+//        timeMethods(start,goal6);
+//    }
+//    for(int i=0;i<5;i++)
+//    {
+//        timeMethods(start,goal7);
+//    }
+//    for(int i=0;i<5;i++)
+//    {
+//        timeMethods(start,goal8);
+//    }
 
-        //Checks key input
-        if (key == key_esc)
-            break;
-
-        float* lidarArray = cvObj.getLidarRange();
-
-        cvObj.seeCameraV2();
-        cvObj.seeLidarV1();
-
-        // Robot pose in gazeboworld
-        double robX = _gazeboWorld.getXPos();
-        double robY = _gazeboWorld.getYPos();
-        double robA = _gazeboWorld.getAngle();
-
-        // Template Matching
-//        cvObj.templateMatching();
-
-        // std::cout << std::setprecision(3) << "X: " << (mapObj.getXPos() - robX) << " Y: " << (mapObj.getYPos() - robY) << " A: " << (mapObj.getAngle() - robA) << std::endl;
-
-
-        // Ball distance
-        if (cvObj.getCircleBool())
-        {
-            double knownPixRadius = 29.0; // størrelse i pixels på marble i smallworld, når man står i starten
-            double knownRadius = 0.5; // radius på marbles
-            double knownDistance = 5; // afstand fra robotens center (0,0) til marble center (5,0) i smallworld
-
-            double focalLength = (knownPixRadius * knownDistance) / knownRadius;
-            double distance = (knownRadius * focalLength) / cvObj.getRadius();
-
-            double marbleAngle = -1 * cvObj.getOffset() * (1.047 / 320) + robA; // FOV: 1.047 rad, pixel width 320
-
-            marbleX = distance * std::cos(marbleAngle) + robX;
-            marbleY = distance * std::sin(marbleAngle) + robY;
-
-            //std::cout << marbleX << " : " << marbleY << std::endl;
-        }
-
-        if (false && cvObj.getCameraLock() && cvObj.getLidarLock())
-        {
-            AI.fuzzyUpdate(lidarArray, robX, robY, robA, marbleX, marbleY);
-            // Generate a pose
-            _gazeboWorld.generatePose(AI.getSpeed(), AI.getSteer());
-        }
-        else if (true)
-        {
-            if ((key == key_up) && (speed <= 1.2f))
-                speed += 0.05;
-            else if ((key == key_down) && (speed >= -1.2f))
-                speed -= 0.05;
-            else if ((key == key_right) && (dir <= 0.4f))
-                dir += 0.05;
-            else if ((key == key_left) && (dir >= -0.4f))
-                dir -= 0.05;
-            else {
-                // slow down
-                speed *= 0.99;
-                dir *= 0.99;
-            }
-            _gazeboWorld.generatePose(speed, dir);
-        }
-        else
-        {
-            _gazeboWorld.generatePose(0, 0);
-        }
-    }
-
-    // Resets
-    _gazeboWorld.generatePose(0, 0);
-    // Make sure to shut everything down.
-    gazebo::client::shutdown();
+//    data.close();
 
 	return 0;
+}
+
+void timeMethods(pair start, pair goal)
+{
+    auto startT = std::chrono::high_resolution_clock::now();
+    auto finishT = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed1, elapsed2;
+
+    startT = std::chrono::high_resolution_clock::now();
+    pathObj.AStarPlan(start,goal);
+    finishT = std::chrono::high_resolution_clock::now();
+    elapsed2 = finishT - startT;
+
+    startT = std::chrono::high_resolution_clock::now();
+    pathObj.BFSPlan(start,goal);
+    finishT = std::chrono::high_resolution_clock::now();
+    elapsed1 = finishT - startT;
+
+    std::cout<<"Path length: "<<pathObj.getPathLength()<<std::endl;
+    std::cout << "A star Elapsed time: " << elapsed1.count() << " s\n";
+    std::cout << "BFS Elapsed time: " << elapsed2.count() << " s\n\n";
+    data<<pathObj.getPathLength()<<","<<elapsed1.count()<<","<< elapsed2.count()<<"\n";
 }

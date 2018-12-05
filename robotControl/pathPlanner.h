@@ -2,6 +2,7 @@
 #define PATHPLANNER_H
 
 #include "opencv2/opencv.hpp"
+#include <chrono>
 
 #include <array>
 #include <vector>
@@ -59,56 +60,46 @@ struct pair
 class pathPlanner
 {
 public:
-
-
     explicit pathPlanner(std::string path);
-    cv::Mat getMap();
+    cv::Mat getMap()
+    {
+        return map;
+    }
+    cv::Mat getMapCopy()
+    {
+        return mapCopy;
+    }
 
-    //Wavefront
-	cv::Mat getMapWave()
-	{
-		return mapWave;
-	}
-	cv::Mat getMapCopy()
-	{
-		return mapCopy;
-	}
-    void wavefrontRoute(pair start, pair goal);
-    void wavefrontPlanner(pair start, pair goal);
-    std::deque<pair> getWavefrontRoute();
-    void drawWavefrontRoute(pair start,pair goal);
-    void drawWavefrontBrushfire(pair start,pair goal);
+    std::deque<pair> AStarPlan(pair start,pair goal);
+    std::deque<pair> BFSPlan(pair start,pair goal);
+    std::deque<pair> GBFSPlan(pair start, pair goal);
+    void drawBrushfire();
+    void drawPath();
 
-    //A Star
-	void AStar(pair start, pair goal);
-	void BFS(pair start, pair goal);
-	void GBFS(pair start, pair goal);
-	std::deque<pair> getPath(pair start, pair goal);
-
-    //MISC
-    void pairToNode(pair var1, node &var2);
-	void drawPath(pair start, pair goal);
-	void drawAStar(pair start, pair goal);
-	void printCameFrom();
+    double getPathLength();
+    void brushfirePoint(pair start);
+    void viewPath();
 
 private:
 	//Init
     cv::Mat map;
     cv::Mat grayMap;
+    cv::Mat mapCopy;
+    cv::Mat brushfire;
+    double **intMap;//[ROW][COL];
+    double **cameFromMap;//[ROW][COL];
+    bool drawedBrushfire=false;
 
-
-    //Wavefront
-    int intMap[ROW][COL];
-    int cameFromMap[ROW][COL];
-	cv::Mat mapWave = map.clone();
     std::deque<pair> routelist;
-
-	//BFS,GBFS, AStar
 	std::array<std::array<pair, COL>, ROW> cameFrom;
-	cv::Mat mapCopy;
 
-	//MISC
-	std::vector<node> lister;
+    //Methods
+    std::deque<pair> getPath(pair start, pair goal);
+    void AStar(pair start, pair goal);
+    void BFS(pair start, pair goal);
+    void GBFS(pair start, pair goal);
+    void pairToNode(pair var1, node &var2);
+
 };
 
 #endif // PATHPLANNER_H

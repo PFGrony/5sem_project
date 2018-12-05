@@ -8,7 +8,8 @@ SOURCES += main.cpp \
     computerVision.cpp \
     fuzzyController.cpp \
     pathPlanner.cpp \
-    mapPlanning.cpp
+    mapPlanning.cpp \
+    wavefront.cpp
 
 #Gazebo
 PKGCONFIG += gazebo
