@@ -2,63 +2,103 @@
 #define PATHPLANNER_H
 
 #include "opencv2/opencv.hpp"
+#include <chrono>
 
 #include <array>
 #include <vector>
 #include <deque>
+#include <cmath>
+#include <string>
 
-struct vertex
+//Big Map
+#define ROW  80
+#define COL  120
+////Small Map
+//#define ROW  15
+//#define COL  20
+
+struct node
 {
-    int currentNode;
-    int previousNode;
     int x;
     int y;
-    int g;//distance;
-    int h;//heuristicDistance;
-    int f;
+    double g=0;//distance;
+    double h=0;//heuristicDistance;
+    double f=0;
 };
+
+struct compareHeuristic
+{
+	bool operator()(const node& a, const node& b)
+	{
+		return a.h > b.h;
+	}
+};
+
+struct compareCost
+{
+	bool operator()(const node& a, const node& b)
+	{
+		return a.f > b.f;
+	}
+};
+
+struct compare
+{
+	bool operator()(const int& a, const int& b)
+	{
+		return a > b;
+	}
+};
+
 struct pair
 {
     int x;
     int y;
 };
 
+
 class pathPlanner
 {
 public:
+    explicit pathPlanner(std::string path);
+    cv::Mat getMap()
+    {
+        return map;
+    }
+    cv::Mat getMapCopy()
+    {
+        return mapCopy;
+    }
 
+    std::deque<pair> AStarPlan(pair start,pair goal);
+    std::deque<pair> BFSPlan(pair start,pair goal);
+    std::deque<pair> GBFSPlan(pair start, pair goal);
+    void drawBrushfire();
+    void drawPath();
 
-    pathPlanner();
-    cv::Mat getMap();
-    void doBrushfire();
-    void AStar(int goalX,int goalY);
-    void addVertex(int x, int y);
-    void wavefrontPlanner(pair start, pair goal);
-    void addAdj(std::deque<pair> &queueAdj);
-
-
-	cv::Mat getMapWave()
-	{
-		return mapWave;
-	}
-    void wavefrontRoute(pair start, pair goal);
-    std::deque<pair> getWavefrontRoute();
-    void drawWavefrontRoute(pair start,pair goal);
-    void drawWavefrontBrushfire(pair start,pair goal);
-
+    double getPathLength();
+    void brushfirePoint(pair start);
+    void viewPath();
 
 private:
-    cv::Mat smallMap=cv::imread("../robotControl/floor_plan.png",CV_LOAD_IMAGE_GRAYSCALE);
+	//Init
     cv::Mat map;
-    std::vector<vertex> ballList;
+    cv::Mat grayMap;
+    cv::Mat mapCopy;
+    cv::Mat brushfire;
+    double **intMap;//[ROW][COL];
+    double **cameFromMap;//[ROW][COL];
+    bool drawedBrushfire=false;
 
-
-    //Wavefront
-    int charMap[80][120];
-    int newMap[80][120];
-    cv::Mat mapWave = cv::imread("../robotControl/floor_plan.png", CV_LOAD_IMAGE_ANYCOLOR);
     std::deque<pair> routelist;
+	std::array<std::array<pair, COL>, ROW> cameFrom;
 
+    //Methods
+    std::deque<pair> getPath(pair start, pair goal);
+    void AStar(pair start, pair goal);
+    void BFS(pair start, pair goal);
+    void GBFS(pair start, pair goal);
+    void pairToNode(pair var1, node &var2);
 
 };
 

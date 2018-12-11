@@ -1,19 +1,10 @@
-#include <iostream>
-
-//Gazebo
-#include <gazebo/gazebo_client.hh>
-#include <gazebo/msgs/msgs.hh>
-#include <gazebo/transport/transport.hh>
-
-//OpenCV
-#include "opencv2/opencv.hpp"
-
-//Classes
+///Classes
 #include "computerVision.h"
 #include "gazeboWorld.h"
 #include "fuzzyController.h"
 #include "generateMap.h"
 #include "QLearning.h"
+
 
 //Key constants
 const int key_left = 81;
@@ -25,21 +16,24 @@ const int key_enter = 10;
 
 static boost::mutex mutexRB;
 
+const std::string imagePath="../robotControl/floor_plan.png";
+
 int main()
 {   
     //Create a Gazebo World
     gazeboWorld _gazeboWorld;
 
-	//Get Gazebo World pointer
-	gazebo::transport::NodePtr node = _gazeboWorld.getNode();
+    //Creata Gazebo World
+    gazeboWorld _gazeboWorld;
 
-	//resets Gazebo World
-	_gazeboWorld.worldReset();
+    //Get Gazebo World pointer
+    gazebo::transport::NodePtr node = _gazeboWorld.getNode();
 
+    //resets Gazebo World
+    _gazeboWorld.worldReset();
 
     //Camera Functions class
     computerVision cvObj;
-
     cvObj.startCamera(node);
     cvObj.startLidar(node);
 
@@ -66,6 +60,7 @@ int main()
     double mapleX = -20.0;
     double mapleY = 0.0;
 
+        float* lidarArray = cvObj.getLidarRange();
 
 	// Loop
 	while (true)
@@ -87,21 +82,28 @@ int main()
 		float* lidarArray = cvObj.getLidarRange();
 
         cvObj.seeCameraV2();
-		cvObj.seeLidarNew();
+        cvObj.seeLidarV1();
 
-		// Robot pose in gazeboworld
-		double robX = _gazeboWorld.getXPos();
-		double robY = _gazeboWorld.getYPos();
-		double robA = _gazeboWorld.getAngle();
+        // Robot pose in gazeboworld
+        double robX = _gazeboWorld.getXPos();
+        double robY = _gazeboWorld.getYPos();
+        double robA = _gazeboWorld.getAngle();
 
-		// Template Matching
+        // Template Matching
 //        cvObj.templateMatching();
 
+        // std::cout << std::setprecision(3) << "X: " << (mapObj.getXPos() - robX) << " Y: " << (mapObj.getYPos() - robY) << " A: " << (mapObj.getAngle() - robA) << std::endl;
 
         //Mapping
         //double imgX = (map.cols/2)+robX*5.6;
         //double imgY = (map.rows/2)-robY*5.6;
 
+        // Ball distance
+        if (cvObj.getCircleBool())
+        {
+            double knownPixRadius = 29.0; // størrelse i pixels på marble i smallworld, når man står i starten
+            double knownRadius = 0.5; // radius på marbles
+            double knownDistance = 5; // afstand fra robotens center (0,0) til marble center (5,0) i smallworld
 
         // Ball distance
         if (cvObj.getCircleBool())
