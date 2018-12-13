@@ -12,8 +12,6 @@
 #include "computerVision.h"
 #include "gazeboWorld.h"
 #include "fuzzyController.h"
-#include "generateMap.h"
-#include "pathPlanner.h"
 
 //Key constants
 const int key_left = 81;
@@ -52,17 +50,6 @@ int main()
 	// maple (x,y)
 	double mapleX = 1.0;
 	double mapleY = 1.0;
-
-
-    //Path planner
-    pathPlanner plan;
-
-    pair start=pair{1,2};
-    pair goal=pair{60,75};
-    plan.wavefrontPlanner(start,goal);
-    plan.wavefrontRoute(start,goal);
-    plan.drawWavefrontRoute(start,goal);
-
 
 	// Loop
 	while (true)
