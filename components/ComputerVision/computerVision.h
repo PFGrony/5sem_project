@@ -20,17 +20,19 @@ public:
     float* getLidarRange();
 
     //Camera
-    cv::Mat getMatCamera();
+    std::pair<double, double> getMarblePos(std::pair<double, double> robPos,double robAngle);
+    void seeCamera();
+    void seeCameraV1();
+    void seeCameraV2();
+
     bool getCameraLock();
     bool getCircleBool();
     int getOffset();
     float getRadius();
 
+    //LIDAR
     void seeLidar();
-
-    void seeCamera();
-    void seeCameraV1();
-    void seeCameraV2();
+    void seeLidarV1();
 
     void templateMatching();
 

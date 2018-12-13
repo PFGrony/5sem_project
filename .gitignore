@@ -5,6 +5,6 @@ build-robot_control-Desktop-Debug
 
 *.user
 
-Components/build-computerVision-Desktop-Debug
-Components/build-mapPlanning-Desktop-Debug
-Components/build-pathPlanner-Desktop-Debug
+Components/build-computerVision-Desktop-Debug/
+Components/build-mapPlanning-Desktop-Debug/
+Components/build-pathPlanner-Desktop-Debug/
