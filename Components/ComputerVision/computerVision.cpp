@@ -17,9 +17,11 @@ static float *lA = lidarAngle;
 static int nsecCopy;
 static int secCopy;
 
-computerVision::computerVision()
+computerVision::computerVision(gazebo::transport::NodePtr node)
 {
     templ=cv::imread("../robotControl/circle3.png",CV_LOAD_IMAGE_ANYCOLOR);
+    startCamera(node);
+    startLidar(node);
 }
 
 // Locks
@@ -63,7 +65,7 @@ float computerVision::getRadius()
 }
 
 
-
+//Original
 void computerVision::seeLidar()
 {
     if(lidarLock)
@@ -110,7 +112,7 @@ void computerVision::seeCamera()
     }
 }
 
-
+//Modified
 void computerVision::seeCameraV1()
 {
     if(cameraLock)

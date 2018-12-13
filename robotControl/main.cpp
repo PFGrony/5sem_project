@@ -60,13 +60,13 @@ int main()
     double mapleX = -20.0;
     double mapleY = 0.0;
 
-        float* lidarArray = cvObj.getLidarRange();
+    float* lidarArray = cvObj.getLidarRange();
 
-	// Loop
-	while (true)
-	{
-		//Waits for 10ms in gazebo
-		gazebo::common::Time::MSleep(10);
+    // Loop
+    while (true)
+    {
+        //Waits for 10ms in gazebo
+        gazebo::common::Time::MSleep(10);
 
         //Get key input
         mutexRB.lock();
@@ -79,7 +79,7 @@ int main()
         else if(key == key_enter)
             QLcounter++;
 
-		float* lidarArray = cvObj.getLidarRange();
+        float* lidarArray = cvObj.getLidarRange();
 
         cvObj.seeCameraV2();
         cvObj.seeLidarV1();
@@ -90,7 +90,7 @@ int main()
         double robA = _gazeboWorld.getAngle();
 
         // Template Matching
-//        cvObj.templateMatching();
+        //        cvObj.templateMatching();
 
         // std::cout << std::setprecision(3) << "X: " << (mapObj.getXPos() - robX) << " Y: " << (mapObj.getYPos() - robY) << " A: " << (mapObj.getAngle() - robA) << std::endl;
 
@@ -105,21 +105,19 @@ int main()
             double knownRadius = 0.5; // radius på marbles
             double knownDistance = 5; // afstand fra robotens center (0,0) til marble center (5,0) i smallworld
 
-        // Ball distance
-        if (cvObj.getCircleBool())
-        {
-            double knownPixRadius = 29.0; // størrelse i pixels på maple i smallworld, når man står i starten
-            double knownRadius = 0.5; // radius på maples
-            double knownDistance = 5; // afstand fra robotens center (0,0) til maple center (5,0) i smallworld
+            // Ball distance
+            if (cvObj.getCircleBool())
+            {
+                double knownPixRadius = 29.0; // størrelse i pixels på maple i smallworld, når man står i starten
+                double knownRadius = 0.5; // radius på maples
+                double knownDistance = 5; // afstand fra robotens center (0,0) til maple center (5,0) i smallworld
 
+            }
 
-        cv::imshow("map",plan.getMapWave());
-	}
-
-	// Resets
-	_gazeboWorld.generatePose(0, 0);
-	// Make sure to shut everything down.
-	gazebo::client::shutdown();
+            // Resets
+            _gazeboWorld.generatePose(0, 0);
+            // Make sure to shut everything down.
+            gazebo::client::shutdown();
 
             //std::cout << mapleX << " : " << mapleY << std::endl;
         }
@@ -138,17 +136,17 @@ int main()
         else if(true)
         {
             if ((key == key_up) && (speed <= 1.2f))
-              speed += 0.05;
+                speed += 0.05;
             else if ((key == key_down) && (speed >= -1.2f))
-              speed -= 0.05;
+                speed -= 0.05;
             else if ((key == key_right) && (dir <= 0.4f))
-              dir += 0.05;
+                dir += 0.05;
             else if ((key == key_left) && (dir >= -0.4f))
-              dir -= 0.05;
+                dir -= 0.05;
             else {
-              // slow down
-                    speed *= 0.99;
-                    dir *= 0.99;
+                // slow down
+                speed *= 0.99;
+                dir *= 0.99;
             }
             _gazeboWorld.generatePose(speed,dir);
         }
@@ -158,11 +156,11 @@ int main()
         }
 
 
-//        if(doOnce==1)
-//        {
-//            plan.doBrushfire();
-//            doOnce=0;
-//        }
+        //        if(doOnce==1)
+        //        {
+        //            plan.doBrushfire();
+        //            doOnce=0;
+        //        }
 
     }
 

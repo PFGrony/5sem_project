@@ -1,17 +1,10 @@
-build-FuzzyLiteTest-Desktop-Debug
-build-FuzzyLiteTest-Desktop-Release
-
-build-CameraTest-Desktop-Debug
-build-CameraTest-Desktop-Release
-
-build-Test_Lidar-Desktop-Debug
-build-Test_Lidar-Desktop-Releas
-
 build-robot_control-Desktop-Release
 build-robot_control-Desktop-Release
-
-build-robotControl-Desktop-Debug/
-
-build-robot_control-Desktop-Debug/
+build-robotControl-Desktop-Debug
+build-robot_control-Desktop-Debug
 
 *.user
+
+Components/build-computerVision-Desktop-Debug
+Components/build-mapPlanning-Desktop-Debug
+Components/build-pathPlanner-Desktop-Debug

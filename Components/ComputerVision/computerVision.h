@@ -12,24 +12,21 @@ static boost::mutex mutex;
 class computerVision
 {
 public:
-    computerVision();
+    explicit computerVision(gazebo::transport::NodePtr);
 
+    //LIDAR
     bool getLidarLock();
-    bool getCameraLock();
-
-    cv::Mat getMatCamera();
     float* getLidarAngle();
     float* getLidarRange();
+
+    //Camera
+    cv::Mat getMatCamera();
+    bool getCameraLock();
     bool getCircleBool();
     int getOffset();
     float getRadius();
 
-
-    void startCamera(gazebo::transport::NodePtr &node);
-    void startLidar(gazebo::transport::NodePtr &node);
-
     void seeLidar();
-    void seeLidarV1();
 
     void seeCamera();
     void seeCameraV1();
@@ -38,10 +35,11 @@ public:
     void templateMatching();
 
 private:
+    //Gazebo
+    void startCamera(gazebo::transport::NodePtr &node);
+    void startLidar(gazebo::transport::NodePtr &node);
     static void cameraCallback(ConstImageStampedPtr &msg);
     static void lidarCallback(ConstLaserScanStampedPtr &msg);
-
-
     gazebo::transport::SubscriberPtr cameraSubscriber;
     gazebo::transport::SubscriberPtr lidarSubscriber;
 

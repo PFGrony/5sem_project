@@ -1,10 +1,6 @@
 ///Classes
-//#include "computerVision.h"
-//#include "gazeboWorld.h"
-//#include "fuzzyController.h"
 #include "pathPlanner.h"
 #include "fstream"
-//#include "mapPlanning.h"
 
 
 //Key constants
@@ -15,7 +11,7 @@ const int key_right = 83;
 const int key_esc = 27;
 
 
-const std::string imagePath="../robotControl/floor_plan.png";
+const std::string imagePath="../../maps/floor_plan.png";
 std::fstream data;
 
 void timeMethods(pair start, pair goal);
@@ -45,7 +41,7 @@ int main()
 
 //    //Test 2
 
-//    data.open ("../robotControl/timeGraph.txt", std::fstream::in | std::fstream::out | std::fstream::app);
+//    data.open ("../maps/timeGraph.txt", std::fstream::in | std::fstream::out | std::fstream::app);
 //    data<<"pathLenghth,AStar,BFS"<<"\n";
 
 //    std::cout<<"Test 2"<<std::endl;

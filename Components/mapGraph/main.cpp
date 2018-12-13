@@ -10,7 +10,7 @@ const int key_right = 83;
 const int key_esc = 27;
 
 
-const std::string imagePath="../robotControl/floor_plan.png";
+const std::string imagePath="../../maps/floor_plan.png";
 
 int main()
 {

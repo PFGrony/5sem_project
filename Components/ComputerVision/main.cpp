@@ -1,10 +1,6 @@
 ///Classes
 #include "computerVision.h"
 #include "gazeboWorld.h"
-#include "fuzzyController.h"
-#include "pathPlanner.h"
-#include "mapPlanning.h"
-
 
 //Key constants
 const int key_left = 81;
@@ -13,8 +9,7 @@ const int key_down = 84;
 const int key_right = 83;
 const int key_esc = 27;
 
-
-const std::string imagePath="../robotControl/floor_plan.png";
+const std::string imagePath="../../maps/floor_plan.png";
 
 int main()
 {
@@ -29,20 +24,9 @@ int main()
     _gazeboWorld.worldReset();
 
     //Camera Functions class
-    computerVision cvObj;
-    cvObj.startCamera(node);
-    cvObj.startLidar(node);
+    computerVision cvObj(node);
 
-    //Start AI of doom
-    fuzzyController AI;
-    AI.fuzzyInit();
-
-    //Start Map Graph Creation
-    mapPlanning planner(imagePath);
-    planner.calculateMap();
-    planner.showMap();
-    cv::waitKey();
-
+    //Control variables
     float speed = 0.0;
     float dir = 0.0;
 
@@ -50,6 +34,7 @@ int main()
     double marbleX = 1.0;
     double marbleY = 1.0;
 
+    //Data
     std::fstream fs1, fs2;
     fs1.open ("marblePos1.txt", std::fstream::in | std::fstream::out | std::fstream::app);
     fs2.open ("robotPos1.txt", std::fstream::in | std::fstream::out | std::fstream::app);
@@ -70,20 +55,12 @@ int main()
         if (key == key_esc)
             break;
 
-        float* lidarArray = cvObj.getLidarRange();
-
         cvObj.seeCameraV2();
-        cvObj.seeLidarV1();
 
         // Robot pose in gazeboworld
         double robX = _gazeboWorld.getXPos();
         double robY = _gazeboWorld.getYPos();
         double robA = _gazeboWorld.getAngle();
-
-        // Template Matching
-//        cvObj.templateMatching();
-
-        // std::cout << std::setprecision(3) << "X: " << (mapObj.getXPos() - robX) << " Y: " << (mapObj.getYPos() - robY) << " A: " << (mapObj.getAngle() - robA) << std::endl;
 
 
         // Ball distance
@@ -101,44 +78,32 @@ int main()
             marbleX = distance * std::cos(marbleAngle) + robX;
             marbleY = distance * std::sin(marbleAngle) + robY;
 
-//            std::cout<<q++%100<<std::endl;
-//            std::cout<<"Calculated: ("<<marbleX<<","<<marbleY<<")"<<std::endl;
+            //            std::cout<<q++%100<<std::endl;
+            //            std::cout<<"Calculated: ("<<marbleX<<","<<marbleY<<")"<<std::endl;
             std::cout<<"Own position: ("<<robX<<","<<robY<<")"<<std::endl;
             std::cout<<"Angle: "<<robA<<std::endl;
 
-//            fs1 << marbleX<<","<<marbleY<< std::endl;
-//            fs2 << robX<<","<<robY<< std::endl;
+            //            fs1 << marbleX<<","<<marbleY<< std::endl;
+            //            fs2 << robX<<","<<robY<< std::endl;
         }
 
 
 
-        if (false && cvObj.getCameraLock() && cvObj.getLidarLock())
-        {
-            AI.fuzzyUpdate(lidarArray, robX, robY, robA, marbleX, marbleY);
-            // Generate a pose
-            _gazeboWorld.generatePose(AI.getSpeed(), AI.getSteer());
+        if ((key == key_up) && (speed <= 1.2f))
+            speed += 0.05;
+        else if ((key == key_down) && (speed >= -1.2f))
+            speed -= 0.05;
+        else if ((key == key_right) && (dir <= 0.4f))
+            dir += 0.05;
+        else if ((key == key_left) && (dir >= -0.4f))
+            dir -= 0.05;
+        else {
+            // slow down
+            speed *= 0.99;
+            dir *= 0.99;
         }
-        else if (true)
-        {
-            if ((key == key_up) && (speed <= 1.2f))
-                speed += 0.05;
-            else if ((key == key_down) && (speed >= -1.2f))
-                speed -= 0.05;
-            else if ((key == key_right) && (dir <= 0.4f))
-                dir += 0.05;
-            else if ((key == key_left) && (dir >= -0.4f))
-                dir -= 0.05;
-            else {
-                // slow down
-                speed *= 0.99;
-                dir *= 0.99;
-            }
-            _gazeboWorld.generatePose(speed, dir);
-        }
-        else
-        {
-            _gazeboWorld.generatePose(0, 0);
-        }
+        _gazeboWorld.generatePose(speed, dir);
+
     }
     fs1.close();
     fs2.close();
@@ -148,5 +113,5 @@ int main()
     // Make sure to shut everything down.
     gazebo::client::shutdown();
 
-	return 0;
+    return 0;
 }
