@@ -99,8 +99,8 @@ int main()
 		// Ball distance
 		if (cvObj.getCircleBool())
 		{
-			double knownPixRadius = 29.0; // størrelse i pixels på maple i smallworld, når man står i starten
-			double knownRadius = 0.5; // radius på maples
+			double knownPixRadius = 29.0; // stÃ¸rrelse i pixels pÃ¥ maple i smallworld, nÃ¥r man stÃ¥r i starten
+			double knownRadius = 0.5; // radius pÃ¥ maples
 			double knownDistance = 5; // afstand fra robotens center (0,0) til maple center (5,0) i smallworld
 
 			double focalLength = (knownPixRadius * knownDistance) / knownRadius;
