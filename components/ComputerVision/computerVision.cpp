@@ -241,7 +241,7 @@ void computerVision::seeCameraV2()
         std::vector<cv::Vec3f> circles;
 
         // Apply the Hough Transform to find the circles
-        cv::HoughCircles( gray, circles, CV_HOUGH_GRADIENT, 1, gray.rows/8, 200, 20, 10, 100 );
+        cv::HoughCircles( gray, circles, CV_HOUGH_GRADIENT, 1, gray.rows/8, 200, 20, 7, 77 );
 
         int rad=0;
         int newrad = 0;
