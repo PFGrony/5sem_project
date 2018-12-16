@@ -103,6 +103,7 @@ private:
 
 	int numberOfMarbles;
 	int finalMarblesFound;
+	int randomNumber;
 	vector<int> marbles;
 
 	int batteryStart;
