@@ -7,39 +7,41 @@
 
 #include "opencv2/opencv.hpp"
 
+static boost::mutex mutexCV;
+
 class computerVision
 {
 public:
-    computerVision();
+    explicit computerVision(gazebo::transport::NodePtr);
 
+    //LIDAR
     bool getLidarLock();
-    bool getCameraLock();
-
-    cv::Mat getMatCamera();
     float* getLidarAngle();
     float* getLidarRange();
-    bool getCircleBool();
-    int getOffset();
-    float getRadius();
 
-
-    void startCamera(gazebo::transport::NodePtr &node);
-    void startLidar(gazebo::transport::NodePtr &node);
-
-    void seeLidar();
-    void seeLidarV1();
-
+    //Camera
+    std::pair<double, double> getMarblePos(std::pair<double, double> robPos,double robAngle);
     void seeCamera();
     void seeCameraV1();
     void seeCameraV2();
 
+    bool getCameraLock();
+    bool getCircleBool();
+    int getOffset();
+    float getRadius();
+
+    //LIDAR
+    void seeLidar();
+    void seeLidarV1();
+
     void templateMatching();
 
 private:
+    //Gazebo
+    void startCamera(gazebo::transport::NodePtr &node);
+    void startLidar(gazebo::transport::NodePtr &node);
     static void cameraCallback(ConstImageStampedPtr &msg);
     static void lidarCallback(ConstLaserScanStampedPtr &msg);
-
-
     gazebo::transport::SubscriberPtr cameraSubscriber;
     gazebo::transport::SubscriberPtr lidarSubscriber;
 

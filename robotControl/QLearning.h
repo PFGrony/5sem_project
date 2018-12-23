@@ -1,3 +1,6 @@
+#ifndef QLEARNER_H
+#define QLEARNER_H
+
 #include "mapPlanning.h"
 #include <vector>
 #include <iostream>
@@ -56,6 +59,9 @@ public:
 	void setE(int x);
 	void setDiscountRate(double x);
 	void setLearningRate(double x);
+	void setRun(int x);
+
+	int getMarblesFound();
 
 	void printAiList();
 
@@ -100,6 +106,7 @@ private:
 
 	int numberOfMarbles;
 	int finalMarblesFound;
+	int randomNumber;
 	vector<int> marbles;
 
 	int batteryStart;
@@ -110,3 +117,5 @@ private:
 	bool hasRun;
 	bool test;
 };
+
+#endif // QLEARNER_H

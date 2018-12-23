@@ -23,9 +23,9 @@ void fuzzyController::fuzzyInit()
     inAngle->addTerm(new Ramp("right",-0.500, 0.500));
     engine->addInputVariable(inAngle);
 
-    float close = 1.000;
-    float mid = 1.500;
-    float far = 3.000;
+    float close = 0.800;
+    float mid = 1.600;
+    float far = 2.800;
 
     inFarLeft = new InputVariable;
     inFarLeft->setName("inFarLeft");
@@ -104,7 +104,7 @@ void fuzzyController::fuzzyInit()
     engine->addOutputVariable(outSteer);
 
     float slow = 0.000;
-    float medium = 0.350;
+    float medium = 0.500;
     float fast = 1.000;
 
     outSpeed = new OutputVariable;
@@ -152,7 +152,6 @@ void fuzzyController::fuzzyInit()
     mamdani->addRule(Rule::parse("if inForward is close and inFarLeft is not close then outSteer is sharpLeft",engine));
     mamdani->addRule(Rule::parse("if inForward is close and inFarRight is not close then outSteer is sharpRight",engine));
 
-    mamdani->addRule(Rule::parse("if inFarLeft is far and inForward is close then outSteer is softLeft", engine));
     //Speed
     mamdani->addRule(Rule::parse("if inForward is close then outSpeed is slow", engine));
     mamdani->addRule(Rule::parse("if inForward is mid then outSpeed is medium", engine));
@@ -174,18 +173,20 @@ void fuzzyController::fuzzyUpdate(float *arrays, double robot_x, double robot_y,
 
     goal =  acos(((ahead_x*ac_x)+(ahead_y*ac_y))/(sqrt(ahead_x*ahead_x+ahead_y*ahead_y)*sqrt(ac_x*ac_x+ac_y*ac_y)));
 
+    if (goal != goal)
+        goal = 0;
+
     double left_right = ahead_x*ac_y - ahead_y*ac_x;
 
     if(left_right < 0)
         goal *= -1;
 
-    //left_right = 0;
     //std::cout << goal << std::endl;
 
     // setup to find the lowest value for left and right, and to find the averrage for the rest
     farLeft = 0;
     left = 10.0;
-    forward = 0.0;
+    forward = 10.0;
     right = 10.0;
     farRight = 0;
     // The boarder from each space
@@ -203,8 +204,8 @@ void fuzzyController::fuzzyUpdate(float *arrays, double robot_x, double robot_y,
         if (i > (rFarLeft-1) && i<rLeft && left > *(arrays+i))
             left = *(arrays+i);
 
-        if (i > (rLeft-1) && i<rForward /*&& forward > *(arrays+i)*/)
-            forward += *(arrays+i);
+        if (i > (rLeft-1) && i<rForward && forward > *(arrays+i))
+            forward = *(arrays+i);
 
         if (i > (rForward-1) && i<rRight && right > *(arrays+i))
             right = *(arrays+i);
@@ -215,7 +216,7 @@ void fuzzyController::fuzzyUpdate(float *arrays, double robot_x, double robot_y,
 
     farLeft = farLeft/(rFarLeft);
     //left = left/(rLeft-rFarLeft);
-    forward = forward/(rForward-rLeft);
+    //forward = forward/(rForward-rLeft);
     //right = right/(rRight-rForward);
     farRight = farRight/(rFarRight-rRight);
 
@@ -232,16 +233,11 @@ void fuzzyController::fuzzyUpdate(float *arrays, double robot_x, double robot_y,
 
     speed = outSpeed->getValue();
     steer = outSteer->getValue();
-
-    if (speed != speed)
-        speed = 0;
-    if (steer != steer)
-        steer = 0;
 }
 
 float fuzzyController::getSpeed()
 {
-    return speed;
+    return 0.5*speed;
 }
 
 float fuzzyController::getSteer()

@@ -1,8 +1,9 @@
+#ifndef MAPPLANNING_H
+#define MAPPLANNING_H
+
 #include "opencv2/opencv.hpp"
 #include <queue>
 #include <string>
-
-#pragma once
 
 #define THRESHOLD 4.3
 
@@ -19,14 +20,6 @@ struct paths
 	int cost;
     std::deque<coordinate> path;
 };
-
-//struct barVal
-//{
-//	double val = -1;
-//	double amount = 1;
-//	coordinate pairs = { 0,0 };
-//	bool seen = false;
-//};
 
 class mapPlanning
 {
@@ -63,3 +56,4 @@ private:
 	cv::Mat points;
 };
 
+#endif // MAPPLANNING_H

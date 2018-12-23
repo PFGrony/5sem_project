@@ -1,7 +1,7 @@
 ///Classes
 #include "pathPlanner.h"
 #include "fstream"
-
+#include <chrono>
 
 //Key constants
 const int key_left = 81;
@@ -26,13 +26,19 @@ int main()
 
 //    //Test 1
 
-//    pathObj.BFSPlan(start,goal8);
-//    pathObj.drawBrushfire();
-//    pathObj.drawPath();
-//    pathObj.viewPath();
-//    cv::waitKey();
+    pathObj.BFSPlan(goal4,goal8);
+    pathObj.drawBrushfire();
+    pathObj.drawPath();
+    pathObj.viewPath();
+    cv::waitKey();
 
-    pathObj.AStarPlan(start,goal8);
+    pathObj.GBFSPlan(goal4,goal8);
+    pathObj.drawBrushfire();
+    pathObj.drawPath();
+    pathObj.viewPath();
+    cv::waitKey();
+
+    pathObj.AStarPlan(goal4,goal8);
     pathObj.drawBrushfire();
     pathObj.drawPath();
     pathObj.viewPath();

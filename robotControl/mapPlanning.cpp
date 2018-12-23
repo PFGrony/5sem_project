@@ -91,7 +91,6 @@ void mapPlanning::findCriticalPoints()
 	{
 		valueChanged = false;
 
-
 		for (int i = 0; i < grayMap.rows; i++) //Rows
 		{
 			for (int j = 0; j < grayMap.cols; j++) //Columns
@@ -145,7 +144,6 @@ void mapPlanning::findCriticalPoints()
 	cv::Mat maxims(im_brushfire.size(), im_brushfire.type()); // container for all local maximums
 	cv::dilate(im_brushfire, maxims, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(double(map.cols / THRESHOLD), double(map.rows / THRESHOLD))));
 	cv::compare(im_brushfire, maxims, points, CV_CMP_GE);
-
 
 
     //

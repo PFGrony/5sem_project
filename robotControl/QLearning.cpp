@@ -3,19 +3,19 @@
 QLearning::QLearning()
 {
 	// Learning rate and discount rate determins the values of the Q(s,a)
-	learningRate = 0.50;
-	discountRate = 0.25;
+	learningRate = 0.92;
+	discountRate = 0.24;
 
 	// the threshhold
 	theta = 0.01;
 	runs = 1000;
 
 	// how often will we get a random move (1/e)
-	e = 10;
+	e = 11;
 
 	// the number of marbles
 	numberOfMarbles = 16;
-	batteryStart = 250;
+	batteryStart = 500;
 
 	// how many iterations did it run
 	iteration = 0;
@@ -23,10 +23,11 @@ QLearning::QLearning()
 
 	// if it is false it will load the rooms
 	hasRun = false;
+	randomNumber = 2;
 
 	// init random seed
-	srand(time(NULL));
-	srand(rand() % 30 + 1);
+	/*srand(time(NULL));
+	srand(rand() % 100 + 1);*/
 }
 
 QLearning::~QLearning()
@@ -35,8 +36,6 @@ QLearning::~QLearning()
 
 void QLearning::runQLearning()
 {
-	// load bigworld if nothing else has been loaded
-	loadBigWorld();
 	// load aiList
 	setAiList();
 	// setup all the need data types
@@ -98,7 +97,8 @@ void QLearning::runQLearning()
 			
 			// battery update
 			if (reward == 10)
-				battery += 50;
+				battery += 25;
+
 			battery += (s->cost[a] * -1);
 			// caculate the needed placements on the table
 
@@ -176,7 +176,7 @@ void QLearning::calculateaiTable()
 	int battery			= batteryStart;
 	float reward		= 0;
 	vector<moves> actions;
-
+	int TotalReward = 0;
 	state * s;
 	state * nS;
 
@@ -201,10 +201,14 @@ void QLearning::calculateaiTable()
 		a = getNextTableAction(s);
 		// reward for state with the action
 		reward = getReward(s, a);
+		TotalReward += reward;
 
 		if (reward == 10)
-			battery += 50;
+			battery += 25;
 		battery += (s->cost[a] * -1);
+
+		if (reward == -20)
+			battery += -50;
 		//
 		if (a == 0 && marbles[s->roomNumber - 1] != 0)
 		{
@@ -225,6 +229,7 @@ void QLearning::calculateaiTable()
 	}
 	finalMarblesFound = marblesFound;
 	bestActions = actions;
+	cout << TotalReward << " ";
 }
 
 void QLearning::setAiList()
@@ -292,7 +297,7 @@ double QLearning::getValueAiList(int room, int state, int action)
 		++it2;
 	}
 
-	return -10.0;
+	return -25.0;
 }
 
 void QLearning::loadBigWorld()
@@ -494,9 +499,11 @@ void QLearning::importMap(vector<paths> pathVec)
 	else
 		hasRun = true;
 
+	
+
 	vector<coordinate> roomCoord;
 
-	for (int j = 0;j<pathVec.size();j++)
+	for (int j = 0; j < pathVec.size(); j++)
 	{
 		bool notThere = true;
 		for (int i = 0; i < roomCoord.size(); i++)
@@ -528,7 +535,7 @@ void QLearning::importMap(vector<paths> pathVec)
 	{
 		allStates.push_back(state{});
 		allStates[i].roomNumber = i + 1;
-
+		
 	}
 
 	// add all room connections + the ability to stay in the room
@@ -543,6 +550,7 @@ void QLearning::importMap(vector<paths> pathVec)
 		worldUnExp.push_back(bool(true));
 		marbles.push_back(0);
 	}
+
 	maxCost = 0;
 
 	for (int i = 0; i < roomCoord.size(); i++)
@@ -550,7 +558,7 @@ void QLearning::importMap(vector<paths> pathVec)
 		if (roomCoord[i].x == 64 && roomCoord[i].y == 39)
 			startingRoom = i;
 
-		cout << "Node " << i+1 << "; " << roomCoord[i].x << ":" << roomCoord[i].y << endl;
+		/*cout << "Node " << i+1 << "; " << roomCoord[i].x << ":" << roomCoord[i].y << endl;*/
 		allStates[i].posStates.x = roomCoord[i].x;
 		allStates[i].posStates.y = roomCoord[i].y;
 		for (int j = 0; j < pathVec.size(); j++)
@@ -593,6 +601,16 @@ void QLearning::setLearningRate(double x)
 	learningRate = x;
 }
 
+void QLearning::setRun(int x)
+{
+	runs = x;
+}
+
+int QLearning::getMarblesFound()
+{
+	return finalMarblesFound;
+}
+
 void QLearning::printAiList()
 {
 	int counter = 0;
@@ -625,7 +643,9 @@ void QLearning::setExploration()
 		worldUnExp[i] = true;
 		marbles[i] = 0;
 	}
-		
+
+	
+	srand(randomNumber++);
 
 	for (int i = 0; i < numberOfMarbles; i++)
 		marbles[rand() % numberOfRooms] += 1;
@@ -653,7 +673,7 @@ int QLearning::getReward(state * s, int a)
 	else
 	{
 		if (worldUnExp[getNextState(s, a)->roomNumber - 1])
-			return 2;
+			return 5;
 		else
 			return -5;
 	}

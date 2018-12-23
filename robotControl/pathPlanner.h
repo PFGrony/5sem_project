@@ -2,20 +2,10 @@
 #define PATHPLANNER_H
 
 #include "opencv2/opencv.hpp"
-#include <chrono>
-
-#include <array>
 #include <vector>
 #include <deque>
 #include <cmath>
 #include <string>
-
-//Big Map
-#define ROW  80
-#define COL  120
-////Small Map
-//#define ROW  15
-//#define COL  20
 
 struct node
 {
@@ -39,14 +29,6 @@ struct compareCost
 	bool operator()(const node& a, const node& b)
 	{
 		return a.f > b.f;
-	}
-};
-
-struct compare
-{
-	bool operator()(const int& a, const int& b)
-	{
-		return a > b;
 	}
 };
 
@@ -86,12 +68,12 @@ private:
     cv::Mat grayMap;
     cv::Mat mapCopy;
     cv::Mat brushfire;
-    double **intMap;//[ROW][COL];
-    double **cameFromMap;//[ROW][COL];
+    double **intMap;
+    double **cameFromMap;
     bool drawedBrushfire=false;
 
     std::deque<pair> routelist;
-	std::array<std::array<pair, COL>, ROW> cameFrom;
+    std::vector<std::vector<pair>> cameFrom;
 
     //Methods
     std::deque<pair> getPath(pair start, pair goal);

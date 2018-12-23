@@ -17,9 +17,11 @@ static float *lA = lidarAngle;
 static int nsecCopy;
 static int secCopy;
 
-computerVision::computerVision()
+computerVision::computerVision(gazebo::transport::NodePtr node)
 {
     templ=cv::imread("../robotControl/circle3.png",CV_LOAD_IMAGE_ANYCOLOR);
+    startCamera(node);
+    startLidar(node);
 }
 
 // Locks
@@ -32,11 +34,6 @@ bool computerVision::getCameraLock()
     return cameraLock;
 }
 
-// Get Data containers
-cv::Mat computerVision::getMatCamera()
-{
-    return matCamera;
-}
 
 float* computerVision::getLidarAngle()
 {
@@ -45,6 +42,35 @@ float* computerVision::getLidarAngle()
 float* computerVision::getLidarRange()
 {
     return lR;
+}
+
+
+std::pair<double, double> computerVision::getMarblePos(std::pair<double, double> robPos,double robAngle)
+{
+    // Ball distance
+    if (getCircleBool())
+    {
+        double knownPixRadius = 29.0; // størrelse i pixels på marble i smallworld, når man står i starten
+        double knownRadius = 0.5; // radius på marbles
+        double knownDistance = 5; // afstand fra robotens center (0,0) til marble center (5,0) i smallworld
+
+        double focalLength = (knownPixRadius * knownDistance) / knownRadius;
+        double distance = (knownRadius * focalLength) / getRadius();
+
+        double marbleAngle = -1 * getOffset() * (1.047 / 320) + robAngle; // FOV: 1.047 rad, pixel width 320
+
+        double marbleX = distance * std::cos(marbleAngle) + robPos.first;
+        double marbleY = distance * std::sin(marbleAngle) + robPos.second;
+
+        //            std::cout<<q++%100<<std::endl;
+        //            std::cout<<"Calculated: ("<<marbleX<<","<<marbleY<<")"<<std::endl;
+//        std::cout<<"Own position: ("<<robPos.first<<","<<robPos.second<<")"<<std::endl;
+//        std::cout<<"Angle: "<<robAngle<<std::endl;
+
+        //            fs1 << marbleX<<","<<marbleY<< std::endl;
+        //            fs2 << robX<<","<<robY<< std::endl;
+        return {marbleX,marbleY};
+    }
 }
 
 bool computerVision::getCircleBool()
@@ -63,7 +89,7 @@ float computerVision::getRadius()
 }
 
 
-
+//Original
 void computerVision::seeLidar()
 {
     if(lidarLock)
@@ -110,7 +136,7 @@ void computerVision::seeCamera()
     }
 }
 
-
+//Modified
 void computerVision::seeCameraV1()
 {
     if(cameraLock)
@@ -215,7 +241,7 @@ void computerVision::seeCameraV2()
         std::vector<cv::Vec3f> circles;
 
         // Apply the Hough Transform to find the circles
-        cv::HoughCircles( gray, circles, CV_HOUGH_GRADIENT, 1, gray.rows/8, 200, 20, 1, 100 );
+        cv::HoughCircles( gray, circles, CV_HOUGH_GRADIENT, 1, gray.rows/8, 200, 20, 7, 77 );
 
         int rad=0;
         int newrad = 0;

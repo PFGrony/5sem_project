@@ -4,7 +4,7 @@ pathPlanner::pathPlanner(std::string path)
 {
     map = cv::imread(path, CV_LOAD_IMAGE_ANYCOLOR);
     cv::cvtColor(map, grayMap, CV_BGR2GRAY);
-
+    cameFrom.resize(map.rows,std::vector<pair>(map.cols,{0,0}));
 
     intMap = new double*[map.rows];
     cameFromMap = new double*[map.rows];
@@ -200,9 +200,6 @@ void pathPlanner::BFS(pair start, pair goal)
         if (current.x == goal.x && current.y == goal.y)
             break;
 
-        int counter = (cameFromMap[current.y][current.x]) + 1;
-        //std::cout << "x: " << current.x << " y: " << current.y << " Val: "<<counter<<std::endl;
-
         pair neighbour;
         int connectivity = 8;
         for (size_t i = 0; i < connectivity; i++)
@@ -226,6 +223,10 @@ void pathPlanner::BFS(pair start, pair goal)
 
             if (neighbour.x < 0 || neighbour.y < 0 || neighbour.x >= map.cols || neighbour.y >= map.rows)
                 continue;
+
+            int counter = (cameFromMap[current.y][current.x]) + 1;
+            if(i>3)
+                counter+=1.41;
 
             if (cameFromMap[neighbour.y][neighbour.x] == 0)
             {
@@ -303,9 +304,6 @@ void pathPlanner::GBFS(pair startPair, pair goalPair)
         if (current.x == goal.x && current.y == goal.y)
             break;
 
-        int counter = (cameFromMap[current.y][current.x]) + 1;
-        //std::cout << "x: " << current.x << " y: " << current.y << " Val: "<<counter<<std::endl;
-
         node neighbour;
         int connectivity = 8;
         for (size_t i = 0; i < connectivity; i++)
@@ -330,6 +328,10 @@ void pathPlanner::GBFS(pair startPair, pair goalPair)
             if (neighbour.x < 0 || neighbour.y < 0 || neighbour.x >= map.cols || neighbour.y >= map.rows)
                 continue;
 
+            int counter = (cameFromMap[current.y][current.x]) + 1;
+            if(i>3)
+                counter+=1.41;
+
             if (cameFromMap[neighbour.y][neighbour.x] == 0)
             {
                 neighbour.h = (double)abs(neighbour.x - goal.x) + (double)abs(neighbour.y - goal.y);
@@ -342,33 +344,34 @@ void pathPlanner::GBFS(pair startPair, pair goalPair)
 
     }
 
-    for (size_t i = 0; i < map.rows; i++)
-    {
-        for (size_t j = 0; j < map.cols; j++)
-        {
-            if (i == start.y && j == start.x)
-                std::cout << 'S';
-            else if (i == goal.y && j == goal.x)
-                std::cout << 'G';
-            else if (cameFromMap[i][j] == 0)
-                std::cout << ' ';
-            else if (cameFromMap[i][j] == 1)
-                std::cout << '#';
-            else
-            {
-                pair temp = cameFrom.at(i).at(j);
-                if (i < temp.y)
-                    std::cout << 'V';
-                else if (i > temp.y)
-                    std::cout << '^';
-                else if (j < temp.x)
-                    std::cout << '>';
-                else if (j > temp.x)
-                    std::cout << '<';
-            }
-        }
-        std::cout << std::endl;
-    }
+//    //debug code
+//    for (size_t i = 0; i < map.rows; i++)
+//    {
+//        for (size_t j = 0; j < map.cols; j++)
+//        {
+//            if (i == start.y && j == start.x)
+//                std::cout << 'S';
+//            else if (i == goal.y && j == goal.x)
+//                std::cout << 'G';
+//            else if (cameFromMap[i][j] == 0)
+//                std::cout << ' ';
+//            else if (cameFromMap[i][j] == 1)
+//                std::cout << '#';
+//            else
+//            {
+//                pair temp = cameFrom.at(i).at(j);
+//                if (i < temp.y)
+//                    std::cout << 'V';
+//                else if (i > temp.y)
+//                    std::cout << '^';
+//                else if (j < temp.x)
+//                    std::cout << '>';
+//                else if (j > temp.x)
+//                    std::cout << '<';
+//            }
+//        }
+//        std::cout << std::endl;
+//    }
 }
 
 void pathPlanner::AStar(pair startPair, pair goalPair)
