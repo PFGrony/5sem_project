@@ -308,7 +308,7 @@ void mapPlanning::findCriticalPoints()
 	mapWithCrits = im_brushfire.clone();
 	mapWithPaths = im_brushfire.clone();
 	critPoints = criticalPoints.size();
-    //showMap();
+    showMap();
 }
 
 void mapPlanning::planMap()
@@ -563,7 +563,7 @@ void mapPlanning::planPath(vector<coordinate> conVec)
             else
                 mapWithPaths.at<cv::Vec3b>(path.at(i).y, path.at(i).x) = cv::Vec3b(0, 0, 255);
 		}
-        //showMap();
+        showMap();
 	}
 
 }
