@@ -20,6 +20,7 @@ const int key_esc = 27;
 int main()
 {
     // mapPlanning
+    cout << "Critical points:" << endl;
     mapPlanning planner("floor_plan.png");
     planner.calculateMap();
 
