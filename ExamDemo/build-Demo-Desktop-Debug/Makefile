@@ -15,7 +15,7 @@ CXX           = g++
 DEFINES       = -DQT_QML_DEBUG
 CFLAGS        = -pipe -g -std=c++11 -std=c++14 -pthread -std=c++11 -std=c++14 -pthread -Wall -W -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -std=gnu++11 -std=c++11 -std=c++14 -pthread -std=c++11 -std=c++14 -pthread -Wall -W -fPIC $(DEFINES)
-INCPATH       = -I../Demo -I. -I/home/kuus/Desktop/5sem_project/ExamDemo/Demo/../fuzzylite -I/home/kuus/Desktop/5sem_project/ExamDemo/Demo/fuzzylite -isystem /usr/include/gazebo-9 -isystem /usr/include/sdformat-6.0 -isystem /usr/include/ignition/transport4 -isystem /usr/include/ignition/msgs1 -isystem /usr/include/ignition/fuel_tools1 -isystem /usr/include/x86_64-linux-gnu -I/usr/lib/x86_64-linux-gnu/libzip/include -isystem /usr/include/ignition/common1 -isystem /usr/include/ignition/math4 -isystem /usr/include/uuid -isystem /usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -isystem /usr/include/opencv -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
+INCPATH       = -I../Demo -I. -I../fuzzylite -I/home/kuus/Desktop/5sem_project/ExamDemo/Demo/fuzzylite -isystem /usr/include/gazebo-9 -isystem /usr/include/sdformat-6.0 -isystem /usr/include/ignition/transport4 -isystem /usr/include/ignition/msgs1 -isystem /usr/include/ignition/fuel_tools1 -isystem /usr/include/x86_64-linux-gnu -I/usr/lib/x86_64-linux-gnu/libzip/include -isystem /usr/include/ignition/common1 -isystem /usr/include/ignition/math4 -isystem /usr/include/uuid -isystem /usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -isystem /usr/include/opencv -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++
 QMAKE         = /usr/lib/qt5/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -52,10 +52,16 @@ OBJECTS_DIR   = ./
 
 SOURCES       = ../Demo/main.cpp \
 		../Demo/mapPlanning.cpp \
-		../Demo/QLearning.cpp 
+		../Demo/QLearning.cpp \
+		../Demo/computerVision.cpp \
+		../Demo/fuzzyController.cpp \
+		../Demo/gazeboWorld.cpp 
 OBJECTS       = main.o \
 		mapPlanning.o \
-		QLearning.o
+		QLearning.o \
+		computerVision.o \
+		fuzzyController.o \
+		gazeboWorld.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/linux.conf \
@@ -110,6 +116,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt_config.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_post.prf \
+		../Demo/.qmake.stash \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exclusive_builds.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/toolchain.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf \
@@ -125,9 +132,15 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		../Demo/Demo.pro mapPlanning.h \
-		QLearning.h ../Demo/main.cpp \
+		QLearning.h \
+		computerVision.h \
+		fuzzyController.h \
+		gazeboWorld.h ../Demo/main.cpp \
 		../Demo/mapPlanning.cpp \
-		../Demo/QLearning.cpp
+		../Demo/QLearning.cpp \
+		../Demo/computerVision.cpp \
+		../Demo/fuzzyController.cpp \
+		../Demo/gazeboWorld.cpp
 QMAKE_TARGET  = Demo
 DESTDIR       = 
 TARGET        = Demo
@@ -193,6 +206,7 @@ Makefile: ../Demo/Demo.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt_config.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exclusive_builds.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/toolchain.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf \
@@ -263,6 +277,7 @@ Makefile: ../Demo/Demo.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/qt_config.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++/qmake.conf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_post.prf:
+.qmake.stash:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/exclusive_builds.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/toolchain.prf:
 /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/default_pre.prf:
@@ -322,7 +337,119 @@ compiler_clean:
 ####### Compile
 
 main.o: ../Demo/main.cpp ../Demo/mapPlanning.h \
-		../Demo/QLearning.h
+		../Demo/QLearning.h \
+		../Demo/computerVision.h \
+		../Demo/gazeboWorld.h \
+		../Demo/fuzzyController.h \
+		../fuzzylite/fl/Headers.h \
+		../fuzzylite/fl/fuzzylite.h \
+		../fuzzylite/fl/Benchmark.h \
+		../fuzzylite/fl/Complexity.h \
+		../fuzzylite/fl/imex/FldExporter.h \
+		../fuzzylite/fl/imex/Exporter.h \
+		../fuzzylite/fl/Console.h \
+		../fuzzylite/fl/Engine.h \
+		../fuzzylite/fl/Exception.h \
+		../fuzzylite/fl/activation/Activation.h \
+		../fuzzylite/fl/activation/First.h \
+		../fuzzylite/fl/activation/General.h \
+		../fuzzylite/fl/activation/Highest.h \
+		../fuzzylite/fl/activation/Last.h \
+		../fuzzylite/fl/activation/Lowest.h \
+		../fuzzylite/fl/activation/Proportional.h \
+		../fuzzylite/fl/activation/Threshold.h \
+		../fuzzylite/fl/defuzzifier/Bisector.h \
+		../fuzzylite/fl/defuzzifier/IntegralDefuzzifier.h \
+		../fuzzylite/fl/defuzzifier/Defuzzifier.h \
+		../fuzzylite/fl/defuzzifier/Centroid.h \
+		../fuzzylite/fl/defuzzifier/SmallestOfMaximum.h \
+		../fuzzylite/fl/defuzzifier/LargestOfMaximum.h \
+		../fuzzylite/fl/defuzzifier/MeanOfMaximum.h \
+		../fuzzylite/fl/defuzzifier/WeightedAverage.h \
+		../fuzzylite/fl/defuzzifier/WeightedDefuzzifier.h \
+		../fuzzylite/fl/defuzzifier/WeightedSum.h \
+		../fuzzylite/fl/factory/ActivationFactory.h \
+		../fuzzylite/fl/factory/ConstructionFactory.h \
+		../fuzzylite/fl/hedge/Hedge.h \
+		../fuzzylite/fl/norm/SNorm.h \
+		../fuzzylite/fl/norm/Norm.h \
+		../fuzzylite/fl/norm/TNorm.h \
+		../fuzzylite/fl/term/Term.h \
+		../fuzzylite/fl/Operation.h \
+		../fuzzylite/fl/factory/CloningFactory.h \
+		../fuzzylite/fl/factory/FactoryManager.h \
+		../fuzzylite/fl/factory/TNormFactory.h \
+		../fuzzylite/fl/factory/SNormFactory.h \
+		../fuzzylite/fl/factory/DefuzzifierFactory.h \
+		../fuzzylite/fl/factory/TermFactory.h \
+		../fuzzylite/fl/factory/HedgeFactory.h \
+		../fuzzylite/fl/factory/FunctionFactory.h \
+		../fuzzylite/fl/term/Function.h \
+		../fuzzylite/fl/imex/CppExporter.h \
+		../fuzzylite/fl/imex/FclImporter.h \
+		../fuzzylite/fl/imex/Importer.h \
+		../fuzzylite/fl/imex/FclExporter.h \
+		../fuzzylite/fl/imex/FisImporter.h \
+		../fuzzylite/fl/imex/FisExporter.h \
+		../fuzzylite/fl/imex/FllImporter.h \
+		../fuzzylite/fl/imex/FllExporter.h \
+		../fuzzylite/fl/imex/JavaExporter.h \
+		../fuzzylite/fl/imex/RScriptExporter.h \
+		../fuzzylite/fl/hedge/Any.h \
+		../fuzzylite/fl/hedge/Extremely.h \
+		../fuzzylite/fl/hedge/HedgeFunction.h \
+		../fuzzylite/fl/hedge/Not.h \
+		../fuzzylite/fl/hedge/Seldom.h \
+		../fuzzylite/fl/hedge/Somewhat.h \
+		../fuzzylite/fl/hedge/Very.h \
+		../fuzzylite/fl/norm/s/AlgebraicSum.h \
+		../fuzzylite/fl/norm/s/BoundedSum.h \
+		../fuzzylite/fl/norm/s/DrasticSum.h \
+		../fuzzylite/fl/norm/s/EinsteinSum.h \
+		../fuzzylite/fl/norm/s/HamacherSum.h \
+		../fuzzylite/fl/norm/s/Maximum.h \
+		../fuzzylite/fl/norm/s/NilpotentMaximum.h \
+		../fuzzylite/fl/norm/s/NormalizedSum.h \
+		../fuzzylite/fl/norm/s/SNormFunction.h \
+		../fuzzylite/fl/norm/s/UnboundedSum.h \
+		../fuzzylite/fl/norm/t/AlgebraicProduct.h \
+		../fuzzylite/fl/norm/t/BoundedDifference.h \
+		../fuzzylite/fl/norm/t/DrasticProduct.h \
+		../fuzzylite/fl/norm/t/EinsteinProduct.h \
+		../fuzzylite/fl/norm/t/HamacherProduct.h \
+		../fuzzylite/fl/norm/t/Minimum.h \
+		../fuzzylite/fl/norm/t/NilpotentMinimum.h \
+		../fuzzylite/fl/norm/t/TNormFunction.h \
+		../fuzzylite/fl/rule/Antecedent.h \
+		../fuzzylite/fl/rule/Consequent.h \
+		../fuzzylite/fl/rule/Rule.h \
+		../fuzzylite/fl/rule/RuleBlock.h \
+		../fuzzylite/fl/rule/Expression.h \
+		../fuzzylite/fl/term/Aggregated.h \
+		../fuzzylite/fl/term/Activated.h \
+		../fuzzylite/fl/term/Bell.h \
+		../fuzzylite/fl/term/Binary.h \
+		../fuzzylite/fl/term/Concave.h \
+		../fuzzylite/fl/term/Constant.h \
+		../fuzzylite/fl/term/Cosine.h \
+		../fuzzylite/fl/term/Discrete.h \
+		../fuzzylite/fl/term/Gaussian.h \
+		../fuzzylite/fl/term/GaussianProduct.h \
+		../fuzzylite/fl/term/Linear.h \
+		../fuzzylite/fl/term/PiShape.h \
+		../fuzzylite/fl/term/Ramp.h \
+		../fuzzylite/fl/term/Rectangle.h \
+		../fuzzylite/fl/term/SShape.h \
+		../fuzzylite/fl/term/Sigmoid.h \
+		../fuzzylite/fl/term/SigmoidDifference.h \
+		../fuzzylite/fl/term/SigmoidProduct.h \
+		../fuzzylite/fl/term/Spike.h \
+		../fuzzylite/fl/term/Trapezoid.h \
+		../fuzzylite/fl/term/Triangle.h \
+		../fuzzylite/fl/term/ZShape.h \
+		../fuzzylite/fl/variable/InputVariable.h \
+		../fuzzylite/fl/variable/Variable.h \
+		../fuzzylite/fl/variable/OutputVariable.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o ../Demo/main.cpp
 
 mapPlanning.o: ../Demo/mapPlanning.cpp ../Demo/mapPlanning.h
@@ -331,6 +458,124 @@ mapPlanning.o: ../Demo/mapPlanning.cpp ../Demo/mapPlanning.h
 QLearning.o: ../Demo/QLearning.cpp ../Demo/QLearning.h \
 		../Demo/mapPlanning.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o QLearning.o ../Demo/QLearning.cpp
+
+computerVision.o: ../Demo/computerVision.cpp ../Demo/computerVision.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o computerVision.o ../Demo/computerVision.cpp
+
+fuzzyController.o: ../Demo/fuzzyController.cpp ../Demo/fuzzyController.h \
+		../fuzzylite/fl/Headers.h \
+		../fuzzylite/fl/fuzzylite.h \
+		../fuzzylite/fl/Benchmark.h \
+		../fuzzylite/fl/Complexity.h \
+		../fuzzylite/fl/imex/FldExporter.h \
+		../fuzzylite/fl/imex/Exporter.h \
+		../fuzzylite/fl/Console.h \
+		../fuzzylite/fl/Engine.h \
+		../fuzzylite/fl/Exception.h \
+		../fuzzylite/fl/activation/Activation.h \
+		../fuzzylite/fl/activation/First.h \
+		../fuzzylite/fl/activation/General.h \
+		../fuzzylite/fl/activation/Highest.h \
+		../fuzzylite/fl/activation/Last.h \
+		../fuzzylite/fl/activation/Lowest.h \
+		../fuzzylite/fl/activation/Proportional.h \
+		../fuzzylite/fl/activation/Threshold.h \
+		../fuzzylite/fl/defuzzifier/Bisector.h \
+		../fuzzylite/fl/defuzzifier/IntegralDefuzzifier.h \
+		../fuzzylite/fl/defuzzifier/Defuzzifier.h \
+		../fuzzylite/fl/defuzzifier/Centroid.h \
+		../fuzzylite/fl/defuzzifier/SmallestOfMaximum.h \
+		../fuzzylite/fl/defuzzifier/LargestOfMaximum.h \
+		../fuzzylite/fl/defuzzifier/MeanOfMaximum.h \
+		../fuzzylite/fl/defuzzifier/WeightedAverage.h \
+		../fuzzylite/fl/defuzzifier/WeightedDefuzzifier.h \
+		../fuzzylite/fl/defuzzifier/WeightedSum.h \
+		../fuzzylite/fl/factory/ActivationFactory.h \
+		../fuzzylite/fl/factory/ConstructionFactory.h \
+		../fuzzylite/fl/hedge/Hedge.h \
+		../fuzzylite/fl/norm/SNorm.h \
+		../fuzzylite/fl/norm/Norm.h \
+		../fuzzylite/fl/norm/TNorm.h \
+		../fuzzylite/fl/term/Term.h \
+		../fuzzylite/fl/Operation.h \
+		../fuzzylite/fl/factory/CloningFactory.h \
+		../fuzzylite/fl/factory/FactoryManager.h \
+		../fuzzylite/fl/factory/TNormFactory.h \
+		../fuzzylite/fl/factory/SNormFactory.h \
+		../fuzzylite/fl/factory/DefuzzifierFactory.h \
+		../fuzzylite/fl/factory/TermFactory.h \
+		../fuzzylite/fl/factory/HedgeFactory.h \
+		../fuzzylite/fl/factory/FunctionFactory.h \
+		../fuzzylite/fl/term/Function.h \
+		../fuzzylite/fl/imex/CppExporter.h \
+		../fuzzylite/fl/imex/FclImporter.h \
+		../fuzzylite/fl/imex/Importer.h \
+		../fuzzylite/fl/imex/FclExporter.h \
+		../fuzzylite/fl/imex/FisImporter.h \
+		../fuzzylite/fl/imex/FisExporter.h \
+		../fuzzylite/fl/imex/FllImporter.h \
+		../fuzzylite/fl/imex/FllExporter.h \
+		../fuzzylite/fl/imex/JavaExporter.h \
+		../fuzzylite/fl/imex/RScriptExporter.h \
+		../fuzzylite/fl/hedge/Any.h \
+		../fuzzylite/fl/hedge/Extremely.h \
+		../fuzzylite/fl/hedge/HedgeFunction.h \
+		../fuzzylite/fl/hedge/Not.h \
+		../fuzzylite/fl/hedge/Seldom.h \
+		../fuzzylite/fl/hedge/Somewhat.h \
+		../fuzzylite/fl/hedge/Very.h \
+		../fuzzylite/fl/norm/s/AlgebraicSum.h \
+		../fuzzylite/fl/norm/s/BoundedSum.h \
+		../fuzzylite/fl/norm/s/DrasticSum.h \
+		../fuzzylite/fl/norm/s/EinsteinSum.h \
+		../fuzzylite/fl/norm/s/HamacherSum.h \
+		../fuzzylite/fl/norm/s/Maximum.h \
+		../fuzzylite/fl/norm/s/NilpotentMaximum.h \
+		../fuzzylite/fl/norm/s/NormalizedSum.h \
+		../fuzzylite/fl/norm/s/SNormFunction.h \
+		../fuzzylite/fl/norm/s/UnboundedSum.h \
+		../fuzzylite/fl/norm/t/AlgebraicProduct.h \
+		../fuzzylite/fl/norm/t/BoundedDifference.h \
+		../fuzzylite/fl/norm/t/DrasticProduct.h \
+		../fuzzylite/fl/norm/t/EinsteinProduct.h \
+		../fuzzylite/fl/norm/t/HamacherProduct.h \
+		../fuzzylite/fl/norm/t/Minimum.h \
+		../fuzzylite/fl/norm/t/NilpotentMinimum.h \
+		../fuzzylite/fl/norm/t/TNormFunction.h \
+		../fuzzylite/fl/rule/Antecedent.h \
+		../fuzzylite/fl/rule/Consequent.h \
+		../fuzzylite/fl/rule/Rule.h \
+		../fuzzylite/fl/rule/RuleBlock.h \
+		../fuzzylite/fl/rule/Expression.h \
+		../fuzzylite/fl/term/Aggregated.h \
+		../fuzzylite/fl/term/Activated.h \
+		../fuzzylite/fl/term/Bell.h \
+		../fuzzylite/fl/term/Binary.h \
+		../fuzzylite/fl/term/Concave.h \
+		../fuzzylite/fl/term/Constant.h \
+		../fuzzylite/fl/term/Cosine.h \
+		../fuzzylite/fl/term/Discrete.h \
+		../fuzzylite/fl/term/Gaussian.h \
+		../fuzzylite/fl/term/GaussianProduct.h \
+		../fuzzylite/fl/term/Linear.h \
+		../fuzzylite/fl/term/PiShape.h \
+		../fuzzylite/fl/term/Ramp.h \
+		../fuzzylite/fl/term/Rectangle.h \
+		../fuzzylite/fl/term/SShape.h \
+		../fuzzylite/fl/term/Sigmoid.h \
+		../fuzzylite/fl/term/SigmoidDifference.h \
+		../fuzzylite/fl/term/SigmoidProduct.h \
+		../fuzzylite/fl/term/Spike.h \
+		../fuzzylite/fl/term/Trapezoid.h \
+		../fuzzylite/fl/term/Triangle.h \
+		../fuzzylite/fl/term/ZShape.h \
+		../fuzzylite/fl/variable/InputVariable.h \
+		../fuzzylite/fl/variable/Variable.h \
+		../fuzzylite/fl/variable/OutputVariable.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o fuzzyController.o ../Demo/fuzzyController.cpp
+
+gazeboWorld.o: ../Demo/gazeboWorld.cpp ../Demo/gazeboWorld.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o gazeboWorld.o ../Demo/gazeboWorld.cpp
 
 ####### Install
 

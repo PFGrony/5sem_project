@@ -12,104 +12,105 @@ using namespace std;
 
 struct QlPoints
 {
-	double x;
-	double y;
+    double x;
+    double y;
 };
 
 struct state
 {
-	vector<state *> possibleStates;
-	vector<int> cost;
-	QlPoints posStates;
-	int roomNumber;
+    vector<state *> possibleStates;
+    vector<int> cost;
+    QlPoints posStates;
+    int roomNumber;
 };
 
 struct moves
 {
-	state * s;
-	int a;
-	int battery;
+    state * s;
+    int a;
+    int battery;
 };
 
 struct valueState
 {
-	int state;
-	int action;
-	double value;
+    int state;
+    int action;
+    double value;
 };
 
 class QLearning
 {
 public:
-	QLearning();
-	~QLearning();
+    QLearning();
+    ~QLearning();
 
-	void runQLearning();
+    void runQLearning();
 
-	QlPoints getPoint(int x);
+    QlPoints getPoint(int x);
 
-	void printBestActions();
+    void printBestActions();
 
-	void loadTestWorld();
-	void importMap(vector<paths> pathVec);
+    void loadTestWorld();
+    void importMap(vector<paths> pathVec);
 
-	void setE(int x);
-	void setDiscountRate(double x);
-	void setLearningRate(double x);
-	void setRun(int x);
+    void setE(int x);
+    void setDiscountRate(double x);
+    void setLearningRate(double x);
+    void setRun(int x);
 
-	int getMarblesFound();
+    int getMarblesFound();
 
-	void printAiList();
+    void printAiList();
 
-	int getBestSize();
+    int getBestSize();
 private:
-	void calculateaiTable();
+    void calculateaiTable();
 
-	void setAiList();
-	void insertValueAiList(int room, int state, int action, double value);
-	double getValueAiList(int room, int state, int action);
+    void setAiList();
+    void insertValueAiList(int room, int state, int action, double value);
+    double getValueAiList(int room, int state, int action);
 
-	void loadBigWorld();
+    void loadBigWorld();
 
-	void setExploration();
+    void setExploration();
 
-	state * getNextState(state* s, int a);
-	int getReward(state* s, int a);
-	int getNextAction(state* s);
+    state * getNextState(state* s, int a);
+    int getReward(state* s, int a);
+    int getNextAction(state* s);
 
-	int getNextTableAction(state * s);
+    int getNextTableAction(state * s);
 
-	double learningRate;
-	double discountRate;
+    double learningRate;
+    double discountRate;
 
-	double theta;
+    double theta;
 
-	int runs;
+    int runs;
 
-	int e;
+    int e;
 
-	int numberOfRooms;
-	int startingRoom;
-	int maxCost;
+    int numberOfRooms;
+    int startingRoom;
+    int maxCost;
 
-	int statesUsed;
+    int statesUsed;
 
-	int iteration;
+    int iteration;
 
-	vector<state> allStates;
-	vector<moves> bestActions;
-	vector<bool> worldUnExp;
+    vector<state> allStates;
+    vector<moves> bestActions;
+    vector<bool> worldUnExp;
 
-	int numberOfMarbles;
-	int finalMarblesFound;
-	vector<int> marbles;
+    int numberOfMarbles;
+    int finalMarblesFound;
+    int randomNumber;
+    vector<int> marbles;
 
-	int batteryStart;
+    int batteryStart;
 
-	list<list<valueState>*> aiList;
+    list<list<valueState>*> aiList;
 
-	//double aiTable[320][10] = { };
-	bool hasRun;
-	bool test;
+    //double aiTable[320][10] = { };
+    bool hasRun;
+    bool test;
 };
