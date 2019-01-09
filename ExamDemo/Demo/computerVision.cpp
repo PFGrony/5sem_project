@@ -64,8 +64,8 @@ std::pair<double, double> computerVision::getMarblePos(std::pair<double, double>
 
         //            std::cout<<q++%100<<std::endl;
         //            std::cout<<"Calculated: ("<<marbleX<<","<<marbleY<<")"<<std::endl;
-        std::cout<<"Own position: ("<<robPos.first<<","<<robPos.second<<")"<<std::endl;
-        std::cout<<"Angle: "<<robAngle<<std::endl;
+        //std::cout<<"Own position: ("<<robPos.first<<","<<robPos.second<<")"<<std::endl;
+        //std::cout<<"Angle: "<<robAngle<<std::endl;
 
         //            fs1 << marbleX<<","<<marbleY<< std::endl;
         //            fs2 << robX<<","<<robY<< std::endl;

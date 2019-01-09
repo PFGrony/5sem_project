@@ -8,7 +8,8 @@ SOURCES += main.cpp \
     QLearning.cpp \
     computerVision.cpp \
     fuzzyController.cpp \
-    gazeboWorld.cpp
+    gazeboWorld.cpp \
+    pathPlanner.cpp
 
 #Gazebo
 PKGCONFIG += gazebo
@@ -37,4 +38,5 @@ HEADERS += \
     QLearning.h \
     computerVision.h \
     fuzzyController.h \
-    gazeboWorld.h
+    gazeboWorld.h \
+    pathPlanner.h

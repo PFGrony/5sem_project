@@ -5,6 +5,7 @@
 #include "computerVision.h"
 #include "gazeboWorld.h"
 #include "fuzzyController.h"
+#include "pathPlanner.h"
 
 using namespace std;
 
@@ -21,6 +22,9 @@ int main()
     // mapPlanning
     mapPlanning planner("floor_plan.png");
     planner.calculateMap();
+
+    // pathPlanner
+    pathPlanner pathObj("floor_plan.png");
 
     // QLearning
     QLearning QL;
@@ -47,6 +51,35 @@ int main()
     float speed = 0.0;
     float dir = 0.0;
 
+    ppPair start{0,0};
+    ppPair goal{0,0};
+
+    deque<ppPair> path;
+
+    int QLpathCounter = 0;
+    int stayCounter = 100;
+
+    double distanceRobToPos = 0;
+
+    double posX = 0;
+    double posY = 0;
+
+    cin.get();
+
+    while(path.empty())
+    {
+        start.x = QL.getPoint(QLpathCounter).x;
+        start.y = QL.getPoint(QLpathCounter).y;
+
+        goal.x = QL.getPoint(QLpathCounter+1).x;
+        goal.y = QL.getPoint(QLpathCounter+1).y;
+
+        path = pathObj.AStarPlan(start,goal);
+    }
+
+    int pathLengths = path.size();
+    cout << "Start " << start.x << ":" << start.y << " Goal " << goal.x << ":" << goal.y << endl;
+    QLpathCounter++;
     while (true)
     {
         //Waits for 10ms in gazebo
@@ -66,24 +99,48 @@ int main()
         cvObj.seeCameraV2();
         cvObj.seeLidarV1();
 
+        if(stayCounter < 2 && pathLengths < 3)
+        {
+
+            start.x = QL.getPoint(QLpathCounter).x;
+            start.y = QL.getPoint(QLpathCounter).y;
+
+            goal.x = QL.getPoint(QLpathCounter+1).x;
+            goal.y = QL.getPoint(QLpathCounter+1).y;
+                deque<ppPair> newPath = pathObj.AStarPlan(start,goal);
+                path.swap(newPath);
+                pathLengths = path.size();
+                cout << "Start " << start.x << ":" << start.y << " Goal " << goal.x << ":" << goal.y << endl;
+                QLpathCounter++;
+        }
+
+        if (distanceRobToPos < 2 && pathLengths > 2)
+        {
+                pathLengths--;
+                posX = (path.begin()->x-60)/1.44;
+                posY = (40-path.begin()->y)/1.44;
+                path.pop_front();
+                stayCounter = 1000;
+        }
+
+        if (pathLengths < 3)
+        {
+            if (stayCounter > 1)
+                stayCounter--;
+        }
+
         // Robot pose in gazeboworld
         double robX = _gazeboWorld.getXPos();
         double robY = _gazeboWorld.getYPos();
         double robA = _gazeboWorld.getAngle();
-
-        double posX = (QL.getPoint(3).x-60)*1.44;
-        double posY = (40-QL.getPoint(3).y)*1.44;
-
-        cout << posX << ":" << posY << endl;
-
-        double distanceRobToPos = sqrt(pow(posX-robX,2)+pow(posY-robY,2));
-
-
+        distanceRobToPos = sqrt(pow(posX-robX,2)+pow(posY-robY,2));
+        //cout << distanceRobToPos << endl;
+        //cout << robX << ":" << robY << endl;
         // Ball distance
         if (cvObj.getCircleBool())
         {
             std::pair<double,double> marblePos=cvObj.getMarblePos({robX,robY},robA);
-            //std::cout<<"Calculated: ("<<marblePos.first<<","<<marblePos.second<<")"<<std::endl;
+            std::cout<<"Calculated marble position: ("<<(marblePos.first*1.44)+60<<","<<80-((marblePos.second*1.44)+40)<<")"<<std::endl;
             //std::cout<<"Own position: ("<<robX<<","<<robY<<")"<<std::endl;
             //std::cout<<"Angle: "<<robA<<std::endl;
 
